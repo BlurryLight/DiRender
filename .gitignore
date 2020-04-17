@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# others
+*tags
+*.user
+*build*
+compile_commands.json
+*conf
+
