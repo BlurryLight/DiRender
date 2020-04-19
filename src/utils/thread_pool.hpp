@@ -1,7 +1,6 @@
 #ifndef DI_THREAD_POOL_HPP
 #define DI_THREAD_POOL_HPP
 
-#include "config.h"
 #include <condition_variable>
 #include <functional>
 #include <future>
@@ -9,6 +8,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <utils/di_global.h>
 #include <vector>
 
 NAMESPACE_BEGIN(DR)
