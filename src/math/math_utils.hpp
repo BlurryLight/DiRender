@@ -5,6 +5,7 @@
 #include <limits>
 #include <numeric>
 #include <utils/di_global.h>
+#include <algorithm>
 
 NAMESPACE_BEGIN(DR)
 constexpr float kFloatInfinity = std::numeric_limits<float>::max();
