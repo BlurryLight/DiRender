@@ -5,115 +5,98 @@
 #include <utils/di_global.h>
 NAMESPACE_BEGIN(DR)
 
-template <typename T> class Vector2;
-template <typename T> class Point2;
-template <typename T> class Normal2;
-template <typename T> class Vector3;
-template <typename T> class Point3;
-template <typename T> class Normal3;
-// alias
-using Vector2f = Vector2<float>;
-using Vector2i = Vector2<int>;
-using Vector3f = Vector3<float>;
-using Vector3i = Vector2<int>;
+class Vector2f;
+class Vector3f;
+class Point2f;
+class Point2f;
+class Normal3f;
+class Normal3f;
 
-using Point2f = Point2<float>;
-using Point2i = Point2<int>;
-using Point3f = Point3<float>;
-using Point3i = Point2<int>;
-
-using Normal2f = Normal2<float>;
-using Normal2i = Normal2<int>;
-using Normal3f = Normal3<float>;
-using Normal3i = Normal2<int>;
-
-template <typename T> class Vector2 {
+class Vector2f {
 public:
   union {
     struct {
-      T x, y;
+      float x, y;
     };
     struct {
-      T u, v;
+      float u, v;
     };
   };
 
 public:
-  inline Vector2() : x(0), y(0) {}
-  inline Vector2(T xx, T yy) : x(xx), y(yy) {}
-  inline Vector2(T v):x(v),y(v){}
-  inline Vector2(const Vector2 &other) : x(other.x), y(other.y) {}
-  template <typename U> inline Vector2<T> &operator=(const Vector2<U> &other) {
-    x = static_cast<T>(other.x);
-    y = static_cast<T>(other.y);
+  inline Vector2f() : x(0), y(0) {}
+  inline Vector2f(float xx, float yy) : x(xx), y(yy) {}
+  inline Vector2f(float v):x(v),y(v){}
+  inline Vector2f(const Vector2f &other) : x(other.x), y(other.y) {}
+  inline Vector2f &operator=(const Vector2f &other) {
+    x = other.x;
+    y = other.y;
     return *this;
   }
   inline bool has_nan() const {
-    if (std::is_integral<T>::value)
-      return false;
     return (std::isnan(x)) || (std::isnan(y));
   }
 
   // operator
   // immutable / const
 
-  inline bool operator==(const Vector2 &other) const {
+  inline bool operator==(const Vector2f &other) const {
     return (x == other.x) && (y == other.y);
   }
 
-  inline bool operator!=(const Vector2 &other) const {
+  inline bool operator!=(const Vector2f &other) const {
     return !((*this) == other);
   }
-  inline Vector2<T> operator-() const { return Vector2<T>{-x, -y}; }
-  inline Vector2<T> operator+(const Vector2<T> &other) const {
-    return Vector2<T>{x + other.x, y + other.y};
+  inline Vector2f operator-() const { return Vector2f{-x, -y}; }
+  inline Vector2f operator+(const Vector2f &other) const {
+    return Vector2f{x + other.x, y + other.y};
   }
-  inline Vector2<T> operator-(const Vector2<T> &other) const {
-    return Vector2<T>{x - other.x, y - other.y};
+  inline Vector2f operator-(const Vector2f &other) const {
+    return Vector2f{x - other.x, y - other.y};
   }
-  template <typename U> inline Vector2<T> operator*(U other) const {
-    return Vector2<T>(x * other, y * other);
+  inline Vector2f operator*(float other) const {
+    return Vector2f(x * other, y * other);
   }
-  template <typename U> inline Vector2<T> operator/(U other) const {
+  inline Vector2f operator/(float other) const {
     float inv = 1.0f / other;
-    return Vector2<T>(x * inv, y * inv);
+    return Vector2f(x * inv, y * inv);
   }
 
-  inline friend Vector2 operator*(const float &other, const Vector2 &v) {
-    return Vector2(v.x * other, v.y * other);
+  inline friend Vector2f operator*(const float &other, const Vector2f &v) {
+    return Vector2f(v.x * other, v.y * other);
   }
 
-  inline friend Vector2 operator/(const float &other, const Vector2 &v) {
-    return Vector2(other / v.x, other / v.y);
+  inline friend Vector2f operator/(const float &other, const Vector2f &v) {
+    return Vector2f(other / v.x, other / v.y);
   }
 
   // mutable
 
-  inline Vector2<T> &operator+=(const Vector2<T> &other) {
+  inline Vector2f &operator+=(const Vector2f &other) {
     x += other.x;
     y += other.y;
     return *this;
   }
-  inline Vector2<T> &operator-=(const Vector2<T> &other) {
+  inline Vector2f &operator-=(const Vector2f &other) {
     x -= other.x;
     y -= other.y;
     return *this;
   }
 
-  template <typename U> inline Vector2<T> &operator*=(U other) {
+  inline Vector2f &operator*=(float other) {
     x *= other;
     y *= other;
     return *this;
   }
 
-  template <typename U> inline Vector2<T> &operator/=(U other) {
+  inline Vector2f &operator/=(float other) {
     float inv = 1.0f / other;
     x *= inv;
     y *= inv;
     return *this;
   }
   // debug
-  inline friend std::ostream &operator<<(std::ostream &os, const Vector2 &v) {
+  inline friend std::ostream &operator<<(std::ostream &os, const Vector2f &v) {
     os << "[ " << v.x << ", " << v.y << " ]";
     return os;
   }
@@ -122,30 +105,30 @@ public:
   inline float l2_norm() const { return length(); }
   inline float squared_length() const { return (x * x + y * y); }
 
-  T &operator[](int index) {
+  float &operator[](int index) {
     // no validation
     return (&x)[index];
   }
-  T operator[](int index) const {
+  float operator[](int index) const {
     // no validation
     return (&x)[index];
   }
 
-  T at(int index) const {
+  float at(int index) const {
+    if (index < 0 || index > 2) {
+      throw std::out_of_range("Vector2f index out of range\n");
+    }
+    return (&x)[index];
+  }
+
+  float &at(int index) {
     if (index < 0 || index > 2) {
       throw std::out_of_range("Vector2 index out of range\n");
     }
     return (&x)[index];
   }
 
-  T &at(int index) {
-    if (index < 0 || index > 2) {
-      throw std::out_of_range("Vector2 index out of range\n");
-    }
-    return (&x)[index];
-  }
-
-  inline Vector2 normalize() { return (*this) / this->length(); }
+  inline Vector2f normalize() { return (*this) / this->length(); }
 };
 
 NAMESPACE_END(DR)

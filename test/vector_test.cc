@@ -5,14 +5,6 @@ TEST(VECTOR,vector2)
 {
   //ctor,dtor
   {
-    Vector2i test;
-    EXPECT_EQ(test.x,0);
-    EXPECT_EQ(test.y,0);
-    EXPECT_EQ(test.u,0);
-    EXPECT_EQ(test.v,0);
-  }
-  //ctor,dtor
-  {
     Vector2f test;
     EXPECT_FLOAT_EQ(test.x,0.0f);
     EXPECT_FLOAT_EQ(test.y,0.0f);
@@ -23,10 +15,8 @@ TEST(VECTOR,vector2)
   {
     Vector2f ftest{std::numeric_limits<float>::quiet_NaN(),0.0f};
     Vector2f ftest1;
-    Vector2i itest;
     EXPECT_TRUE(ftest.has_nan());
     EXPECT_FALSE(ftest1.has_nan());
-    EXPECT_FALSE(itest.has_nan());
   }
   //operators
   {
@@ -45,21 +35,7 @@ TEST(VECTOR,vector2)
     ftest2 /= -1;
     EXPECT_TRUE(ftest1 == ftest2);
 
-    Vector2i itest1{1};
-    Vector2i itest2{-1};
-    EXPECT_FALSE(itest1 == itest2);
-    itest2 = -itest2;
-    EXPECT_TRUE(itest1 == itest2);
-    itest2 += 1.0f; //{2}
-    EXPECT_FALSE(itest1 == itest2);
-    itest2 -= 1.0f; //{1}
-    EXPECT_TRUE(itest1 == itest2);
-    itest2 *= -1;
-    EXPECT_TRUE(-itest1 == itest2);
-    itest2 /= -1;
-    EXPECT_TRUE(itest1 == itest2);
   }
-
   //other
   {
     Vector2f ftest{1.0f};
