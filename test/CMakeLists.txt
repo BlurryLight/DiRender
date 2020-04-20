@@ -17,6 +17,7 @@ set (SOURCE_HEADERS
 
 set(SOURCE_LIST
     thread_pool_test.cc
+    vector_test.cc
     )
 add_executable(runTests tests.cc ${SOURCE_LIST} ${SOURCE_HEADERS})
 target_link_libraries(runTests ${GTEST_LIBRARIES} Threads::Threads)

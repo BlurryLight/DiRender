@@ -41,6 +41,7 @@ public:
 public:
   inline Vector2() : x(0), y(0) {}
   inline Vector2(T xx, T yy) : x(xx), y(yy) {}
+  inline Vector2(T v):x(v),y(v){}
   inline Vector2(const Vector2 &other) : x(other.x), y(other.y) {}
   template <typename U> inline Vector2<T> &operator=(const Vector2<U> &other) {
     x = static_cast<T>(other.x);
@@ -49,7 +50,7 @@ public:
   }
   inline bool has_nan() const {
     if (std::is_integral<T>::value)
-      return true;
+      return false;
     return (std::isnan(x)) || (std::isnan(y));
   }
 
@@ -105,7 +106,7 @@ public:
     return *this;
   }
 
-  template <typename U> inline Vector2<T> &operator/(U other) {
+  template <typename U> inline Vector2<T> &operator/=(U other) {
     float inv = 1.0f / other;
     x *= inv;
     y *= inv;
