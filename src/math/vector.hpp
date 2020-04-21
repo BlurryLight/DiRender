@@ -17,8 +17,8 @@ class Point3f;
 // alias
 using vec3 = Vector3f;
 using vec2 = Vector2f;
-//Normal2f is really rare
-//using Normal2f = Vector2f;
+// Normal2f is really rare
+// using Normal2f = Vector2f;
 using Normal3f = Vector3f;
 
 class Vector2f {
@@ -49,7 +49,8 @@ public:
   // immutable / const
 
   inline bool operator==(const Vector2f &other) const {
-    return (x == other.x) && (y == other.y);
+    //    return (x == other.x) && (y == other.y);
+    return (almost_equal(x, other.x)) && (almost_equal(y, other.y));
   }
 
   inline bool operator!=(const Vector2f &other) const {
@@ -76,6 +77,14 @@ public:
 
   inline friend Vector2f operator/(const float &other, const Vector2f &v) {
     return Vector2f{other / v.x, other / v.y};
+  }
+
+  inline friend Vector2f operator+(const float &other, const Vector2f &v) {
+    return Vector2f{other + v.x, other + v.y};
+  }
+
+  inline friend Vector2f operator-(const float &other, const Vector2f &v) {
+    return Vector2f{other - v.x, other - v.y};
   }
 
   // mutable
@@ -144,6 +153,10 @@ public:
 
   inline Vector3f cross(const Vector2f &other) const;
 
+  template<class T>
+  static T min(const T &lhs, const T& rhs) = delete;
+  template<class T>
+  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
   static Vector2f min(const Vector2f &lhs, const Vector2f &rhs) {
     return Vector2f{std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y)};
   }
@@ -193,7 +206,9 @@ public:
   // immutable / const
 
   inline bool operator==(const Vector3f &other) const {
-    return (x == other.x) && (y == other.y) && (z == other.z);
+    //    return (x == other.x) && (y == other.y) && (z == other.z);
+    return (almost_equal(x, other.x)) && (almost_equal(y, other.y)) &&
+           (almost_equal(z, other.z));
   }
 
   inline bool operator!=(const Vector3f &other) const {
@@ -220,6 +235,14 @@ public:
 
   inline friend Vector3f operator/(const float &other, const Vector3f &v) {
     return Vector3f(other / v.x, other / v.y, other / v.z);
+  }
+
+  inline friend Vector3f operator+(const float &other, const Vector3f &v) {
+    return Vector3f(other + v.x, other + v.y, other + v.z);
+  }
+
+  inline friend Vector3f operator-(const float &other, const Vector3f &v) {
+    return Vector3f(other - v.x, other - v.y, other - v.z);
   }
 
   // mutable
@@ -296,6 +319,11 @@ public:
     };
   }
 
+  template<class T>
+  static T min(const T &lhs, const T& rhs) = delete;
+  template<class T>
+  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
+
   static Vector3f min(const Vector3f &lhs, const Vector3f &rhs) {
     return Vector3f{std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y),
                     std::min(lhs.z, rhs.z)};
@@ -326,7 +354,8 @@ public:
   // immutable / const
 
   inline bool operator==(const Point2f &other) const {
-    return (x == other.x) && (y == other.y);
+    //    return (x == other.x) && (y == other.y);
+    return (almost_equal(x, other.x) && almost_equal(y, other.y));
   }
 
   inline bool operator!=(const Point2f &other) const {
@@ -356,6 +385,14 @@ public:
 
   inline friend Point2f operator/(const float &other, const Point2f &v) {
     return Point2f{other / v.x, other / v.y};
+  }
+
+  inline friend Point2f operator+(const float &other, const Point2f &v) {
+    return Point2f{other + v.x, other + v.y};
+  }
+
+  inline friend Point2f operator-(const float &other, const Point2f &v) {
+    return Point2f{other - v.x, other - v.y};
   }
 
   // mutable
@@ -414,6 +451,10 @@ public:
 
   inline Vector2f operator()() const { return Vector2f{*this}; }
 
+  template<class T>
+  static T min(const T &lhs, const T& rhs) = delete;
+  template<class T>
+  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
   static Point2f max(const Point2f &lhs, const Point2f &rhs) {
     return Point2f{std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y)};
   }
@@ -446,7 +487,9 @@ public:
   // immutable / const
 
   inline bool operator==(const Point3f &other) const {
-    return (x == other.x) && (y == other.y) && (z == other.z);
+    //    return (x == other.x) && (y == other.y) && (z == other.z);
+    return (almost_equal(x, other.x)) && (almost_equal(y, other.y)) &&
+           (almost_equal(z, other.z));
   }
 
   inline bool operator!=(const Point3f &other) const {
@@ -476,6 +519,14 @@ public:
 
   inline friend Point3f operator/(const float &other, const Point3f &v) {
     return Point3f{other / v.x, other / v.y, other / v.z};
+  }
+
+  inline friend Point3f operator+(const float &other, const Point3f &v) {
+    return Point3f(other + v.x, other + v.y, other + v.z);
+  }
+
+  inline friend Point3f operator-(const float &other, const Point3f &v) {
+    return Point3f(other - v.x, other - v.y, other - v.z);
   }
 
   // mutable
@@ -536,14 +587,19 @@ public:
     return (&x)[index];
   }
 
+  template<class T>
+  static T min(const T &lhs, const T& rhs) = delete;
+  template<class T>
+  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
+
   inline Vector3f operator()() const { return Vector3f{*this}; }
   static Point3f min(const Point3f &lhs, const Point3f &rhs) {
     return Point3f{std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y),
-                    std::min(lhs.z, rhs.z)};
+                   std::min(lhs.z, rhs.z)};
   }
   static Point3f max(const Point3f &lhs, const Point3f &rhs) {
     return Point3f{std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y),
-                    std::max(lhs.z, rhs.z)};
+                   std::max(lhs.z, rhs.z)};
   }
 };
 
