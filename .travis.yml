@@ -35,7 +35,7 @@ before_script:
   
 script:
   - mkdir build && cd ./build
-  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DCOVERAGE=1 -GNinja .. 
+  - cmake -DCMAKE_BUILD_TYPE=RELEASE -GNinja .. 
   - ninja
   - ./test/runTests
 
