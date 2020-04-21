@@ -1,0 +1,50 @@
+language: cpp
+
+# ubuntu 16.04 version
+sudo: required
+dist: xenial
+
+matrix:
+  include:
+
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-7','cmake','ninja-build']
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-7']
+          packages: ['clang-7','cmake','ninja-build']
+      env:
+        - MATRIX_EVAL="CXX=clang++-7"
+        
+        
+        
+before_script:
+  - git submodule update --init --recursive
+  - eval "${MATRIX_EVAL}"
+  - $CXX --version
+  - pip install --user cpp-coveralls
+  
+script:
+  - mkdir build && cd ./build
+  - cmake -DCMAKE_BUILD_TYPE=RELEASE -DCOVERAGE=1 -GNinja .. 
+  - ninja
+  - ./test/runTests
+
+after_success:
+  - coveralls --root . -E ".*gtest.*" -E ".*CMakeFiles.*"
+
+branches:
+  only:
+  - master
+  
+notifications:
+  email: false

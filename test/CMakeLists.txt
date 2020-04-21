@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(TEST LANGUAGES CXX)
-find_package(GTest REQUIRED)
+include(${CMAKE_SOURCE_DIR}/cmake/gtest.cmake)
 find_package(Threads REQUIRED)
-#INCLUDE DIR
-include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(../src/)
 
 set (SOURCE_HEADERS
@@ -20,7 +18,7 @@ set(SOURCE_LIST
     vector_test.cc
     )
 add_executable(runTests tests.cc ${SOURCE_LIST} ${SOURCE_HEADERS})
-target_link_libraries(runTests ${GTEST_LIBRARIES} Threads::Threads)
+target_link_libraries(runTests gtest Threads::Threads)
 enable_testing()
 add_test(
     NAME runTests
