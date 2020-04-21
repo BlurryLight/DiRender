@@ -19,10 +19,5 @@ set(SOURCE_LIST
     )
 add_executable(runTests tests.cc ${SOURCE_LIST} ${SOURCE_HEADERS})
 target_compile_options(runTests PRIVATE --coverage)
-target_link_libraries(runTests gtest Threads::Threads)
-enable_testing()
-add_test(
-    NAME runTests
-    COMMAND runTests
-    )
+target_link_libraries(runTests gtest Threads::Threads --coverage)
 

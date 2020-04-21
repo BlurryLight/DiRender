@@ -37,7 +37,7 @@ public:
   inline Vector2f(float xx, float yy) : x(xx), y(yy) {}
   inline Vector2f(float v) : x(v), y(v) {}
   inline Vector2f(const Vector2f &other) : x(other.x), y(other.y) {}
-  inline Vector2f(const Point2f &other);
+  explicit inline Vector2f(const Point2f &other);
   inline Vector2f &operator=(const Vector2f &other) {
     x = other.x;
     y = other.y;
@@ -183,7 +183,7 @@ public:
   inline Vector3f(float v) : x(v), y(v), z(v) {}
   inline Vector3f(const Vector2f &other) : x(other.x), y(other.y), z(0.0f) {}
   inline Vector3f(const Vector3f &other) : x(other.x), y(other.y), z(other.z) {}
-  inline Vector3f(const Point3f &other);
+  explicit inline Vector3f(const Point3f &other);
   inline Vector3f &operator=(const Vector2f &other) {
     x = other.x;
     y = other.y;
@@ -365,6 +365,12 @@ public:
   inline Point2f operator+(const Vector2f &other) const {
     return Point2f{x + other.x, y + other.y};
   }
+  inline Point2f operator-(float other) const {
+    return Point2f{x - other, y - other};
+  }
+  inline Point2f operator+(float other) const {
+    return Point2f{x + other, y + other};
+  }
   inline Point2f operator-(const Vector2f &other) const {
     return Point2f{x - other.x, y - other.y};
   }
@@ -504,6 +510,12 @@ public:
   }
   inline Vector3f operator-(const Point3f &other) const {
     return Vector3f{x - other.x, y - other.y, z - other.z};
+  }
+  inline Point3f operator-(float other) const {
+    return Point3f{x - other, y - other, z- other};
+  }
+  inline Point3f operator+(float other) const {
+    return Point3f{x + other, y + other, z + other};
   }
   inline Point3f operator*(float other) const {
     return Point3f{x * other, y * other, z * other};
