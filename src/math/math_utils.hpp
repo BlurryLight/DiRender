@@ -27,6 +27,8 @@ inline T clamp(const T &low, const T &high, const T &value) {
 template <typename T> inline T lerp(const T &l, const T &r, const float &t) {
   return l * (1 - t) + r * t;
 }
+
+NAMESPACE_BEGIN(impl)
 //from boost
 float boost_relative_difference(float a, float b)
 {
@@ -38,12 +40,18 @@ float boost_epsilon_difference(float a, float b)
   return boost_relative_difference(a, b) / kEpsilon;
 
 }
+NAMESPACE_END(impl)
 
-bool almost_equal(float x,float y,int ulp_num = 3) //units of least precision, or tolarance
+inline bool almost_equal(float x,float y,int ulp_num = 3) //units of least precision, or tolarance
 {
   if(x == y) return true;
-  return boost_epsilon_difference(x,y) < ulp_num;
+  return impl::boost_epsilon_difference(x,y) < ulp_num;
 }
+
+inline float deg2rad (const float& deg){ return deg * kPi / 180.0f;}
+inline float rad2deg (const float& rad){ return rad * k1_Pi * 180.0f;}
+
+
 
 
 NAMESPACE_END(DR)

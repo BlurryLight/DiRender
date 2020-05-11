@@ -1,6 +1,37 @@
 #include <gtest/gtest.h>
 #include <math/vector.hpp>
 using namespace DR;
+
+TEST(UTILS, util_test) {
+  //clamp
+  {
+    float fltmax = kFloatMax;
+    float fltmin = kFloatMin;
+    float fltlst = kFloatLowest;
+    EXPECT_FLOAT_EQ(clamp(0.0f,1.0f,fltmax),1.0f);
+    EXPECT_FLOAT_EQ(clamp(0.0f,1.0f,fltmin),fltmin);
+    EXPECT_FLOAT_EQ(clamp(0.0f,1.0f,fltlst),0.0f);
+  }
+
+  //deg2rad / rad2deg
+  {
+    float pi_over_6 = kPi / 6.0f;
+    EXPECT_FLOAT_EQ(deg2rad(30.0f),pi_over_6);
+    EXPECT_FLOAT_EQ(rad2deg(pi_over_6),30.0f);
+
+    EXPECT_FLOAT_EQ(deg2rad(180.0f),kPi);
+    EXPECT_FLOAT_EQ(rad2deg(kPi),180.0f);
+
+    EXPECT_FLOAT_EQ(deg2rad(0.0f),0.0f);
+    EXPECT_FLOAT_EQ(rad2deg(0.0f),0.0f);
+
+    EXPECT_FLOAT_EQ(deg2rad(-180.0f),-kPi);
+    EXPECT_FLOAT_EQ(rad2deg(-kPi),-180.0f);
+  }
+
+
+}
+
 TEST(VECTOR, vector2) {
   // ctor,dtor
   {

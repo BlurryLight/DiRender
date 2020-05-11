@@ -11,6 +11,7 @@ set (SOURCE_HEADERS
     ../src/math/math_utils.hpp
     ../src/math/matrix.hpp
     ../src/math/vector.hpp
+    ../src/cores/ray.hpp
     )
 
 set(SOURCE_LIST
@@ -18,6 +19,5 @@ set(SOURCE_LIST
     vector_test.cc
     )
 add_executable(runTests tests.cc ${SOURCE_LIST} ${SOURCE_HEADERS})
-target_compile_options(runTests PRIVATE --coverage)
-target_link_libraries(runTests gtest Threads::Threads --coverage)
+target_link_libraries(runTests gtest Threads::Threads)
 
