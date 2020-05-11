@@ -31,16 +31,12 @@ before_script:
   - git submodule update --init --recursive
   - eval "${MATRIX_EVAL}"
   - $CXX --version
-  - pip install --user cpp-coveralls
   
 script:
   - mkdir build && cd ./build
   - cmake -DCMAKE_BUILD_TYPE=RELEASE -GNinja .. 
   - ninja
   - ./test/runTests
-
-after_success:
-  - coveralls --root . -E ".*gtest.*" -E ".*CMakeFiles.*"
 
 branches:
   only:
