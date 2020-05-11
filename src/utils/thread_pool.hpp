@@ -1,5 +1,4 @@
-#ifndef DI_THREAD_POOL_HPP
-#define DI_THREAD_POOL_HPP
+#pragma once
 
 #include <condition_variable>
 #include <functional>
@@ -33,7 +32,7 @@ private:
   bool stop_ = false;
 };
 
-void ThreadPool::init(size_t nthreads) {
+inline void ThreadPool::init(size_t nthreads) {
   for (size_t i = 0; i < nthreads; i++) {
     workers_.emplace_back([this] {
       while (true) {
@@ -57,12 +56,12 @@ void ThreadPool::init(size_t nthreads) {
   }
 }
 
-ThreadPool::ThreadPool() {
+inline ThreadPool::ThreadPool() {
   size_t n = std::thread::hardware_concurrency();
   this->init(n);
 }
 
-ThreadPool::ThreadPool(size_t nthreads) { this->init(nthreads); }
+inline ThreadPool::ThreadPool(size_t nthreads) { this->init(nthreads); }
 
 template <typename F, typename... Args>
 decltype(auto) ThreadPool::enqueue_task(F &&func, Args &&... args) {
@@ -80,7 +79,7 @@ decltype(auto) ThreadPool::enqueue_task(F &&func, Args &&... args) {
   return res;
 }
 
-ThreadPool::~ThreadPool() {
+inline ThreadPool::~ThreadPool() {
   {
     std::unique_lock<std::mutex> lk(queue_mutex_);
     this->stop_ = true;
@@ -93,5 +92,3 @@ ThreadPool::~ThreadPool() {
 }
 
 NAMESPACE_END(DR)
-
-#endif

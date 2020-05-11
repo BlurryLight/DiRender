@@ -1,5 +1,4 @@
-#ifndef DI_VECTOR_HPP
-#define DI_VECTOR_HPP
+#pragma once
 #include <iostream>
 #include <math/math_utils.hpp>
 #include <utils/di_global.h>
@@ -145,7 +144,7 @@ public:
     return (&x)[index];
   }
 
-  inline Vector2f normalize() { return (*this) / this->length(); }
+  inline Vector2f normalize() const { return (*this) / this->length(); }
 
   inline float dot(const Vector2f &other) const {
     return x * other.x + y * other.y;
@@ -307,7 +306,7 @@ public:
     return (&x)[index];
   }
 
-  inline Vector3f normalize() { return (*this) / this->length(); }
+  inline Vector3f normalize() const  { return (*this) / this->length(); }
   inline float dot(const Vector3f &other) const {
     return x * other.x + y * other.y + z * other.z;
   }
@@ -645,4 +644,3 @@ inline float dot(const Vector3f &lhs, const Vector3f &rhs) {
 
 NAMESPACE_END(DR)
 
-#endif

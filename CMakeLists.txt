@@ -12,6 +12,8 @@ set (SOURCE_HEADERS
     src/math/matrix.hpp
     src/math/vector.hpp
     src/cores/ray.hpp
+    src/cores/render.h
+    src/cores/render.cc
     )
 include_directories("src")
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})

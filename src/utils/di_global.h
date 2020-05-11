@@ -1,5 +1,4 @@
-#ifndef DI_GLOBAL_H
-#define DI_GLOBAL_H
+#pragma once
 
 // macros
 // namespace
@@ -14,4 +13,3 @@
 
 
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef DI_MATH_UTILS_HPP
-#define DI_MATH_UTILS_HPP
+#pragma once
 
 #include <algorithm>
 #include <cmath>
@@ -30,12 +29,12 @@ template <typename T> inline T lerp(const T &l, const T &r, const float &t) {
 
 NAMESPACE_BEGIN(impl)
 //from boost
-float boost_relative_difference(float a, float b)
+inline float boost_relative_difference(float a, float b)
 {
   return std::fabs((a - b) / std::min(a, b));
 }
 
-float boost_epsilon_difference(float a, float b)
+inline float boost_epsilon_difference(float a, float b)
 {
   return boost_relative_difference(a, b) / kEpsilon;
 
@@ -56,4 +55,3 @@ inline float rad2deg (const float& rad){ return rad * k1_Pi * 180.0f;}
 
 NAMESPACE_END(DR)
 
-#endif

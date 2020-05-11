@@ -1,5 +1,4 @@
-#ifndef DI_RAY_HPP
-#define DI_RAY_HPP
+#pragma once
 #include <math/geometry.hpp>
 #include <utils/di_global.h>
 
@@ -28,4 +27,3 @@ public:
 
 NAMESPACE_END(DR)
 
-#endif
