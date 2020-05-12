@@ -31,7 +31,7 @@ before_script:
   - git submodule update --init --recursive
   - eval "${MATRIX_EVAL}"
   - $CXX --version
-  - clang-format-check.py
+  - ./clang-format-check.py
   
 script:
   - mkdir build && cd ./build
