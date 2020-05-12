@@ -30,8 +30,12 @@ jobs:
       env:
         CXX: cl
         CC: cl
-      run: mkdir build && cd build && ls && cmake -GNinja -DCMAKE_BUILD_TYPE=RELEASE ..
+      run: |
+        mkdir build
+        cd build
+        pwd
+        cmake -GNinja -DCMAKE_BUILD_TYPE=RELEASE ..
     - name: build
-      run:  ninja
+      run:  cmake --build build --parallel
     - name: test
       run: ctest -T test --verbose
