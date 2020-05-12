@@ -9,7 +9,3 @@
 #if !defined(NAMESPACE_END)
 #define NAMESPACE_END(name) }
 #endif
-
-
-
-

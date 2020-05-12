@@ -28,30 +28,26 @@ template <typename T> inline T lerp(const T &l, const T &r, const float &t) {
 }
 
 NAMESPACE_BEGIN(impl)
-//from boost
-inline float boost_relative_difference(float a, float b)
-{
+// from boost
+inline float boost_relative_difference(float a, float b) {
   return std::fabs((a - b) / std::min(a, b));
 }
 
-inline float boost_epsilon_difference(float a, float b)
-{
+inline float boost_epsilon_difference(float a, float b) {
   return boost_relative_difference(a, b) / kEpsilon;
-
 }
 NAMESPACE_END(impl)
 
-inline bool almost_equal(float x,float y,int ulp_num = 3) //units of least precision, or tolarance
+inline bool
+almost_equal(float x, float y,
+             int ulp_num = 3) // units of least precision, or tolarance
 {
-  if(x == y) return true;
-  return impl::boost_epsilon_difference(x,y) < ulp_num;
+  if (x == y)
+    return true;
+  return impl::boost_epsilon_difference(x, y) < ulp_num;
 }
 
-inline float deg2rad (const float& deg){ return deg * kPi / 180.0f;}
-inline float rad2deg (const float& rad){ return rad * k1_Pi * 180.0f;}
-
-
-
+inline float deg2rad(const float &deg) { return deg * kPi / 180.0f; }
+inline float rad2deg(const float &rad) { return rad * k1_Pi * 180.0f; }
 
 NAMESPACE_END(DR)
-

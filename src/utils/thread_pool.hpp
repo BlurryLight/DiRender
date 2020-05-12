@@ -72,7 +72,7 @@ decltype(auto) ThreadPool::enqueue_task(F &&func, Args &&... args) {
   {
     std::unique_lock<std::mutex> lk(queue_mutex_);
     if (!this->stop_) {
-      tasks_.emplace([task](){ (*task)(); });
+      tasks_.emplace([task]() { (*task)(); });
     }
   }
   this->queue_cv_.notify_one();

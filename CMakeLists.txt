@@ -14,6 +14,8 @@ set (SOURCE_HEADERS
     src/cores/ray.hpp
     src/cores/render.h
     src/cores/render.cc
+    src/cores/bounds.h
+    src/cores/bounds.cc
     )
 include_directories("src")
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})

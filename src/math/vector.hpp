@@ -152,10 +152,9 @@ public:
 
   inline Vector3f cross(const Vector2f &other) const;
 
-  template<class T>
-  static T min(const T &lhs, const T& rhs) = delete;
-  template<class T>
-  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
+  template <class T> static T min(const T &lhs, const T &rhs) = delete;
+  template <class T>
+  static T max(const T &lhs, const T &rhs) = delete; // forbid other type
   static Vector2f min(const Vector2f &lhs, const Vector2f &rhs) {
     return Vector2f{std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y)};
   }
@@ -306,7 +305,7 @@ public:
     return (&x)[index];
   }
 
-  inline Vector3f normalize() const  { return (*this) / this->length(); }
+  inline Vector3f normalize() const { return (*this) / this->length(); }
   inline float dot(const Vector3f &other) const {
     return x * other.x + y * other.y + z * other.z;
   }
@@ -318,10 +317,9 @@ public:
     };
   }
 
-  template<class T>
-  static T min(const T &lhs, const T& rhs) = delete;
-  template<class T>
-  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
+  template <class T> static T min(const T &lhs, const T &rhs) = delete;
+  template <class T>
+  static T max(const T &lhs, const T &rhs) = delete; // forbid other type
 
   static Vector3f min(const Vector3f &lhs, const Vector3f &rhs) {
     return Vector3f{std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y),
@@ -456,10 +454,9 @@ public:
 
   inline Vector2f operator()() const { return Vector2f{*this}; }
 
-  template<class T>
-  static T min(const T &lhs, const T& rhs) = delete;
-  template<class T>
-  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
+  template <class T> static T min(const T &lhs, const T &rhs) = delete;
+  template <class T>
+  static T max(const T &lhs, const T &rhs) = delete; // forbid other type
   static Point2f max(const Point2f &lhs, const Point2f &rhs) {
     return Point2f{std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y)};
   }
@@ -511,7 +508,7 @@ public:
     return Vector3f{x - other.x, y - other.y, z - other.z};
   }
   inline Point3f operator-(float other) const {
-    return Point3f{x - other, y - other, z- other};
+    return Point3f{x - other, y - other, z - other};
   }
   inline Point3f operator+(float other) const {
     return Point3f{x + other, y + other, z + other};
@@ -598,10 +595,9 @@ public:
     return (&x)[index];
   }
 
-  template<class T>
-  static T min(const T &lhs, const T& rhs) = delete;
-  template<class T>
-  static T max(const T &lhs, const T& rhs) = delete; //forbid other type
+  template <class T> static T min(const T &lhs, const T &rhs) = delete;
+  template <class T>
+  static T max(const T &lhs, const T &rhs) = delete; // forbid other type
 
   inline Vector3f operator()() const { return Vector3f{*this}; }
   static Point3f min(const Point3f &lhs, const Point3f &rhs) {
@@ -643,4 +639,3 @@ inline float dot(const Vector3f &lhs, const Vector3f &rhs) {
 }
 
 NAMESPACE_END(DR)
-
