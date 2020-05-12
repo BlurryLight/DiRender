@@ -1,6 +1,7 @@
 #pragma once
 #include <cores/ray.hpp>
 #include <math/geometry.hpp>
+#include <bitset>
 
 NAMESPACE_BEGIN(DR)
 class Bounds3 {
@@ -22,7 +23,13 @@ public:
   bool is_overlapped(const Bounds3 &other) const;
   bool is_inside(const Point3f &p) const;
   bool Intersect_test(const Ray &ray, const Vector3f &invDir,
-                      const std::array<bool, 3> &dirIsNeg);
+                      std::bitset<3> dirIsNeg);
+
+  static Bounds3 Union(const Bounds3 &bs,const Point3f& p);
+  static Bounds3 Union(const Bounds3 &lhs,const Bounds3& rhs);
+  static Bounds3 Intersect(const Bounds3 &lhs,const Bounds3& rhs);
+  static bool Overlaps(const Bounds3 &lhs,const Bounds3& rhs);
+  static bool Inside(const Point3f &p,const Bounds3& bs);
 
 private:
   Point3f pMin_, pMax_;

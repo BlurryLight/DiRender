@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#define _USE_MATH_DEFINES // to make MSVC happy
 #include <cmath>
 #include <limits>
 #include <numeric>
