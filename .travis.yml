@@ -12,7 +12,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-7','cmake','ninja-build']
+          packages: ['g++-7','cmake','ninja-build','clang-format']
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
@@ -21,7 +21,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-7']
-          packages: ['clang-7','cmake','ninja-build']
+          packages: ['clang-7','cmake','ninja-build','clang-format']
       env:
         - MATRIX_EVAL="CXX=clang++-7"
         
@@ -31,6 +31,7 @@ before_script:
   - git submodule update --init --recursive
   - eval "${MATRIX_EVAL}"
   - $CXX --version
+  - clang-format-check.py
   
 script:
   - mkdir build && cd ./build
