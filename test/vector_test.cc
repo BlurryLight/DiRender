@@ -68,8 +68,8 @@ TEST(VECTOR, vector2) {
   // other
   {
     Vector2f ftest{1.0f};
-    EXPECT_FLOAT_EQ(ftest.length(), M_SQRT2);
-    EXPECT_FLOAT_EQ(ftest.squared_length(), M_SQRT2 * M_SQRT2);
+    EXPECT_FLOAT_EQ(ftest.length(), kSqrt2);
+    EXPECT_FLOAT_EQ(ftest.squared_length(), kSqrt2 * kSqrt2);
 
     EXPECT_FLOAT_EQ(ftest[0], 1.0f);
     EXPECT_FLOAT_EQ(ftest[1], 1.0f);
