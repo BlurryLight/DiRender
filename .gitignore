@@ -37,4 +37,8 @@
 *build*
 compile_commands.json
 *conf
+out
+.vs
+.vscode
+
 

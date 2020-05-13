@@ -6,10 +6,7 @@ set(ACCELERATOR_SOURCE
 set(CORES_SOURCE
     ${CMAKE_SOURCE_DIR}/src/cores/bounds.cc
     ${CMAKE_SOURCE_DIR}/src/cores/bounds.h
-    ${CMAKE_SOURCE_DIR}/src/cores/camera.h
     ${CMAKE_SOURCE_DIR}/src/cores/intersection.hpp
-    ${CMAKE_SOURCE_DIR}/src/cores/pinholeCamera.cc
-    ${CMAKE_SOURCE_DIR}/src/cores/pinholeCamera.h
     ${CMAKE_SOURCE_DIR}/src/cores/ray.hpp
     ${CMAKE_SOURCE_DIR}/src/cores/render.cc
     ${CMAKE_SOURCE_DIR}/src/cores/render.h
@@ -27,6 +24,12 @@ set(MATH_SOURCE
 set(SAMPLER_SOURCE
     )
 
+set(CAMERAS_SOURCE
+    ${CMAKE_SOURCE_DIR}/src/cameras/camera.h
+    ${CMAKE_SOURCE_DIR}/src/cameras/pinholeCamera.cc
+    ${CMAKE_SOURCE_DIR}/src/cameras/pinholeCamera.h
+    )
+
 set(SHAPES_SOURCE
     ${CMAKE_SOURCE_DIR}/src/shapes/shape.h
     ${CMAKE_SOURCE_DIR}/src/shapes/sphere.cc
@@ -39,4 +42,4 @@ set(UTILS_SOURCE
     )
 
 set(SOURCE_HEADERS ${ACCELERATOR_SOURCE} ${CORES_SOURCE} ${MATH_SOURCE} ${SAMPLER_SOURCE}
-    ${SHAPES_SOURCE} ${UTILS_SOURCE})
+    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE})

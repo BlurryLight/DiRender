@@ -6,6 +6,7 @@ include(${CMAKE_SOURCE_DIR}/source_list.cmake)
 set(SOURCE_LIST
     thread_pool_test.cc
     vector_test.cc
+    matrix4.cc
     )
 add_executable(runTests tests.cc ${SOURCE_LIST} ${SOURCE_HEADERS})
 target_include_directories(runTests PRIVATE ../src/)
