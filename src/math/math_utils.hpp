@@ -40,8 +40,16 @@ inline float boost_epsilon_difference(float a, float b) {
 NAMESPACE_END(impl)
 
 inline bool
+almost_equal(float x, float y)
+{
+  if (x == y)
+    return true;
+  return impl::boost_epsilon_difference(x, y) < 3; //Binary predicate to support <algorithm>
+}
+
+inline bool
 almost_equal(float x, float y,
-             int ulp_num = 3) // units of least precision, or tolarance
+             int ulp_num) // units of least precision, or tolarance
 {
   if (x == y)
     return true;

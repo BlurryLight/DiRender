@@ -9,6 +9,7 @@ NAMESPACE_BEGIN(DR)
 struct Matrix4;
 using mat4 = struct Matrix4;
 struct Matrix4 {
+public:
   std::array<std::array<float, 4>, 4> m;
   Matrix4();
   explicit Matrix4(float m_[4][4]);
@@ -18,6 +19,10 @@ struct Matrix4 {
   Matrix4 &operator=(const Matrix4 &other);
   bool operator==(const Matrix4 &other) const;
   bool operator!=(const Matrix4 &other) const;
+  Matrix4 operator*(const Matrix4& other) const
+  {
+    return this->multiply(other);
+  }
   Matrix4(float row00, float row01, float row02, float row03, float row10,
           float row11, float row12, float row13, float row20, float row21,
           float row22, float row23, float row30, float row31, float row32,
@@ -65,7 +70,14 @@ inline Matrix4 &Matrix4::operator=(const Matrix4 &other) {
 }
 
 inline bool Matrix4::operator==(const Matrix4 &other) const {
-  return this->m == other.m;
+  //  return this->m == other.m;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      if(!almost_equal(m[i][j],other.m[i][j]))
+        return false;
+    }
+  }
+  return true;
 }
 
 inline bool Matrix4::operator!=(const Matrix4 &other) const {
