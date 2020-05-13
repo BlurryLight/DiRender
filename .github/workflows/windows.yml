@@ -24,7 +24,10 @@ jobs:
     - name: Setup VS Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@master
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
       
     - name: configure
       env:
