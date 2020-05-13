@@ -1,99 +1,79 @@
 #pragma once
-#include <math/math_utils.hpp>
-#include <utils/di_global.h>
-#include <math/vector.hpp>
 #include <array>
 #include <iostream>
+#include <math/math_utils.hpp>
+#include <math/vector.hpp>
+#include <utils/di_global.h>
 NAMESPACE_BEGIN(DR)
 
 struct Matrix4;
 using mat4 = struct Matrix4;
-struct Matrix4
-{
-  std::array<std::array<float,4>,4> m;
+struct Matrix4 {
+  std::array<std::array<float, 4>, 4> m;
   Matrix4();
   explicit Matrix4(float m_[4][4]);
-  explicit Matrix4(std::array<std::array<float,4>,4> m_);
-  Matrix4(float diag);//diag elements
-  Matrix4(const Matrix4& other);
-  Matrix4& operator=(const Matrix4& other);
-  bool operator==(const Matrix4& other) const ;
-  bool operator!=(const Matrix4& other) const;
-  Matrix4(
-      float row00,float row01,float row02,float row03,
-      float row10,float row11,float row12,float row13,
-      float row20,float row21,float row22,float row23,
-      float row30,float row31,float row32,float row33
-          );
-  Matrix4 inverse() const
-  {
-    return Matrix4::Inverse(*this);
-  }
+  explicit Matrix4(std::array<std::array<float, 4>, 4> m_);
+  Matrix4(float diag); // diag elements
+  Matrix4(const Matrix4 &other);
+  Matrix4 &operator=(const Matrix4 &other);
+  bool operator==(const Matrix4 &other) const;
+  bool operator!=(const Matrix4 &other) const;
+  Matrix4(float row00, float row01, float row02, float row03, float row10,
+          float row11, float row12, float row13, float row20, float row21,
+          float row22, float row23, float row30, float row31, float row32,
+          float row33);
+  Matrix4 inverse() const { return Matrix4::Inverse(*this); }
   Matrix4 transpose() const;
   Matrix4 multiply() const;
-  const float* data() const;
-  friend std::ostream& operator<<(std::ostream& os,const Matrix4& mat4)
-  {
-    for(const auto & row : mat4.m)
-    {
+  const float *data() const;
+  friend std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4) {
+    for (const auto &row : mat4.m) {
       os << "[ ";
-      for( const auto & elem : row)
-      {
+      for (const auto &elem : row) {
         os << elem << " ";
       }
       os << "]" << std::endl;
     }
     return os;
   }
-  static Matrix4 Inverse(const Matrix4& mat);
-  static Matrix4 Transpose(const Matrix4& mat);
-  static Matrix4 Multiply(const Matrix4& lhs,const Matrix4& rhs);
+  static Matrix4 Inverse(const Matrix4 &mat);
+  static Matrix4 Transpose(const Matrix4 &mat);
+  static Matrix4 Multiply(const Matrix4 &lhs, const Matrix4 &rhs);
 };
 
-inline Matrix4::Matrix4(float diag)
-{
-  for(auto& i : m)
+inline Matrix4::Matrix4(float diag) {
+  for (auto &i : m)
     i.fill(0.0f);
-  for(int i =0 ;i < 4;i++)
+  for (int i = 0; i < 4; i++)
     m[i][i] = diag;
 }
-inline Matrix4::Matrix4() : Matrix4(1.0f){}
+inline Matrix4::Matrix4() : Matrix4(1.0f) {}
 
-inline const float *Matrix4::data() const
-{
-  return m[0].data();
+inline const float *Matrix4::data() const { return m[0].data(); }
+
+inline Matrix4::Matrix4(const Matrix4 &other) { this->m = other.m; }
+
+inline Matrix4::Matrix4(float m_[4][4]) {
+  std::copy_n(&m_[0][0], 16, this->m[0].begin());
 }
 
-inline Matrix4::Matrix4(const Matrix4 &other)
-{
-  this->m = other.m;
-}
-
-inline Matrix4::Matrix4(float m_[4][4])
-{
-  std::copy_n(&m_[0][0],16,this->m[0].begin());
-}
-
-inline Matrix4 &Matrix4::operator=(const Matrix4 &other)
-{
+inline Matrix4 &Matrix4::operator=(const Matrix4 &other) {
   this->m = other.m;
   return (*this);
 }
 
-inline bool Matrix4::operator==(const Matrix4 &other) const
-{
+inline bool Matrix4::operator==(const Matrix4 &other) const {
   return this->m == other.m;
 }
 
-inline bool Matrix4::operator!=(const Matrix4 &other) const
-{
+inline bool Matrix4::operator!=(const Matrix4 &other) const {
   return !(this->m == other.m);
 }
 
-
-
-inline Matrix4::Matrix4(float row00, float row01, float row02, float row03, float row10, float row11, float row12, float row13, float row20, float row21, float row22, float row23, float row30, float row31, float row32, float row33)
-{
+inline Matrix4::Matrix4(float row00, float row01, float row02, float row03,
+                        float row10, float row11, float row12, float row13,
+                        float row20, float row21, float row22, float row23,
+                        float row30, float row31, float row32, float row33) {
   m[0][0] = row00;
   m[0][1] = row01;
   m[0][2] = row02;
@@ -170,9 +150,8 @@ inline Matrix4 Matrix4::Inverse(const Matrix4 &mat) {
   return result;
 }
 
-inline Matrix4::Matrix4(std::array<std::array<float, 4>, 4> m_)
-{
-  this->m =  m_;
+inline Matrix4::Matrix4(std::array<std::array<float, 4>, 4> m_) {
+  this->m = m_;
 }
 
 NAMESPACE_END(DR)
