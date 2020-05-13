@@ -12,6 +12,7 @@ set(CORES_SOURCE
     ${CMAKE_SOURCE_DIR}/src/cores/render.h
     ${CMAKE_SOURCE_DIR}/src/cores/scene.cc
     ${CMAKE_SOURCE_DIR}/src/cores/scene.h
+    ${CMAKE_SOURCE_DIR}/src/cores/primitive.h
     )
 
 set(MATH_SOURCE
@@ -19,6 +20,8 @@ set(MATH_SOURCE
     ${CMAKE_SOURCE_DIR}/src/math/math_utils.hpp
     ${CMAKE_SOURCE_DIR}/src/math/matrix.hpp
     ${CMAKE_SOURCE_DIR}/src/math/vector.hpp
+    ${CMAKE_SOURCE_DIR}/src/math/transform.h
+    ${CMAKE_SOURCE_DIR}/src/math/transform.cc
     )
 
 set(SAMPLER_SOURCE
