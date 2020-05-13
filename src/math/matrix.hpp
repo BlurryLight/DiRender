@@ -23,8 +23,10 @@ struct Matrix4 {
           float row22, float row23, float row30, float row31, float row32,
           float row33);
   Matrix4 inverse() const { return Matrix4::Inverse(*this); }
-  Matrix4 transpose() const;
-  Matrix4 multiply() const;
+  Matrix4 transpose() const { return Matrix4::Transpose(*this); }
+  Matrix4 multiply(const Matrix4 &other) const {
+    return Matrix4::Multiply(*this, other);
+  }
   const float *data() const;
   friend std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4) {
     for (const auto &row : mat4.m) {
@@ -152,6 +154,26 @@ inline Matrix4 Matrix4::Inverse(const Matrix4 &mat) {
 
 inline Matrix4::Matrix4(std::array<std::array<float, 4>, 4> m_) {
   this->m = m_;
+}
+
+inline Matrix4 Matrix4::Transpose(const Matrix4 &mat) {
+  Matrix4 copy = mat;
+  for (int i = 0; i < 4; i++)
+    for (int j = 0; j < 4; j++) {
+      copy.m[i][j] = mat.m[j][i];
+    }
+  return copy;
+}
+
+inline Matrix4 Matrix4::Multiply(const Matrix4 &lhs, const Matrix4 &rhs) {
+  Matrix4 result;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      result.m[i][j] = lhs.m[i][0] * rhs.m[0][j] + lhs.m[i][1] * rhs.m[1][j] +
+                       lhs.m[i][2] * rhs.m[2][j] + lhs.m[i][3] * rhs.m[3][j];
+    }
+  }
+  return result;
 }
 
 NAMESPACE_END(DR)

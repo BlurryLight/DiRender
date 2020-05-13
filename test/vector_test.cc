@@ -3,33 +3,31 @@
 using namespace DR;
 
 TEST(UTILS, util_test) {
-  //clamp
+  // clamp
   {
     float fltmax = kFloatMax;
     float fltmin = kFloatMin;
     float fltlst = kFloatLowest;
-    EXPECT_FLOAT_EQ(clamp(0.0f,1.0f,fltmax),1.0f);
-    EXPECT_FLOAT_EQ(clamp(0.0f,1.0f,fltmin),fltmin);
-    EXPECT_FLOAT_EQ(clamp(0.0f,1.0f,fltlst),0.0f);
+    EXPECT_FLOAT_EQ(clamp(0.0f, 1.0f, fltmax), 1.0f);
+    EXPECT_FLOAT_EQ(clamp(0.0f, 1.0f, fltmin), fltmin);
+    EXPECT_FLOAT_EQ(clamp(0.0f, 1.0f, fltlst), 0.0f);
   }
 
-  //deg2rad / rad2deg
+  // deg2rad / rad2deg
   {
     float pi_over_6 = kPi / 6.0f;
-    EXPECT_FLOAT_EQ(deg2rad(30.0f),pi_over_6);
-    EXPECT_FLOAT_EQ(rad2deg(pi_over_6),30.0f);
+    EXPECT_FLOAT_EQ(deg2rad(30.0f), pi_over_6);
+    EXPECT_FLOAT_EQ(rad2deg(pi_over_6), 30.0f);
 
-    EXPECT_FLOAT_EQ(deg2rad(180.0f),kPi);
-    EXPECT_FLOAT_EQ(rad2deg(kPi),180.0f);
+    EXPECT_FLOAT_EQ(deg2rad(180.0f), kPi);
+    EXPECT_FLOAT_EQ(rad2deg(kPi), 180.0f);
 
-    EXPECT_FLOAT_EQ(deg2rad(0.0f),0.0f);
-    EXPECT_FLOAT_EQ(rad2deg(0.0f),0.0f);
+    EXPECT_FLOAT_EQ(deg2rad(0.0f), 0.0f);
+    EXPECT_FLOAT_EQ(rad2deg(0.0f), 0.0f);
 
-    EXPECT_FLOAT_EQ(deg2rad(-180.0f),-kPi);
-    EXPECT_FLOAT_EQ(rad2deg(-kPi),-180.0f);
+    EXPECT_FLOAT_EQ(deg2rad(-180.0f), -kPi);
+    EXPECT_FLOAT_EQ(rad2deg(-kPi), -180.0f);
   }
-
-
 }
 
 TEST(VECTOR, vector2) {
@@ -260,12 +258,13 @@ TEST(POINT, Point2) {
   {
     Point2f ftest1{1.0f};
     Point2f ftest2{1.0f};
-//    auto test1 = ftest1 + ftest2; //error cannot implicitily convert to Vector2f
-    auto test1 = ftest1 + static_cast<DR::Vector2f>(ftest2); //Ok
-    auto test2 = ftest1 + Vector2f(ftest2); //Ok
+    //    auto test1 = ftest1 + ftest2; //error cannot implicitily convert to
+    //    Vector2f
+    auto test1 = ftest1 + static_cast<DR::Vector2f>(ftest2); // Ok
+    auto test2 = ftest1 + Vector2f(ftest2);                  // Ok
     auto test3 = ftest1 - ftest2;
-    EXPECT_EQ(test1,test2);
-    EXPECT_EQ(test2,Point2f(2.0f));
+    EXPECT_EQ(test1, test2);
+    EXPECT_EQ(test2, Point2f(2.0f));
     EXPECT_EQ(test3, Vector2f());
   }
   // max_min
@@ -337,22 +336,22 @@ TEST(POINT, point3) {
     ftest.at(1) = 2.0f;
     EXPECT_FLOAT_EQ(ftest.at(1), 2.0f);
     ftest.at(0) = 0.0f; // ftest={0.0f,2.0f,1.0f}
-    EXPECT_EQ(ftest, Point3f(0.0f, 2.0f , 1.0f ));
+    EXPECT_EQ(ftest, Point3f(0.0f, 2.0f, 1.0f));
   }
   // +-
   {
     Point3f x{1.0f, 0.0f, 0.0f};
     Point3f y = x;
 
-//    auto test1 = x + y; //trigger error
+    //    auto test1 = x + y; //trigger error
 
     auto test1 = x + static_cast<Vector3f>(y);
     auto test2 = x + Vector3f(y);
     auto test3 = x - y;
 
-    EXPECT_EQ(test1,test2);
-    EXPECT_EQ(test2,Point3f(2.0f,0.0f,0.0f));
-    EXPECT_EQ(test3,Vector3f(0.0f));
+    EXPECT_EQ(test1, test2);
+    EXPECT_EQ(test2, Point3f(2.0f, 0.0f, 0.0f));
+    EXPECT_EQ(test3, Vector3f(0.0f));
   }
   // max_min
   {
