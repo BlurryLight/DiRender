@@ -26,6 +26,10 @@ public:
     }
     return false;
   }
+  static Transform Inverse(const Transform& other)
+  {
+    return Transform(other.mInv_,other.m_);
+  }
 
   // Todo: xx
   Point3f operator()(const Point3f& other) const {}
