@@ -4,9 +4,9 @@
 #include <cmath>
 #include <limits>
 #include <numeric>
-#include <utils/di_global.h>
 #include <random>
 #include <thread>
+#include <utils/di_global.h>
 
 NAMESPACE_BEGIN(DR)
 constexpr float kFloatInfinity = std::numeric_limits<float>::max();
@@ -41,17 +41,15 @@ inline float boost_epsilon_difference(float a, float b) {
 }
 NAMESPACE_END(impl)
 
-inline bool
-almost_equal(float x, float y)
-{
+inline bool almost_equal(float x, float y) {
   if (x == y)
     return true;
-  return impl::boost_epsilon_difference(x, y) < 3; //Binary predicate to support <algorithm>
+  return impl::boost_epsilon_difference(x, y) <
+         3; // Binary predicate to support <algorithm>
 }
 
-inline bool
-almost_equal(float x, float y,
-             int ulp_num) // units of least precision, or tolarance
+inline bool almost_equal(float x, float y,
+                         int ulp_num) // units of least precision, or tolarance
 {
   if (x == y)
     return true;
@@ -61,12 +59,10 @@ almost_equal(float x, float y,
 inline float deg2rad(const float &deg) { return deg * kPi / 180.0f; }
 inline float rad2deg(const float &rad) { return rad * k1_Pi * 180.0f; }
 
-inline float get_random_float(float min=0.0f,float max=1.0f)
-{
+inline float get_random_float(float min = 0.0f, float max = 1.0f) {
   static thread_local std::mt19937 generator(std::random_device{}());
-  std::uniform_real_distribution<> dis(min,max);
+  std::uniform_real_distribution<> dis(min, max);
   return dis(generator);
 }
-
 
 NAMESPACE_END(DR)

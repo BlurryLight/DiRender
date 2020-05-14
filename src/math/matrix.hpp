@@ -19,8 +19,7 @@ public:
   Matrix4 &operator=(const Matrix4 &other);
   bool operator==(const Matrix4 &other) const;
   bool operator!=(const Matrix4 &other) const;
-  Matrix4 operator*(const Matrix4& other) const
-  {
+  Matrix4 operator*(const Matrix4 &other) const {
     return this->multiply(other);
   }
   Matrix4(float row00, float row01, float row02, float row03, float row10,
@@ -73,7 +72,7 @@ inline bool Matrix4::operator==(const Matrix4 &other) const {
   //  return this->m == other.m;
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
-      if(!almost_equal(m[i][j],other.m[i][j]))
+      if (!almost_equal(m[i][j], other.m[i][j]))
         return false;
     }
   }
