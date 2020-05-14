@@ -33,12 +33,13 @@
 
 # others
 *tags
-*.user
+*.user*
 *build*
 compile_commands.json
 *conf
 out
 .vs
 .vscode
+
 
 
