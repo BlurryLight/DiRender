@@ -10,4 +10,9 @@
 
 NAMESPACE_BEGIN(DR)
 
+inline Vector3f reflect(const Vector3f& in, const Vector3f& normal)
+{
+  return in - 2 * dot(in,normal) * normal;
+}
+
 NAMESPACE_END(DR)

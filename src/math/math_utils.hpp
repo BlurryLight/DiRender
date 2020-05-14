@@ -5,6 +5,8 @@
 #include <limits>
 #include <numeric>
 #include <utils/di_global.h>
+#include <random>
+#include <thread>
 
 NAMESPACE_BEGIN(DR)
 constexpr float kFloatInfinity = std::numeric_limits<float>::max();
@@ -58,5 +60,13 @@ almost_equal(float x, float y,
 
 inline float deg2rad(const float &deg) { return deg * kPi / 180.0f; }
 inline float rad2deg(const float &rad) { return rad * k1_Pi * 180.0f; }
+
+inline float get_random_float(float min=0.0f,float max=1.0f)
+{
+  static thread_local std::mt19937 generator(std::random_device{}());
+  std::uniform_real_distribution<> dis(min,max);
+  return dis(generator);
+}
+
 
 NAMESPACE_END(DR)

@@ -29,8 +29,8 @@ set(SAMPLER_SOURCE
 
 set(CAMERAS_SOURCE
     ${CMAKE_SOURCE_DIR}/src/cameras/camera.h
-    ${CMAKE_SOURCE_DIR}/src/cameras/pinholeCamera.cc
-    ${CMAKE_SOURCE_DIR}/src/cameras/pinholeCamera.h
+    ${CMAKE_SOURCE_DIR}/src/cameras/pinhole_camera.cc
+    ${CMAKE_SOURCE_DIR}/src/cameras/pinhole_camera.h
     )
 
 set(SHAPES_SOURCE
@@ -43,6 +43,12 @@ set(UTILS_SOURCE
     ${CMAKE_SOURCE_DIR}/src/utils/di_global.h
     ${CMAKE_SOURCE_DIR}/src/utils/thread_pool.hpp
     )
+set(MATERIAL_SOURCE
+    ${CMAKE_SOURCE_DIR}/src/material/material.h
+    ${CMAKE_SOURCE_DIR}/src/material/matte_material.h
+    ${CMAKE_SOURCE_DIR}/src/material/matte_material.cc
+    )
+
 
 set(SOURCE_HEADERS ${ACCELERATOR_SOURCE} ${CORES_SOURCE} ${MATH_SOURCE} ${SAMPLER_SOURCE}
-    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE})
+    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE} ${MATERIAL_SOURCE})
