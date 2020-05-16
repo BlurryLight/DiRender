@@ -1,5 +1,6 @@
 #pragma once
 #include <cores/bounds.h>
+#include <cores/intersection.hpp>
 #include <math/geometry.hpp>
 #include <memory>
 #include <shapes/shape.h>
@@ -22,7 +23,12 @@ struct GeometricPrimitive : public Primitive {
       : shape_(shape), mat_(mat) {}
   virtual Bounds3 WorldBounds() const override { return shape_->WorldBounds(); }
   virtual bool Intersect(const Ray &ray, Intersection *isect) const override {
-    return shape_->Intersect(ray, nullptr, isect);
+    auto flag = shape_->Intersect(ray, nullptr, isect);
+    if (flag) {
+      isect->mat_ptr = mat_.get();
+      isect->primi_ptr = (Primitive *)this;
+    }
+    return flag;
   }
   virtual bool Intersect_test(const Ray &ray) const override {
     return shape_->Intersect(ray, nullptr, nullptr);

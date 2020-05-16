@@ -1,8 +1,9 @@
 #pragma once
-#include <utils/di_global.h>
+#include <cores/bounds.h>
 #include <math/geometry.hpp>
-#include <shapes/shape.h>
 #include <math/transform.h>
+#include <shapes/shape.h>
+#include <utils/di_global.h>
 
 NAMESPACE_BEGIN(DR)
 class Sphere : public Shape
@@ -17,12 +18,13 @@ public:
          float radius)
       : Shape(LocalToWorld, WorldToLocal, reverseOrientation), radius_(radius) {
   }
-  Bounds3 WorldBounds() override;
-  Bounds3 ObjectBounds() override;
+  ~Sphere() {}
+  Bounds3 WorldBounds() const override;
+  Bounds3 ObjectBounds() const override;
   bool Intersect(const Ray &ray, float *time = nullptr, Intersection *isect = nullptr) const override;
   float Area() const override;
-  std::pair<Intersection, float> sample() const override; //uniform
-  std::pair<Intersection, float> sample(const Point3f& ref) const; //uniform
+  std::pair<Intersection, float> sample() const override{};           // uniform
+  std::pair<Intersection, float> sample(const Point3f &ref) const {}; // uniform
   float solidAngle(const Point3f& p) const
   {
     Point3f center = (*LocalToWorld)(Point3f{0.0f});
