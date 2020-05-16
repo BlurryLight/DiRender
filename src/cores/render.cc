@@ -8,13 +8,18 @@ void Render::render() {
   int width = 400;
   this->framebuffer_.resize(height * width);
 
-  Point3f origin{0.0f, 0.0f, 5.0f};
+  Point3f origin{0.0f, 0.0f, 0.0f};
   Point3f low_left{-2.0f, -2.0f, -1.0f};
   Vector3f horizontal{4.0f, 0.0f, 0.0f};
   Vector3f vertical{0.0f, 4.0f, 0.0f};
 
-  auto trans = std::make_shared<Transform>();
-  auto sphere = std::make_shared<Sphere>(trans, trans, false, 0.1);
+  auto mat4 = Matrix4();
+  mat4.m[1][3] = 0;
+  mat4.m[0][3] = 0;
+  mat4.m[2][3] = -2;
+  auto trans = std::make_shared<Transform>(mat4);
+  auto trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
+  auto sphere = std::make_shared<Sphere>(trans, trans_inv, false, 1);
 
   auto cast_ray = [&sphere](const Ray &r) {
     Vector3f unit_vec = r.direction_.normalize();

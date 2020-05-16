@@ -153,6 +153,7 @@ inline Matrix4 Matrix4::Inverse(const Matrix4 &mat) {
     }
   }
 
+  // i = pivot column
   for (int i = 0; i < 4; i++) {
     float f = copy[i][i];
     if (almost_equal(f, 0.0f)) {
@@ -163,7 +164,7 @@ inline Matrix4 Matrix4::Inverse(const Matrix4 &mat) {
       result.m[i][j] /= f;
     }
     for (int k = i + 1; k < 4; k++) {
-      f = copy[k][i];
+      f = copy[i][k];
       for (int j = 0; j < 4; j++) {
         copy[j][k] -= f * copy[j][i];
         result.m[j][k] -= f * result.m[j][i];

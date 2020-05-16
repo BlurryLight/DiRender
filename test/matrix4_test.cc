@@ -73,4 +73,21 @@ TEST(MATRIX4, basic) {
     EXPECT_EQ(mat_scaled, Matrix4::Multiply(scale3, mat));
     EXPECT_EQ(mat_scaled, scale3.multiply(mat));
   }
+  // inverse
+
+  {
+    // clang-format off
+    auto mat = mat4(         1,0,0,1,
+                             0,1,0,2,
+                             0,0,1,3,
+                             0,0,0,1
+                             );
+    auto mat_inv = mat4(     1,0,0,-1,
+                             0,1,0,-2,
+                             0,0,1,-3,
+                             0,0,0,1
+                             );
+    // clang-format on
+    EXPECT_EQ(mat_inv, Matrix4::Inverse(mat));
+  }
 }
