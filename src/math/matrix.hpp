@@ -22,6 +22,16 @@ public:
   Matrix4 operator*(const Matrix4 &other) const {
     return this->multiply(other);
   }
+  bool is_identity() const {
+    return almost_equal(m[0][0], 1.0f) && almost_equal(m[1][1], 1.0f) &&
+           almost_equal(m[2][2], 1.0f) && almost_equal(m[3][3], 1.0f) &&
+           almost_equal(m[0][1], 0.0f) && almost_equal(m[0][2], 0.0f) &&
+           almost_equal(m[0][3], 0.0f) && almost_equal(m[1][0], 0.0f) &&
+           almost_equal(m[1][2], 0.0f) && almost_equal(m[1][3], 0.0f) &&
+           almost_equal(m[2][0], 0.0f) && almost_equal(m[2][1], 0.0f) &&
+           almost_equal(m[2][3], 0.0f) && almost_equal(m[3][0], 0.0f) &&
+           almost_equal(m[3][1], 0.0f) && almost_equal(m[3][2], 0.0f);
+  }
   Matrix4(float row00, float row01, float row02, float row03, float row10,
           float row11, float row12, float row13, float row20, float row21,
           float row22, float row23, float row30, float row31, float row32,
