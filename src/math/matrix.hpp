@@ -118,60 +118,51 @@ inline Matrix4::Matrix4(float row00, float row01, float row02, float row03,
   m[3][3] = row33;
 }
 
-inline Matrix4 Matrix4::Inverse(const Matrix4 &mat) {
-  auto copy = mat.m;
-  auto result = Matrix4();
-  int row = 0, col = 0;
-  while (row < 4 && col < 4) {
-    // argmax
-    float row_max_value = kFloatLowest;
-    int row_max = 0;
-    for (int i = row; i < 4; i++) {
-      if (row_max_value < std::abs(copy[i][col])) {
-        row_max_value = copy[i][col];
-        row_max = i;
-      }
+inline Matrix4 Matrix4::Inverse(const Matrix4 &mat1) {
+  // from scrachPixel
+  auto mat = Matrix4();
+  int N = 4;
+  auto copy = mat1;
+  auto &m = copy.m;
+  for (unsigned column = 0; column < N; ++column) {
+    // Swap row in case our pivot point is not working
+    if (m[column][column] == 0) {
+      unsigned big = column;
+      for (unsigned row = 0; row < N; ++row)
+        if (fabs(m[row][column]) > fabs(m[big][column]))
+          big = row;
+      // Print this is a singular matrix, return identity ?
+      if (big == column)
+        throw std::runtime_error("Matrix4 is not invertible");
+      // Swap rows
+      else
+        for (unsigned j = 0; j < N; ++j) {
+          std::swap(m[column][j], m[big][j]);
+          std::swap(mat.m[column][j], mat.m[big][j]);
+        }
     }
-
-    if (almost_equal(row_max_value, 0.0f)) {
-      col += 1; // no pivot in this column
-    } else {
-      for (int i = 0; i < 4; i++) {
-        std::swap(copy[row_max][i], copy[row][i]);
-        std::swap(result.m[row_max][i], result.m[row][i]);
-      }
-      for (int i = row + 1; i < 4; i++) {
-        float f = copy[i][col] / copy[row][col];
-        copy[i][col] = 0;
-        for (int j = col + 1; j < 4; j++) {
-          copy[i][j] = copy[i][j] - copy[row][j] * f;
-          result.m[i][j] = result.m[i][j] - result.m[row][j] * f;
+    // Set each row in the column to 0
+    for (unsigned row = 0; row < N; ++row) {
+      if (row != column) {
+        float coeff = m[row][column] / m[column][column];
+        if (coeff != 0) {
+          for (unsigned j = 0; j < N; ++j) {
+            m[row][j] -= coeff * m[column][j];
+            mat.m[row][j] -= coeff * mat.m[column][j];
+          }
+          // Set the element to 0 for safety
+          m[row][column] = 0;
         }
       }
-      row += 1;
-      col += 1;
     }
   }
-
-  // i = pivot column
-  for (int i = 0; i < 4; i++) {
-    float f = copy[i][i];
-    if (almost_equal(f, 0.0f)) {
-      throw std::runtime_error("Matrix4 is not invertible");
-    }
-    for (int j = i; j < 4; j++) {
-      copy[i][j] /= f;
-      result.m[i][j] /= f;
-    }
-    for (int k = i + 1; k < 4; k++) {
-      f = copy[i][k];
-      for (int j = 0; j < 4; j++) {
-        copy[j][k] -= f * copy[j][i];
-        result.m[j][k] -= f * result.m[j][i];
-      }
+  // Set each element of the diagonal to 1
+  for (unsigned row = 0; row < N; ++row) {
+    for (unsigned column = 0; column < N; ++column) {
+      mat.m[row][column] /= m[row][row];
     }
   }
-  return result;
+  return mat;
 }
 
 inline Matrix4::Matrix4(std::array<std::array<float, 4>, 4> m_) {
