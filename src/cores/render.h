@@ -8,5 +8,4 @@ public:
 
 private:
   DR::ThreadPool pool_;
-  std::vector<DR::Vector3f> framebuffer_;
 };

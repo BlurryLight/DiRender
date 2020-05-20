@@ -1,3 +1,4 @@
+#include <cameras/pinhole_camera.h>
 #include <cores/primitive.h>
 #include <cores/ray.hpp>
 #include <cores/render.h>
@@ -6,13 +7,8 @@ using namespace DR;
 void Render::render() {
   int height = 400;
   int width = 400;
-  this->framebuffer_.resize(height * width);
 
-  Point3f origin{0.0f, 0.0f, 0.0f};
-  Point3f low_left{-2.0f, -2.0f, -1.0f};
-  Vector3f horizontal{4.0f, 0.0f, 0.0f};
-  Vector3f vertical{0.0f, 4.0f, 0.0f};
-
+  Point3f origin{1.0f, 1.0f, 0.0f};
   auto mat4 = Matrix4();
   mat4.m[1][3] = 0;
   mat4.m[0][3] = 0;
@@ -30,12 +26,7 @@ void Render::render() {
     return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
   };
 
-  //  int tile_num = 16 ;
-  int tile_height = 4;
-  int tile_width = 4;
-
-  int tile_height_pixels = std::ceil(height / tile_height);
-  int tile_width_pixels = std::ceil(width / tile_width);
+  PinholeCamera cam(origin, {0.0, 1.0, 0.0}, {0.0, 0.0, -1.0}, 90.0, 400, 400);
 
   auto render_tile = [&](int height, int width, int blockheight, int blockwidth,
                          int blockheightId, int blockwidthId) {
@@ -47,36 +38,25 @@ void Render::render() {
           return;
         float u = float(trueJ) / (width - 1);
         float v = float(height - 1 - trueI) / (height - 1);
-        Ray r(origin, (low_left + u * horizontal + v * vertical) - origin);
-        framebuffer_[trueI * width + trueJ] = cast_ray(r);
+        auto r = cam.get_ray(u, v);
+        cam.film_ptr_->framebuffer_.at(trueI * width + trueJ) = cast_ray(r);
       }
     }
   };
 
-  for (int i = 0; i < tile_height; i++) {
-    for (int j = 0; j < tile_width; j++) {
+  std::vector<std::future<void>> futures;
+  for (int i = 0; i < cam.film_ptr_->tile_height; i++) {
+    for (int j = 0; j < cam.film_ptr_->tile_width; j++) {
       // parallel
-      //      this->pool_.enqueue_task(render_tile, height, width,
-      //      tile_height_pixels,
-      //                               tile_width_pixels, i, j);
+      futures.emplace_back(this->pool_.enqueue_task(
+          render_tile, height, width, cam.film_ptr_->tile_height_pixels,
+          cam.film_ptr_->tile_width_pixels, i, j));
       // single thread
-      render_tile(height, width, tile_height_pixels, tile_width_pixels, i, j);
+      //      render_tile(height, width, cam.film_ptr_->tile_height_pixels,
+      //                  cam.film_ptr_->tile_width_pixels, i, j);
     }
   }
-  FILE *fp = fopen("binary.ppm", "wb");
-  (void)fprintf(fp, "P6\n%d %d\n255\n", height, width);
-  for (auto i = 0; i < width * height; ++i) {
-    static unsigned char color[3];
-    color[0] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].x), 0.6f));
-    color[1] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].y), 0.6f));
-    color[2] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].z), 0.6f));
-    fwrite(color, 1, 3, fp);
-  }
-  fclose(fp);
+  for (auto &i : futures)
+    i.wait();
+  cam.film_ptr_->write_ppm("output.ppm");
 }
