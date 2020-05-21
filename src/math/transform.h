@@ -1,81 +1,34 @@
 #pragma once
 #include <cores/bounds.h>
 #include <math/geometry.hpp>
+#include <set>
 #include <utils/di_global.h>
 
 NAMESPACE_BEGIN(DR)
 class Transform
 {
 public:
-  Transform():m_(Matrix4()),mInv_(Matrix4()){}
-  Transform(const Matrix4& m):m_(m),mInv_(Matrix4::Inverse(m)){}
+  static std::set<std::shared_ptr<Transform>> TransformTable;
+  Transform() : m_(Matrix4()), mInv_(Matrix4()) {}
+  Transform(const Matrix4 &m) : m_(m), mInv_(Matrix4::Inverse(m)) {}
   Transform(const Matrix4& m,const Matrix4& mInv):m_(m),mInv_(mInv){}
-  bool operator==(const Transform& other) const
-  {
-    return m_ == other.m_ && mInv_ == other.mInv_;
-  }
-  bool operator<(const Transform &other) const { //allow the Transform to be place on std::map
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; i++) {
-        if (m_.m[i][j] < other.m_.m[i][j]) {
-          return true;
-        }
-        if (m_.m[i][j] > other.m_.m[i][j]) {
-          return false;
-        }
-      }
-    }
-    return false;
-  }
+  bool operator==(const Transform &other) const;
+  bool operator<(const Transform &other) const;
   static Transform Inverse(const Transform& other)
   {
-    return Transform(other.mInv_,other.m_);
+    return Transform(other.mInv_, other.m_);
   }
   bool is_identity() const { return m_.is_identity(); }
 
   // Todo: xx
-  Point3f operator()(const Point3f &other) const {
-    float x = other.x, y = other.y, z = other.z;
-    // homocoords
-    float tx =
-        m_.m[0][0] * x + m_.m[0][1] * y + m_.m[0][2] * z + m_.m[0][3] * 1.0f;
-    float ty =
-        m_.m[1][0] * x + m_.m[1][1] * y + m_.m[1][2] * z + m_.m[1][3] * 1.0f;
-    float tz =
-        m_.m[2][0] * x + m_.m[2][1] * y + m_.m[2][2] * z + m_.m[2][3] * 1.0f;
-    float tw =
-        m_.m[3][0] * x + m_.m[3][1] * y + m_.m[3][2] * z + m_.m[3][3] * 1.0f;
-    return {tx / tw, ty / tw, tz / tw};
-  }
+  Point3f operator()(const Point3f &other) const;
 
-  Vector3f operator()(const Vector3f &other) const {
-    float x = other.x, y = other.y, z = other.z;
-    // homocoords
-    float tx = m_.m[0][0] * x + m_.m[0][1] * y + m_.m[0][2] * z;
-    float ty = m_.m[1][0] * x + m_.m[1][1] * y + m_.m[1][2] * z;
-    float tz = m_.m[2][0] * x + m_.m[2][1] * y + m_.m[2][2] * z;
-    return {tx, ty, tz};
-  }
+  Vector3f operator()(const Vector3f &other) const;
 
-  Bounds3 operator()(const Bounds3 &other) const {
-    // homocoords
-    // naive method
-    const Transform &M = (*this);
-    Bounds3 ret;
-    for (int i = 0; i < 2; i++)
-      for (int j = 0; j < 2; j++)
-        for (int k = 0; k < 2; k++) {
-          ret = Bounds3::Union(ret,
-                               M(Point3f{other[i].x, other[j].y, other[k].z}));
-        }
-    return ret;
-  }
-  Ray operator()(const Ray &other) const {
-    const Transform &M = (*this);
-    Point3f o = M(other.origin_);
-    Vector3f d = M(other.direction_);
-    return Ray(o, d, other.tMax_, other.time_);
-  }
+  Normal3f operator()(const Normal3f &other, bool reverse) const;
+
+  Bounds3 operator()(const Bounds3 &other) const;
+  Ray operator()(const Ray &other) const;
 
 private:
   mat4 m_,mInv_;
