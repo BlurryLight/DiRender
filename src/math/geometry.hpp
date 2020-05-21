@@ -15,7 +15,7 @@ inline Vector3f reflect(const Vector3f &in, const Vector3f &normal) {
 }
 
 // coords,pdf
-inline std::pair<Vector3f, float> uniform_sample_sphere() {
+inline std::pair<Point3f, float> uniform_sample_sphere() {
   static float pdf = 1.0f / (4 * kPi);
   float r1 = get_random_float();
   float r2 = get_random_float();
@@ -27,7 +27,7 @@ inline std::pair<Vector3f, float> uniform_sample_sphere() {
   return {{x, y, z}, pdf};
 }
 
-inline std::pair<Vector3f, float> uniform_sample_hemisphere() {
+inline std::pair<Point3f, float> uniform_sample_hemisphere() {
   static float pdf = 1.0f / (2 * kPi);
   float r1 = get_random_float();
   float r2 = get_random_float();
@@ -39,7 +39,7 @@ inline std::pair<Vector3f, float> uniform_sample_hemisphere() {
   return {{x, y, z}, pdf};
 }
 
-inline std::pair<Vector3f, float> cosine_sample_hemisphere() {
+inline std::pair<Point3f, float> cosine_sample_hemisphere() {
   float r1 = get_random_float();
   float r2 = get_random_float();
   float phi = 2 * kPi * r1;

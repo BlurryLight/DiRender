@@ -107,7 +107,8 @@ TEST(GEOMETRY, sample_test) {
   {
     std::vector<std::pair<Vector3f, float>> result;
     for (int i = 0; i < 10000; i++) {
-      result.push_back(uniform_sample_sphere());
+      auto res = uniform_sample_sphere();
+      result.push_back({(Vector3f)res.first, res.second});
     }
     auto pdf = 1.0f / (4 * kPi);
     for (auto &i : result) {
@@ -122,7 +123,8 @@ TEST(GEOMETRY, sample_test) {
   {
     std::vector<std::pair<Vector3f, float>> result;
     for (int i = 0; i < 10000; i++) {
-      result.push_back(uniform_sample_hemisphere());
+      auto res = uniform_sample_hemisphere();
+      result.push_back({(Vector3f)res.first, res.second});
     }
     auto pdf = 1.0f / (2 * kPi);
     for (auto &i : result) {
@@ -137,7 +139,8 @@ TEST(GEOMETRY, sample_test) {
   {
     std::vector<std::pair<Vector3f, float>> result;
     for (int i = 0; i < 10000; i++) {
-      result.push_back(cosine_sample_hemisphere());
+      auto res = cosine_sample_hemisphere();
+      result.push_back({(Vector3f)res.first, res.second});
     }
     for (auto &i : result) {
       EXPECT_TRUE(i.second <= 1 * k1_Pi && i.second >= 0.0f);

@@ -58,3 +58,37 @@ float Sphere::Area() const {
   // object space
   return kPi * 4 * radius_ * radius_;
 }
+
+std::pair<Intersection, float> Sphere::sample() const {
+  std::pair<Point3f, float> res = uniform_sample_sphere();
+  Intersection result;
+  result.coords = static_cast<Vector3f>((*LocalToWorld)(radius_ * res.first));
+  result.normal = (*LocalToWorld)(static_cast<Normal3f>(res.first),
+                                  this->reverseOrientation);
+  float pdf = res.second;
+  return {result, pdf};
+}
+
+std::pair<Intersection, float> Sphere::sample(const Point3f &ref) const {
+  auto center = (*LocalToWorld)(Point3f{0.0f});
+  float distance_squared = (center - ref).squared_length();
+  float cos_theta_max = sqrt(1 - radius_ * radius_ / distance_squared);
+  float solid_angle = 2 * kPi * (1 - cos_theta_max);
+
+  float pdf = 1.0 / solid_angle;
+
+  auto r1 = get_random_float();
+  auto r2 = get_random_float();
+  float z = 1 + r2 * (cos_theta_max - 1);
+
+  auto phi = 2 * kPi * r1;
+  float x = cos(phi) * sqrt(1 - z * z);
+  float y = sin(phi) * sqrt(1 - z * z);
+
+  auto localPoint = Point3f{x, y, z};
+  Intersection result;
+  result.coords = static_cast<Vector3f>((*LocalToWorld)(radius_ * localPoint));
+  result.normal = (*LocalToWorld)(static_cast<Normal3f>(localPoint),
+                                  this->reverseOrientation);
+  return {result, pdf};
+}

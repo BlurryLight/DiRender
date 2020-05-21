@@ -2,6 +2,7 @@
 #include <cores/bounds.h>
 #include <cores/intersection.hpp>
 #include <math/geometry.hpp>
+#include <math/transform.h>
 #include <memory>
 #include <shapes/shape.h>
 #include <utils/di_global.h>
@@ -45,7 +46,9 @@ struct TransformedPrimitive : public Primitive
                      std::shared_ptr<Transform> trans)
       : prim_(prim), trans_(trans) {}
   // transform the AABB
-  Bounds3 WorldBounds() const override{}
+  Bounds3 WorldBounds() const override {
+    return (*trans_)(prim_->WorldBounds());
+  }
   //transform the ray
   bool Intersect_test(const Ray &ray) const override;
   bool Intersect(const Ray &ray, Intersection *isect) const override;

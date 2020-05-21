@@ -17,7 +17,9 @@ public:
   virtual Bounds3 ObjectBounds() const = 0;
   virtual Bounds3 WorldBounds() const = 0;
   virtual bool Intersect(const Ray &ray, float *time = nullptr,
-                         Intersection *isect = nullptr) const {};
+                         Intersection *isect = nullptr) const {
+    return false;
+  };
   virtual float Area() const = 0;
   virtual std::pair<Intersection,float> sample() const = 0; //sample position and pdf
   virtual std::pair<Intersection,float> sample(const Point3f& ref) const

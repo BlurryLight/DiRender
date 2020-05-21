@@ -27,19 +27,24 @@ void Render::render() {
   };
 
   PinholeCamera cam(origin, {0.0, 1.0, 0.0}, {0.0, 0.0, -1.0}, 90.0, 400, 400);
+  int spp = 32;
 
   auto render_tile = [&](int height, int width, int blockheight, int blockwidth,
-                         int blockheightId, int blockwidthId) {
+                         int blockheightId, int blockwidthId, int spp) {
     for (int i = 0; i < blockheight; i++) {
       for (int j = 0; j < blockwidth; j++) {
         int trueJ = blockwidth * blockwidthId + j;
         int trueI = blockheight * blockheightId + i;
         if (trueJ >= width || trueI >= height)
           return;
-        float u = float(trueJ) / (width - 1);
-        float v = float(height - 1 - trueI) / (height - 1);
-        auto r = cam.get_ray(u, v);
-        cam.film_ptr_->framebuffer_.at(trueI * width + trueJ) = cast_ray(r);
+        for (int k = 0; k < spp; k++) {
+          float u = float(trueJ + get_random_float()) / (width - 1);
+          float v =
+              float(height - 1 - trueI + get_random_float()) / (height - 1);
+          auto r = cam.get_ray(u, v);
+          cam.film_ptr_->framebuffer_.at(trueI * width + trueJ) +=
+              cast_ray(r) / spp;
+        }
       }
     }
   };
@@ -50,7 +55,7 @@ void Render::render() {
       // parallel
       futures.emplace_back(this->pool_.enqueue_task(
           render_tile, height, width, cam.film_ptr_->tile_height_pixels,
-          cam.film_ptr_->tile_width_pixels, i, j));
+          cam.film_ptr_->tile_width_pixels, i, j, spp));
       // single thread
       //      render_tile(height, width, cam.film_ptr_->tile_height_pixels,
       //                  cam.film_ptr_->tile_width_pixels, i, j);
