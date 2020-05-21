@@ -31,69 +31,62 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
   }
   return {};
 }
-void Render::render() {
-  int height = 400;
-  int width = 400;
 
-  Point3f origin{0.0f, 0.0f, 0.0f};
-  auto mat4 = Matrix4();
-  mat4.m[1][3] = 0;
-  mat4.m[0][3] = 0;
-  mat4.m[2][3] = -2;
-  auto trans = std::make_shared<Transform>(mat4);
-  auto trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
-  auto sphere_shape_1 = std::make_shared<Sphere>(trans, trans_inv, false, 1);
-
-  mat4.m[0][3] = 0;
-  mat4.m[1][3] = -50;
-  mat4.m[2][3] = -2;
-  trans = std::make_shared<Transform>(mat4);
-  trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
-  auto sphere_shape_2 = std::make_shared<Sphere>(trans, trans_inv, false, 49);
-  auto diffuse = std::make_shared<MatteMaterial>(Vector3f{0.1, 0.1, 0.8f});
-  std::vector<std::shared_ptr<Primitive>> prims;
-  prims.emplace_back(
-      std::make_shared<GeometricPrimitive>(sphere_shape_1, diffuse));
-  prims.emplace_back(
-      std::make_shared<GeometricPrimitive>(sphere_shape_2, diffuse));
-  auto hit_list = std::make_shared<LinearList>(prims);
-
-  PinholeCamera cam(origin, {0.0, 1.0, 0.0}, {0.0, 0.0, -1.0}, 90.0, 400, 400);
-  int spp = 32;
-
-  auto render_tile = [&](int height, int width, int blockheight, int blockwidth,
-                         int blockheightId, int blockwidthId, int spp) {
-    for (int i = 0; i < blockheight; i++) {
-      for (int j = 0; j < blockwidth; j++) {
-        int trueJ = blockwidth * blockwidthId + j;
-        int trueI = blockheight * blockheightId + i;
-        if (trueJ >= width || trueI >= height)
-          return;
-        for (int k = 0; k < spp; k++) {
-          float u = float(trueJ + get_random_float()) / (width - 1);
-          float v =
-              float(height - 1 - trueI + get_random_float()) / (height - 1);
-          auto r = cam.get_ray(u, v);
-          cam.film_ptr_->framebuffer_.at(trueI * width + trueJ) +=
-              cast_ray(r, hit_list, 0) / spp;
-        }
+static void render_tile(std::shared_ptr<Camera> cam,
+                        std::shared_ptr<Primitive> prim, int height, int width,
+                        int blockheight, int blockwidth, int blockheightId,
+                        int blockwidthId, int spp) {
+  for (int i = 0; i < blockheight; i++) {
+    for (int j = 0; j < blockwidth; j++) {
+      int trueJ = blockwidth * blockwidthId + j;
+      int trueI = blockheight * blockheightId + i;
+      if (trueJ >= width || trueI >= height)
+        return;
+      for (int k = 0; k < spp; k++) {
+        float u = float(trueJ + get_random_float()) / (width - 1);
+        float v = float(height - 1 - trueI + get_random_float()) / (height - 1);
+        auto r = cam->get_ray(u, v);
+        cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) +=
+            cast_ray(r, prim, 0) / spp;
       }
     }
-  };
-
-  std::vector<std::future<void>> futures;
-  for (int i = 0; i < cam.film_ptr_->tile_height; i++) {
-    for (int j = 0; j < cam.film_ptr_->tile_width; j++) {
-      // parallel
-      futures.emplace_back(this->pool_.enqueue_task(
-          render_tile, height, width, cam.film_ptr_->tile_height_pixels,
-          cam.film_ptr_->tile_width_pixels, i, j, spp));
-      // single thread
-      //      render_tile(height, width, cam.film_ptr_->tile_height_pixels,
-      //                  cam.film_ptr_->tile_width_pixels, i, j);
-    }
   }
-  for (auto &i : futures)
-    i.wait();
-  cam.film_ptr_->write_ppm("output.ppm");
+}
+
+void Render::render(const Scene &scene) {
+
+  std::shared_ptr<Primitive> hit_list;
+  if (scene.Prims_.size() > 0) {
+    if (scene.Prims_.size() > 1) {
+      std::vector<std::shared_ptr<Primitive>> prims;
+      for (auto &i : scene.Prims_)
+        prims.push_back(i);
+      hit_list = std::make_shared<LinearList>(prims);
+    } else {
+      hit_list = scene.Prims_.at(0); // only one object : maybe a bvh tree
+    }
+  } else {
+    throw std::runtime_error("Scene has no primitive to render!");
+    exit(EXIT_FAILURE);
+  }
+
+  int index = 0;
+  for (const auto &cam : scene.cams_) {
+    std::vector<std::future<void>> futures;
+    for (int i = 0; i < cam->film_ptr_->tile_height; i++) {
+      for (int j = 0; j < cam->film_ptr_->tile_width; j++) {
+        // parallel
+        futures.emplace_back(this->pool_.enqueue_task(
+            render_tile, cam, hit_list, cam->film_ptr_->height,
+            cam->film_ptr_->width, cam->film_ptr_->tile_height_pixels,
+            cam->film_ptr_->tile_width_pixels, i, j, spp_));
+        // single thread
+        //      render_tile(height, width, cam.film_ptr_->tile_height_pixels,
+        //                  cam.film_ptr_->tile_width_pixels, i, j);
+      }
+    }
+    for (auto &i : futures)
+      i.wait();
+    cam->film_ptr_->write_ppm("output.ppm" + std::to_string(index++));
+  }
 }
