@@ -9,18 +9,24 @@ using namespace DR;
 
 static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
                          int depth = 0) {
-  Vector3f unit_vec = r.direction_.normalize();
-  auto t = 0.5f * (unit_vec.y + 1.0f);
-  Intersection isect;
+  float russian_roulette = 0.8f;
+  if (!prim->Intersect_test(r)) {
+    Vector3f unit_vec = r.direction_.normalize();
+    auto t = 0.5f * (unit_vec.y + 1.0f);
+    return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
+  }
   if (depth > 4)
     return {};
-  if (prim->Intersect(r, &isect)) {
+  Intersection isect;
+  if (get_random_float() < russian_roulette && prim->Intersect(r, &isect)) {
     auto res = isect.mat_ptr->sampleScatter(r.direction_, isect);
-    Ray r_new({isect.coords.x, isect.coords.y, isect.coords.z}, res.first);
-    return multiply(isect.mat_ptr->evalRadiance(r.direction_, res.first, isect),
-                    cast_ray(r_new, prim, depth + 1));
+    Ray r_new(isect.coords, res.first);
+    float pdf = res.second;
+    auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
+    return multiply(brdf, cast_ray(r_new, prim, depth + 1)) *
+           dot(r_new.direction_, isect.normal) / (pdf * russian_roulette);
   }
-  return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
+  return {};
 }
 void Render::render() {
   int height = 400;
@@ -41,7 +47,7 @@ void Render::render() {
   trans = std::make_shared<Transform>(mat4);
   trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
   auto sphere_shape_2 = std::make_shared<Sphere>(trans, trans_inv, false, 49);
-  auto diffuse = std::make_shared<MatteMaterial>(Vector3f{0.0, 0.1, 1.0});
+  auto diffuse = std::make_shared<MatteMaterial>(Vector3f{0.1, 0.1, 0.8f});
   std::vector<std::shared_ptr<Primitive>> prims;
   prims.emplace_back(
       std::make_shared<GeometricPrimitive>(sphere_shape_1, diffuse));

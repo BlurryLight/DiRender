@@ -12,8 +12,6 @@ struct Material
                             const Vector3f &r_out) const = 0;
   virtual std::pair<Vector3f, float>
   sampleScatter(const Vector3f &r_in, const Intersection &isect) const = 0;
-  virtual Vector3f evalRadiance(const Vector3f &r_in, const Vector3f &r_out,
-                                const Intersection &isect) const = 0;
   virtual Vector3f evalEmitted(const Vector3f &r_in,
                                const Intersection &isect) const {
     ignore(r_in);

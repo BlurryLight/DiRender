@@ -5,18 +5,7 @@ Vector3f MatteMaterial::evalBxDF(const vec3 &r_in, const Intersection &isect,
 
   ignore(r_in);
   auto tmp = dot(r_out, isect.normal);
-  return tmp > 0 ? tmp * k1_Pi : 0.0f;
-}
-
-Vector3f MatteMaterial::evalRadiance(const Vector3f &r_in,
-                                     const Vector3f &r_out,
-                                     const Intersection &isect) const {
-  ignore(r_in);
-  auto tmp = dot(r_out, isect.normal);
-  if (tmp > 0) {
-    return albedo_ * k1_Pi;
-  }
-  return Vector3f{0.0f};
+  return tmp > 0 ? albedo_ * k1_Pi : Vector3f{};
 }
 
 static Vector3f toWorld(const Vector3f &a, const Vector3f &N) {

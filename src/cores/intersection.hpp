@@ -9,7 +9,7 @@ struct Material;
 struct Intersection {
   Intersection() {
     happened = false;
-    coords = Vector3f{};
+    coords = Point3f{};
     normal = Vector3f{};
     texcoords = Point2f{};
     mat_ptr = nullptr;
@@ -18,7 +18,7 @@ struct Intersection {
   }
   float t;
   bool happened;
-  Vector3f coords;
+  Point3f coords;
   Point2f texcoords;
   Normal3f normal;
   Material *mat_ptr;

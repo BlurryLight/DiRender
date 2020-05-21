@@ -9,8 +9,6 @@ public:
                     const vec3 &r_out) const override;
   std::pair<Vector3f, float>
   sampleScatter(const vec3 &r_in, const Intersection &isect) const override;
-  Vector3f evalRadiance(const Vector3f &r_in, const Vector3f &r_out,
-                        const Intersection &isect) const override;
   ~MatteMaterial(){};
 
 private:

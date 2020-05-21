@@ -5,6 +5,7 @@
 #include <vector>
 
 NAMESPACE_BEGIN(DR)
+// Linear List should be used only for debugging
 class LinearList : public Primitive {
 public:
   Bounds3 WorldBounds() const override {

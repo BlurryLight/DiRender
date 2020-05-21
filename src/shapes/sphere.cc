@@ -44,7 +44,7 @@ bool Sphere::Intersect(const Ray &ray, float *time, Intersection *isect) const {
     }
     if (isect != nullptr) {
       isect->happened = true;
-      isect->coords = static_cast<Vector3f>(ray.at(t0));
+      isect->coords = ray.at(t0);
       isect->normal =
           ((*LocalToWorld)(objRay.at(t0) - Point3f{0.0f})).normalize();
       isect->t = t0;
@@ -62,7 +62,7 @@ float Sphere::Area() const {
 std::pair<Intersection, float> Sphere::sample() const {
   std::pair<Point3f, float> res = uniform_sample_sphere();
   Intersection result;
-  result.coords = static_cast<Vector3f>((*LocalToWorld)(radius_ * res.first));
+  result.coords = (*LocalToWorld)(radius_ * res.first);
   result.normal = (*LocalToWorld)(static_cast<Normal3f>(res.first),
                                   this->reverseOrientation);
   float pdf = res.second;
@@ -87,7 +87,7 @@ std::pair<Intersection, float> Sphere::sample(const Point3f &ref) const {
 
   auto localPoint = Point3f{x, y, z};
   Intersection result;
-  result.coords = static_cast<Vector3f>((*LocalToWorld)(radius_ * localPoint));
+  result.coords = (*LocalToWorld)(radius_ * localPoint);
   result.normal = (*LocalToWorld)(static_cast<Normal3f>(localPoint),
                                   this->reverseOrientation);
   return {result, pdf};
