@@ -38,7 +38,7 @@ bool Sphere::Intersect(const Ray &ray, float *time, Intersection *isect) const {
     t0 = t1;
   if (t0 < 0)
     return false;
-  if (t0 > 1e-2) {
+  if (t0 > 1e-2 && t0 > ray.tMin_ && t0 < ray.tMax_) {
     if (time != nullptr) {
       *time = t0;
     }

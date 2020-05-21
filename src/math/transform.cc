@@ -74,5 +74,5 @@ Ray Transform::operator()(const Ray &other) const {
   const Transform &M = (*this);
   Point3f o = M(other.origin_);
   Vector3f d = M(other.direction_);
-  return Ray(o, d, other.tMax_, other.time_);
+  return Ray(o, d, other.tMax_, other.tMin_);
 }
