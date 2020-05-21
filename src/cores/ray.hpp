@@ -15,6 +15,8 @@ public:
   Ray(const Point3f &origin, const Vector3f &direction,
       float tMax = kFloatInfinity, float tMin = kFloatMin)
       : origin_(origin), direction_(direction) {
+    if (direction_.squared_length() > 1.0f)
+      direction_ = direction_.normalize();
     tMin_ = tMin;
     tMax_ = tMax;
   }
