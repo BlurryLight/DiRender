@@ -4,7 +4,7 @@
 #include <memory>
 
 NAMESPACE_BEGIN(DR)
-struct Transform;
+class Transform;
 struct Intersection;
 class Shape
 {
