@@ -60,12 +60,13 @@ float Sphere::Area() const {
 }
 
 std::pair<Intersection, float> Sphere::sample() const {
-  std::pair<Point3f, float> res = uniform_sample_sphere();
+  Point3f sample_point;
+  float pdf;
+  std::tie(sample_point, pdf) = uniform_sample_sphere();
   Intersection result;
-  result.coords = (*LocalToWorld)(radius_ * res.first);
-  result.normal = (*LocalToWorld)(static_cast<Normal3f>(res.first),
+  result.coords = (*LocalToWorld)(radius_ * sample_point);
+  result.normal = (*LocalToWorld)(static_cast<Normal3f>(sample_point),
                                   this->reverseOrientation);
-  float pdf = res.second;
   return {result, pdf};
 }
 

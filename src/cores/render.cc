@@ -5,6 +5,7 @@
 #include <cores/render.h>
 #include <material/matte_material.h>
 #include <shapes/sphere.h>
+#include <tuple> //for std::tie
 using namespace DR;
 
 static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
@@ -19,9 +20,11 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
     return {};
   Intersection isect;
   if (get_random_float() < russian_roulette && prim->Intersect(r, &isect)) {
-    auto res = isect.mat_ptr->sampleScatter(r.direction_, isect);
-    Ray r_new(isect.coords, res.first);
-    float pdf = res.second;
+    Vector3f new_direction;
+    float pdf;
+    std::tie(new_direction, pdf) =
+        isect.mat_ptr->sampleScatter(r.direction_, isect);
+    Ray r_new(isect.coords, new_direction);
     auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
     return multiply(brdf, cast_ray(r_new, prim, depth + 1)) *
            dot(r_new.direction_, isect.normal) / (pdf * russian_roulette);
