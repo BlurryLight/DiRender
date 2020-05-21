@@ -643,6 +643,10 @@ inline float dot(const Vector2f &lhs, const Vector2f &rhs) {
 inline float dot(const Vector3f &lhs, const Vector3f &rhs) {
   return lhs.dot(rhs);
 }
+
+inline Vector3f multiply(const Vector3f &lhs, const Vector3f &rhs) {
+  return {lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z};
+}
 #ifdef __GNUC__
 
 #pragma GCC diagnostic pop

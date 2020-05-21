@@ -1,6 +1,8 @@
 set(ACCELERATOR_SOURCE
     ${CMAKE_SOURCE_DIR}/src/accelerator/bvh.cc
     ${CMAKE_SOURCE_DIR}/src/accelerator/bvh.h
+    ${CMAKE_SOURCE_DIR}/src/accelerator/linear_list.cc
+    ${CMAKE_SOURCE_DIR}/src/accelerator/linear_list.h
     )
 
 set(CORES_SOURCE
