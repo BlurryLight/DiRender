@@ -11,7 +11,7 @@ public:
   float time_;
 
 public:
-  Ray() : time_(0.0f), tMax_(kFloatInfinity) {}
+  Ray() : tMax_(kFloatInfinity), time_(0.0f) {}
   Ray(const Point3f &origin, const Vector3f &direction,
       float tMax = kFloatInfinity, float time = 0.f)
       : origin_(origin), direction_(direction) {

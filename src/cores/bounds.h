@@ -10,6 +10,7 @@ public:
   Bounds3(const Bounds3 &other);
   Bounds3(const Point3f &pMin, const Point3f &pMax);
   const Point3f &operator[](int index) const;
+  Bounds3 &operator=(const Bounds3 &other);
   bool operator==(const Bounds3 &other) const;
   bool operator!=(const Bounds3 &other) const;
   Vector3f diagonal() const;

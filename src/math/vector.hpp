@@ -4,6 +4,12 @@
 #include <utils/di_global.h>
 NAMESPACE_BEGIN(DR)
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+//匿名struct是不符合标准的
+// C11允许,C++还没跟上
+#endif
 class Vector2f;
 class Vector3f;
 class Point2f;
@@ -637,5 +643,9 @@ inline float dot(const Vector2f &lhs, const Vector2f &rhs) {
 inline float dot(const Vector3f &lhs, const Vector3f &rhs) {
   return lhs.dot(rhs);
 }
+#ifdef __GNUC__
+
+#pragma GCC diagnostic pop
+#endif
 
 NAMESPACE_END(DR)

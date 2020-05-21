@@ -12,6 +12,8 @@ struct Material
   virtual std::pair<Vector3f,float> evalScatter(const Ray& r_in,const Intersection& isect) const = 0;
   virtual Vector3f evalEmitted(const Ray& r_in,const Intersection& isect) const
   {
+    ignore(r_in);
+    ignore(isect);
     return {};
   }
 };

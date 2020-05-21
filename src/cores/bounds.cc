@@ -23,6 +23,12 @@ const Point3f &Bounds3::operator[](int index) const {
   return (index == 0) ? pMin_ : pMax_;
 }
 
+Bounds3 &Bounds3::operator=(const Bounds3 &other) {
+  pMin_ = other.pMin_;
+  pMax_ = other.pMax_;
+  return *this;
+}
+
 bool Bounds3::operator==(const Bounds3 &other) const {
   return (this->pMin_ == other.pMin_) && (this->pMax_ == other.pMax_);
 }

@@ -84,6 +84,7 @@ inline Transform Camera::look_at(Point3f origin, Vector3f WorldUp,
 
 inline Camera::Camera(Point3f origin, Vector3f WorldUp, Vector3f target,
                       float fov, uint height, uint width) {
+  ignore(fov);
   auto view_trans = Camera::look_at(origin, WorldUp, target);
   this->view_trans_ = std::make_shared<Transform>(view_trans);
   this->view_trans_inverse_ =

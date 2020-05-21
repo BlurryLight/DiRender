@@ -18,19 +18,22 @@ public:
   virtual Bounds3 WorldBounds() const = 0;
   virtual bool Intersect(const Ray &ray, float *time = nullptr,
                          Intersection *isect = nullptr) const {
+    ignore(ray);
+    ignore(time);
+    ignore(isect);
     return false;
   };
   virtual float Area() const = 0;
   virtual std::pair<Intersection,float> sample() const = 0; //sample position and pdf
   virtual std::pair<Intersection,float> sample(const Point3f& ref) const
   {
+    ignore(ref);
     return sample();
   }
 //  virtual bool HasEmission() = 0; // Should be in Primitive
 
-  bool reverseOrientation;
   std::shared_ptr<Transform> LocalToWorld,WorldToObject;
-
+  bool reverseOrientation;
 };
 
 NAMESPACE_END(DR)

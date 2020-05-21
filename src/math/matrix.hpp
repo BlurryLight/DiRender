@@ -121,7 +121,7 @@ inline Matrix4::Matrix4(float row00, float row01, float row02, float row03,
 inline Matrix4 Matrix4::Inverse(const Matrix4 &mat1) {
   // from scrachPixel
   auto mat = Matrix4();
-  int N = 4;
+  uint N = 4;
   auto copy = mat1;
   auto &m = copy.m;
   for (unsigned column = 0; column < N; ++column) {
