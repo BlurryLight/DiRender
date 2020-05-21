@@ -5,9 +5,14 @@ class MatteMaterial : public Material
 {
 public:
   MatteMaterial(Vector3f albedo):albedo_(albedo){}
-  Vector3f evalBxDF(const Ray &r_in, const Intersection &isect, const Ray &r_out) const override;
-  std::pair<Vector3f, float> evalScatter(const Ray &r_in, const Intersection &isect) const override;
-  ~MatteMaterial();
+  Vector3f evalBxDF(const vec3 &r_in, const Intersection &isect,
+                    const vec3 &r_out) const override;
+  std::pair<Vector3f, float>
+  sampleScatter(const vec3 &r_in, const Intersection &isect) const override;
+  Vector3f evalRadiance(const Vector3f &r_in, const Vector3f &r_out,
+                        const Intersection &isect) const override;
+  ~MatteMaterial(){};
+
 private:
   Vector3f albedo_;
 };

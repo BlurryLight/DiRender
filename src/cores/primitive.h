@@ -11,10 +11,11 @@ NAMESPACE_BEGIN(DR)
 struct Material;
 
 struct Primitive {
-  virtual ~Primitive();
+  Primitive() {}
+  virtual ~Primitive(){};
   virtual Bounds3 WorldBounds() const = 0;
-  virtual bool Intersect(const Ray &ray, Intersection *isect) const;
-  virtual bool Intersect_test(const Ray &ray) const;
+  virtual bool Intersect(const Ray &, Intersection *) const { return false; };
+  virtual bool Intersect_test(const Ray &) const { return false; };
 };
 
 // binding material with shape

@@ -8,10 +8,14 @@ NAMESPACE_BEGIN(DR)
 struct Material
 {
   virtual ~Material(){};
-  virtual Vector3f evalBxDF(const Ray& r_in,const Intersection& isect,const Ray& r_out) const = 0;
-  virtual std::pair<Vector3f,float> evalScatter(const Ray& r_in,const Intersection& isect) const = 0;
-  virtual Vector3f evalEmitted(const Ray& r_in,const Intersection& isect) const
-  {
+  virtual Vector3f evalBxDF(const Vector3f &r_in, const Intersection &isect,
+                            const Vector3f &r_out) const = 0;
+  virtual std::pair<Vector3f, float>
+  sampleScatter(const Vector3f &r_in, const Intersection &isect) const = 0;
+  virtual Vector3f evalRadiance(const Vector3f &r_in, const Vector3f &r_out,
+                                const Intersection &isect) const = 0;
+  virtual Vector3f evalEmitted(const Vector3f &r_in,
+                               const Intersection &isect) const {
     ignore(r_in);
     ignore(isect);
     return {};

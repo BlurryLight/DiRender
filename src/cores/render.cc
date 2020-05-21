@@ -2,6 +2,7 @@
 #include <cores/primitive.h>
 #include <cores/ray.hpp>
 #include <cores/render.h>
+#include <material/matte_material.h>
 #include <shapes/sphere.h>
 using namespace DR;
 void Render::render() {
@@ -15,13 +16,17 @@ void Render::render() {
   mat4.m[2][3] = -2;
   auto trans = std::make_shared<Transform>(mat4);
   auto trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
-  auto sphere = std::make_shared<Sphere>(trans, trans_inv, false, 1);
+  auto sphere_shape = std::make_shared<Sphere>(trans, trans_inv, false, 1);
+  auto diffuse = std::make_shared<MatteMaterial>(Vector3f{0.0, 0.1, 1.0});
+  auto sphere_obj = std::make_shared<GeometricPrimitive>(sphere_shape, diffuse);
 
-  auto cast_ray = [&sphere](const Ray &r) {
+  auto cast_ray = [&sphere_obj](const Ray &r) {
     Vector3f unit_vec = r.direction_.normalize();
     auto t = 0.5f * (unit_vec.y + 1.0f);
-    if (sphere->Intersect(r)) {
-      return Vector3f{1.0, 0.0, 0.0};
+    Intersection isect;
+    if (sphere_obj->Intersect(r, &isect)) {
+      auto res = isect.mat_ptr->sampleScatter(r.direction_, isect);
+      return isect.mat_ptr->evalRadiance(r.direction_, res.first, isect);
     }
     return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
   };
