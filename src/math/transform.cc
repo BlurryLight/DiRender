@@ -1,7 +1,7 @@
 #include <math/transform.h>
 using namespace DR;
-std::set<std::shared_ptr<Transform>> Transform::TransformTable =
-    std::set<std::shared_ptr<Transform>>{};
+std::map<Transform, std::shared_ptr<Transform>> Transform::TransformTable =
+    std::map<Transform, std::shared_ptr<Transform>>{};
 
 bool Transform::operator==(const Transform &other) const {
   return m_ == other.m_ && mInv_ == other.mInv_;
@@ -10,7 +10,7 @@ bool Transform::operator==(const Transform &other) const {
 bool Transform::operator<(const Transform &other)
     const { // allow the Transform to be place on std::map
   for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; i++) {
+    for (int j = 0; j < 4; j++) {
       if (m_.m[i][j] < other.m_.m[i][j]) {
         return true;
       }

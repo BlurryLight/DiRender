@@ -37,6 +37,7 @@ script:
   - cmake -DCMAKE_BUILD_TYPE=RELEASE -GNinja .. 
   - ninja
   - ./test/runTests
+  - ./DiRender ../sample.toml
 
 branches:
   only:

@@ -1,14 +1,14 @@
 #pragma once
 #include <cores/bounds.h>
+#include <map>
 #include <math/geometry.hpp>
-#include <set>
 #include <utils/di_global.h>
 
 NAMESPACE_BEGIN(DR)
 class Transform
 {
 public:
-  static std::set<std::shared_ptr<Transform>> TransformTable;
+  static std::map<Transform, std::shared_ptr<Transform>> TransformTable;
   Transform() : m_(Matrix4()), mInv_(Matrix4()) {}
   Transform(const Matrix4 &m) : m_(m), mInv_(Matrix4::Inverse(m)) {}
   Transform(const Matrix4& m,const Matrix4& mInv):m_(m),mInv_(mInv){}

@@ -40,6 +40,10 @@ jobs:
         cmake -GNinja -DCMAKE_BUILD_TYPE=RELEASE ..
     - name: build
       run:  cmake --build build --parallel
+    - name: run
+      run: |
+        cd build
+        ./DiRender ../sample.toml
     - name: test
       run: |
         cd build

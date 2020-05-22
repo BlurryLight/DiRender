@@ -89,8 +89,9 @@ inline Camera::Camera(Point3f origin, Vector3f WorldUp, Vector3f target,
   this->view_trans_ = std::make_shared<Transform>(view_trans);
   this->view_trans_inverse_ =
       std::make_shared<Transform>(Transform::Inverse(view_trans));
-  Transform::TransformTable.insert(this->view_trans_);
-  Transform::TransformTable.insert(this->view_trans_inverse_);
+  Transform::TransformTable.insert({*view_trans_, this->view_trans_});
+  Transform::TransformTable.insert(
+      {*view_trans_inverse_, this->view_trans_inverse_});
   film_ptr_ = std::make_unique<Film>(width, height);
 }
 
