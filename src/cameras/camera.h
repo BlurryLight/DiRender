@@ -15,8 +15,8 @@ struct Film {
   int width = 400;
   int tile_height = 4;
   int tile_width = 4;
-  int tile_height_pixels = std::ceil(height / tile_height);
-  int tile_width_pixels = std::ceil(width / tile_width);
+  int tile_height_nums = std::ceil(height / tile_height);
+  int tile_width_nums = std::ceil(width / tile_width);
   void write_ppm(const std::string &filename);
 };
 
