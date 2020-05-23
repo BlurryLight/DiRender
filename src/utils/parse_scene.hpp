@@ -73,8 +73,13 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
     std::shared_ptr<Material> mat_ptr = nullptr;
     if (material_toml.at("type").as_string() == "matte") {
       auto albedo = toml::get<std::vector<float>>(material_toml.at("albedo"));
+      Vector3f emission{};
+      if (material_toml.count("emission")) {
+        auto tmp = toml::get<std::vector<float>>(material_toml.at("emission"));
+        emission = {tmp[0], tmp[1], tmp[2]};
+      }
       mat_ptr = std::make_shared<MatteMaterial>(
-          Vector3f{albedo[0], albedo[1], albedo[2]});
+          Vector3f{albedo[0], albedo[1], albedo[2]}, emission);
     }
     auto shape_toml = shapes_vec[i].at("type").as_string();
     std::shared_ptr<Shape> shape_ptr = nullptr;
