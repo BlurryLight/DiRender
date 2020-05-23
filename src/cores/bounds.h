@@ -17,7 +17,7 @@ public:
   float surface_area() const;
   float volume() const;
   int max_extent() const;
-  Vector3f centroid() const;
+  Point3f centroid() const;
   Vector3f offset(const Point3f &p) const;
   std::pair<Point3f, float> bounding_sphere() const;
   Bounds3 intersect(const Bounds3 &other) const;

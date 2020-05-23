@@ -4,6 +4,7 @@
 #include <material/matte_material.h>
 #include <math/geometry.hpp>
 #include <shapes/sphere.h>
+#include <utils/high_resolution_timer.h>
 #include <utils/parse_scene.hpp>
 using namespace DR;
 int main(int argc, char **argv) {
@@ -16,6 +17,10 @@ int main(int argc, char **argv) {
   parse_scene(filename, &scene, &spp);
 
   DR::Render rd(spp);
+  HRTimer timer;
+  timer.start();
   rd.render(scene);
+  timer.end();
+  std::cout << timer.elapsed() << " ms" << std::endl;
   return 0;
 }

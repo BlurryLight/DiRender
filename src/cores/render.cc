@@ -81,8 +81,10 @@ void Render::render(const Scene &scene) {
             cam->film_ptr_->width, cam->film_ptr_->tile_height_pixels,
             cam->film_ptr_->tile_width_pixels, i, j, spp_));
         // single thread
-        //      render_tile(height, width, cam.film_ptr_->tile_height_pixels,
-        //                  cam.film_ptr_->tile_width_pixels, i, j);
+        //        render_tile(cam, hit_list, cam->film_ptr_->height,
+        //                    cam->film_ptr_->width,
+        //                    cam->film_ptr_->tile_height_pixels,
+        //                    cam->film_ptr_->tile_width_pixels, i, j, spp_);
       }
     }
     for (auto &i : futures)

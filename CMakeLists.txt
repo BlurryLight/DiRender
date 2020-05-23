@@ -7,7 +7,7 @@ find_package(Threads REQUIRED)
 include(${CMAKE_SOURCE_DIR}/source_list.cmake)
 if (MSVC)
     # warning level 4 and all warnings as errors
-#    add_compile_options(/W4 /WX)
+    add_compile_options(/W4)
 else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()

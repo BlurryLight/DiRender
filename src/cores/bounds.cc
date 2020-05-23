@@ -57,9 +57,9 @@ int Bounds3::max_extent() const {
   return 2;
 }
 
-Vector3f Bounds3::centroid() const {
+Point3f Bounds3::centroid() const {
   auto diag = this->diagonal();
-  return diag * 0.5f + static_cast<Vector3f>(pMin_);
+  return pMin_ + diag * 0.5f;
 }
 
 Vector3f Bounds3::offset(const Point3f &p) const {

@@ -1,4 +1,5 @@
 #pragma once
+#include <bitset>
 #include <math/geometry.hpp>
 #include <utils/di_global.h>
 
@@ -24,6 +25,13 @@ public:
   bool has_nan() const {
     return origin_.has_nan() || direction_.has_nan() || std::isnan(tMax_) ||
            std::isnan(tMin_);
+  }
+  std::bitset<3> DirIsNeg() const {
+    std::bitset<3> res;
+    res[0] = (direction_[0] < 0);
+    res[1] = (direction_[1] < 0);
+    res[2] = (direction_[2] < 0);
+    return res;
   }
 };
 

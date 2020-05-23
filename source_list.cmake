@@ -45,6 +45,8 @@ set(UTILS_SOURCE
     ${CMAKE_SOURCE_DIR}/src/utils/di_global.h
     ${CMAKE_SOURCE_DIR}/src/utils/thread_pool.hpp
     ${CMAKE_SOURCE_DIR}/src/utils/parse_scene.hpp
+    ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.h
+    ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.cc
     )
 set(MATERIAL_SOURCE
     ${CMAKE_SOURCE_DIR}/src/material/material.h

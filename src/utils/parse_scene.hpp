@@ -1,5 +1,6 @@
 #pragma once
 #include "../../third_party/toml11/toml.hpp"
+#include <accelerator/bvh.h>
 #include <accelerator/linear_list.h>
 #include <cameras/pinhole_camera.h>
 #include <cores/scene.h>
@@ -55,6 +56,7 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
   const auto &shapes_vec =
       toml::find<std::vector<toml::table>>(objects_toml, "shape");
 
+  std::vector<std::shared_ptr<Primitive>> objects;
   for (uint i = 0; i < names_vec.size(); i++) {
     std::cout << "Objects: " << names_vec[i].at("name") << std::endl;
     auto mat_toml =
@@ -89,7 +91,28 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
     }
 
     auto object_ptr = std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
-    scene->add(object_ptr);
+    objects.push_back(object_ptr);
   }
+  //  for (int i = 0; i < 100; i++) {
+  //    // clang-format off
+  //    Matrix4 mat4(1.0, 0.0, 0.0, 0.0,
+  //                 0.0, 1.0, 0.0, 0.0,
+  //                 0.0, 0.0, 1.0, -2.0,
+  //                 0.0, 0.0, 0.0, 1.0);
+
+  //    mat4.m[0][3] += (get_random_float() * 2  - 1) * 10;
+  //    mat4.m[1][3] += (get_random_float() * 2  - 1) * 10;
+  //    mat4.m[2][3] += (get_random_float() * 2  - 1) * 10;
+  //  auto trans = std::make_shared<Transform>(mat4);
+  //  auto trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
+  //  auto shape_ptr = std::make_shared<Sphere>(trans, trans_inv, 0,
+  //  get_random_float() * 5); auto mat_ptr = std::make_shared<MatteMaterial>(
+  //          Vector3f{get_random_float(),get_random_float(),get_random_float()});
+  //  auto object_ptr = std::make_shared<GeometricPrimitive>(shape_ptr,
+  //  mat_ptr);
+  //   objects.push_back(object_ptr);
+  //  }
+  auto bvh_tree = std::make_shared<BVHTree>(objects);
+  scene->add(bvh_tree);
 }
 NAMESPACE_END(DR)
