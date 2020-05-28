@@ -38,7 +38,8 @@ static void UpdateProgrss(int num_of_tiles) {
   std::unique_lock<std::mutex> lk(mutex);
   count++;
   std::cout << "Tiles Complete:" << count << " Total: " << num_of_tiles << " "
-            << (float)count / num_of_tiles * 100.0 << "%" << std::endl;
+            << (float)count / num_of_tiles * 100.0 << "%" << '\r';
+  fflush(stdout);
 }
 
 static void render_tile(std::shared_ptr<Camera> cam,
@@ -66,7 +67,7 @@ static void render_tile(std::shared_ptr<Camera> cam,
 
 void Render::render(const Scene &scene) {
 
-  std::shared_ptr<Primitive> hit_list;
+  std::shared_ptr<Primitive> hit_list = nullptr;
   if (scene.Prims_.size() > 0) {
     if (scene.Prims_.size() > 1) {
       std::vector<std::shared_ptr<Primitive>> prims;
