@@ -15,6 +15,7 @@ class ThreadPool final {
 public:
   ThreadPool();
   ThreadPool(size_t nthreads);
+  size_t size() const{ return workers_.size();}
   ThreadPool(const ThreadPool &other) = delete;
   ThreadPool(ThreadPool &&other) = delete;
   ThreadPool &operator=(const ThreadPool &) = delete;

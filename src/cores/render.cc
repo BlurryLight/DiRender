@@ -101,6 +101,6 @@ void Render::render(const Scene &scene) {
     }
     for (auto &i : futures)
       i.wait();
-    cam->film_ptr_->write_ppm("output_" + std::to_string(index++) + ".ppm");
+    cam->film_ptr_->write("output_" + std::to_string(index++) + ".ppm",Film::PicType::kPPM);
   }
 }

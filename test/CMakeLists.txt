@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(TEST LANGUAGES CXX)
-include(${CMAKE_SOURCE_DIR}/cmake/gtest.cmake)
+set(GOOGLETEST_ROOT third_party/gtest/googletest CACHE STRING "Google Test source root")
+add_subdirectory(${CMAKE_SOURCE_DIR}/${GOOGLETEST_ROOT} extern)
+
 find_package(Threads REQUIRED)
 include(${CMAKE_SOURCE_DIR}/source_list.cmake)
 set(SOURCE_LIST
@@ -10,6 +12,10 @@ set(SOURCE_LIST
     math_utils_test.cc
     )
 add_executable(runTests tests.cc ${SOURCE_LIST} ${SOURCE_HEADERS})
-target_include_directories(runTests PRIVATE ../src/)
-target_link_libraries(runTests gtest Threads::Threads)
+target_include_directories(runTests PRIVATE 
+    ../src/
+    ${CMAKE_SOURCE_DIR}/${GOOGLETEST_ROOT}
+    ${CMAKE_SOURCE_DIR}/${GOOGLETEST_ROOT}/include
+    )
+target_link_libraries(runTests gtest_main Threads::Threads)
 

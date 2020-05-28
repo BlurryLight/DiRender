@@ -9,6 +9,7 @@ struct Film {
   Film(int w, int h) : height(h), width(w) {
     framebuffer_.resize(height * width);
   }
+  enum class PicType{kPPM = 0,kPNG,kJPG};
   Film() : Film(400, 400) {}
   std::vector<Vector3f> framebuffer_;
   int height = 400;
@@ -17,7 +18,9 @@ struct Film {
   int tile_width = 4;
   int tile_height_nums = std::ceil(height / tile_height);
   int tile_width_nums = std::ceil(width / tile_width);
-  void write_ppm(const std::string &filename);
+  void write(const std::string&filename,PicType type);
+  private:
+    void write_ppm(const std::string &filename);
 };
 
 class Camera {
@@ -35,6 +38,19 @@ protected:
   std::shared_ptr<Transform> view_trans_inverse_;
 };
 
+inline void Film::write(const std::string&filename,PicType type)
+{
+  switch (type)
+  {
+  case PicType::kPNG:
+    /* code */
+    break;
+  
+  default:
+    this->write_ppm(filename);
+    break;
+  }
+}
 inline void Film::write_ppm(const std::string &filename) {
   auto fp = std::unique_ptr<FILE, decltype(&fclose)>(
       fopen(filename.c_str(), "wb"), &fclose);

@@ -15,8 +15,9 @@ int main(int argc, char **argv) {
 
   int spp = 32;
   parse_scene(filename, &scene, &spp);
-
-  DR::Render rd(spp);
+  int nthreads = std::thread::hardware_concurrency();
+  std::cout<<"Threads: " << nthreads<<std::endl;
+  DR::Render rd(spp,nthreads);
   HRTimer timer;
   timer.start();
   rd.render(scene);
