@@ -47,6 +47,8 @@ set(UTILS_SOURCE
     ${CMAKE_SOURCE_DIR}/src/utils/parse_scene.hpp
     ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.h
     ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.cc
+    ${CMAKE_SOURCE_DIR}/src/utils/stb_image_wrapper.h
+    ${CMAKE_SOURCE_DIR}/src/utils/stb_image_wrapper.cc
     )
 set(MATERIAL_SOURCE
     ${CMAKE_SOURCE_DIR}/src/material/material.h
@@ -54,6 +56,11 @@ set(MATERIAL_SOURCE
     ${CMAKE_SOURCE_DIR}/src/material/matte_material.cc
     )
 
+set(THIRD_PARTY_SOURCE
+    ${CMAKE_SOURCE_DIR}/third_party/stb_image_write.h
+    ${CMAKE_SOURCE_DIR}/third_party/stb_image.h
+)
+
 
 set(SOURCE_HEADERS ${ACCELERATOR_SOURCE} ${CORES_SOURCE} ${MATH_SOURCE} ${SAMPLER_SOURCE}
-    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE} ${MATERIAL_SOURCE})
+    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE} ${MATERIAL_SOURCE} ${THIRD_PARTY_SOURCE})

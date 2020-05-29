@@ -57,7 +57,7 @@ public:
   static Matrix4 Multiply(const Matrix4 &lhs, const Matrix4 &rhs);
 };
 
-inline Matrix4::Matrix4(float diag):m() {
+inline Matrix4::Matrix4(float diag) : m() {
   for (auto &i : m)
     i.fill(0.0f);
   for (int i = 0; i < 4; i++)

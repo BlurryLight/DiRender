@@ -4,23 +4,21 @@
 #include <math/transform.h>
 #include <memory>
 #include <string>
+#include <utils/stb_image_wrapper.h>
 NAMESPACE_BEGIN(DR)
 struct Film {
-  Film(int w, int h) : height(h), width(w) {
+  Film(uint w, uint h) : height(h), width(w) {
     framebuffer_.resize(height * width);
   }
-  enum class PicType{kPPM = 0,kPNG,kJPG};
   Film() : Film(400, 400) {}
   std::vector<Vector3f> framebuffer_;
-  int height = 400;
-  int width = 400;
-  int tile_height = 4;
-  int tile_width = 4;
-  int tile_height_nums = std::ceil(height / tile_height);
-  int tile_width_nums = std::ceil(width / tile_width);
+  uint height = 400;
+  uint width = 400;
+  uint tile_height = 4;
+  uint tile_width = 4;
+  uint tile_height_nums = std::ceil(height / tile_height);
+  uint tile_width_nums = std::ceil(width / tile_width);
   void write(const std::string&filename,PicType type);
-  private:
-    void write_ppm(const std::string &filename);
 };
 
 class Camera {
@@ -40,34 +38,18 @@ protected:
 
 inline void Film::write(const std::string&filename,PicType type)
 {
-  switch (type)
+  std::unique_ptr<uint8_t[]> data{new uint8_t[height * width * 3]}; //don't support alpha & HDR
+  for(uint i =0;i<height*width;i++)
   {
-  case PicType::kPNG:
-    /* code */
-    break;
-  
-  default:
-    this->write_ppm(filename);
-    break;
+    for(uint j =0;j<3;j++)
+    {
+      auto tmp = static_cast<uint8_t>(
+          std::pow(clamp(0.0f, 1.0f, framebuffer_[i][j]), 0.6) * 255.99f);
+      data[3 * i + j] = tmp;
+    }
   }
-}
-inline void Film::write_ppm(const std::string &filename) {
-  auto fp = std::unique_ptr<FILE, decltype(&fclose)>(
-      fopen(filename.c_str(), "wb"), &fclose);
-  (void)fprintf(fp.get(), "P6\n%d %d\n255\n", height, width);
-  for (auto i = 0; i < width * height; ++i) {
-    static unsigned char color[3];
-    color[0] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].x), 0.6f));
-    color[1] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].y), 0.6f));
-    color[2] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].z), 0.6f));
-    fwrite(color, 1, 3, fp.get());
-  }
+  Image img(data.get(),height,width,type,3);
+  img.write_image(filename,0);
 }
 
 inline Transform Camera::look_at(Point3f origin, Vector3f WorldUp,

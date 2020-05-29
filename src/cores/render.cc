@@ -85,8 +85,8 @@ void Render::render(const Scene &scene) {
   int index = 0;
   for (const auto &cam : scene.cams_) {
     std::vector<std::future<void>> futures;
-    for (int i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
-      for (int j = 0; j < cam->film_ptr_->tile_width_nums; j++) {
+    for (uint i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
+      for (uint j = 0; j < cam->film_ptr_->tile_width_nums; j++) {
         // parallel
         futures.emplace_back(this->pool_.enqueue_task(
             render_tile, cam, hit_list, cam->film_ptr_->height,
@@ -101,6 +101,8 @@ void Render::render(const Scene &scene) {
     }
     for (auto &i : futures)
       i.wait();
-    cam->film_ptr_->write("output_" + std::to_string(index++) + ".ppm",Film::PicType::kPPM);
+    cam->film_ptr_->write("output_" + std::to_string(index++) +
+                              std::string(MapTypeToSuffix()(PicType::kPNG)),
+                          PicType::kPNG);
   }
 }
