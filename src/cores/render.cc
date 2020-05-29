@@ -26,9 +26,14 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
         isect.mat_ptr->sampleScatter(r.direction_, isect);
     Ray r_new(isect.coords, new_direction);
     auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
-    return isect.mat_ptr->evalEmitted(r.direction_, isect) +
-           multiply(brdf, cast_ray(r_new, prim, depth + 1)) *
-               dot(r_new.direction_, isect.normal) / (pdf * russian_roulette);
+    if (pdf > 0.0f) {
+      return isect.mat_ptr->evalEmitted(r.direction_, isect) +
+             multiply(brdf, cast_ray(r_new, prim, depth + 1)) *
+                 dot(r_new.direction_, isect.normal) / (pdf * russian_roulette);
+    }
+    // reach here when pdf == 0.0f
+    // should never happen
+    return {};
   }
   return {};
 }
@@ -88,19 +93,23 @@ void Render::render(const Scene &scene) {
     for (uint i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
       for (uint j = 0; j < cam->film_ptr_->tile_width_nums; j++) {
         // parallel
+#ifdef NDEBUG
         futures.emplace_back(this->pool_.enqueue_task(
             render_tile, cam, hit_list, cam->film_ptr_->height,
             cam->film_ptr_->width, cam->film_ptr_->tile_height,
             cam->film_ptr_->tile_width, i, j, spp_));
+#else
         // single thread
-        //        render_tile(cam, hit_list, cam->film_ptr_->height,
-        //                    cam->film_ptr_->width,
-        //                    cam->film_ptr_->tile_height_pixels,
-        //                    cam->film_ptr_->tile_width_pixels, i, j, spp_);
+        render_tile(cam, hit_list, cam->film_ptr_->height,
+                    cam->film_ptr_->width, cam->film_ptr_->tile_height,
+                    cam->film_ptr_->tile_width, i, j, spp_);
+#endif
       }
     }
+#ifdef NDEBUG
     for (auto &i : futures)
       i.wait();
+#endif
     cam->film_ptr_->write("output_" + std::to_string(index++) +
                               std::string(MapTypeToSuffix()(PicType::kPNG)),
                           PicType::kPNG);

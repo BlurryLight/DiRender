@@ -49,7 +49,9 @@ inline void Film::write(const std::string&filename,PicType type)
     }
   }
   Image img(data.get(),height,width,type,3);
-  img.write_image(filename,0);
+  if (!img.write_image(filename, 0)) {
+    std::cerr << "Error: Writing " + filename << "failed" << std::endl;
+  }
 }
 
 inline Transform Camera::look_at(Point3f origin, Vector3f WorldUp,

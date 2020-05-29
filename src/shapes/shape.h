@@ -1,10 +1,10 @@
 #pragma once
-#include <cores/ray.hpp>
 #include <cores/bounds.h>
+#include <cores/ray.hpp>
+#include <math/transform.h>
 #include <memory>
 
 NAMESPACE_BEGIN(DR)
-class Transform;
 struct Intersection;
 class Shape
 {

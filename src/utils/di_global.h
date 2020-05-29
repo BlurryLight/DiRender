@@ -8,7 +8,6 @@
 #if !defined(NAMESPACE_END)
 #define NAMESPACE_END(name) }
 #endif
-
 NAMESPACE_BEGIN(DR)
 using uint = unsigned int;
 // suppress the unused-parameter warning

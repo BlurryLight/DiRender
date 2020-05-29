@@ -39,6 +39,8 @@ set(SHAPES_SOURCE
     ${CMAKE_SOURCE_DIR}/src/shapes/shape.h
     ${CMAKE_SOURCE_DIR}/src/shapes/sphere.cc
     ${CMAKE_SOURCE_DIR}/src/shapes/sphere.h
+    ${CMAKE_SOURCE_DIR}/src/shapes/triangle.h
+    ${CMAKE_SOURCE_DIR}/src/shapes/triangle.cc
     )
 
 set(UTILS_SOURCE

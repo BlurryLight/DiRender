@@ -26,7 +26,7 @@ struct GeometricPrimitive : public Primitive {
   virtual Bounds3 WorldBounds() const override { return shape_->WorldBounds(); }
   virtual bool Intersect(const Ray &ray, Intersection *isect) const override {
     auto flag = shape_->Intersect(ray, nullptr, isect);
-    if (flag) {
+    if (flag && isect != nullptr) {
       isect->mat_ptr = mat_.get();
       isect->primi_ptr = (Primitive *)this;
     }
