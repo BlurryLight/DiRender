@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(TEST LANGUAGES CXX)
 set(GOOGLETEST_ROOT third_party/gtest/googletest CACHE STRING "Google Test source root")
+if(MSVC)
+    #make Windows happy
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif(MSVC)
 add_subdirectory(${CMAKE_SOURCE_DIR}/${GOOGLETEST_ROOT} extern)
 
 find_package(Threads REQUIRED)
@@ -11,6 +15,7 @@ set(SOURCE_LIST
     matrix4_test.cc
     math_utils_test.cc
     )
+
 add_executable(runTests tests.cc ${SOURCE_LIST} ${SOURCE_HEADERS})
 target_include_directories(runTests PRIVATE 
     ../src/

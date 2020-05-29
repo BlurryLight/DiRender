@@ -1,6 +1,7 @@
 #pragma once
 #include <utils/di_global.h>
 #include <memory>
+#include <string>
 NAMESPACE_BEGIN(DR)
 class Image
 {
