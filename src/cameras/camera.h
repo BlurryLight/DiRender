@@ -44,7 +44,7 @@ inline void Film::write(const std::string&filename,PicType type)
     for(uint j =0;j<3;j++)
     {
       auto tmp = static_cast<uint8_t>(
-          std::pow(clamp(0.0f, 1.0f, framebuffer_[i][j]), 0.6) * 255.99f);
+          std::pow(clamp(0.0f, 1.0f, framebuffer_[i][j]), 0.6) * 255.0f);
       data[3 * i + j] = tmp;
     }
   }

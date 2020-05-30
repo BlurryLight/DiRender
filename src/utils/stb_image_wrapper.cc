@@ -9,24 +9,17 @@ bool Image::write_image(const std::string &path, bool flip) {
   stbi_flip_vertically_on_write(flip);
   switch (type_) {
   case PicType::kBMP:
-    success =
-        (stbi_write_bmp(path.c_str(), width_, height_, nChannels_, image_)) == 0
-            ? true
-            : false;
+    // Note: Each function in stbi returns 0 on failure and non-0 on success.
+    success = stbi_write_bmp(path.c_str(), width_, height_, nChannels_, image_);
     break;
   case PicType::kJPG:
     success =
         // 90 quality
-        (stbi_write_jpg(path.c_str(), width_, height_, nChannels_, image_,
-                        90)) == 0
-            ? true
-            : false;
+        stbi_write_jpg(path.c_str(), width_, height_, nChannels_, image_, 90);
     break;
   default: // kPNG
-    success = (stbi_write_png(path.c_str(), width_, height_, nChannels_, image_,
-                              width_ * nChannels_)) == 0
-                  ? true
-                  : false;
+    success = stbi_write_png(path.c_str(), width_, height_, nChannels_, image_,
+                             width_ * nChannels_);
     break;
   }
   return success;

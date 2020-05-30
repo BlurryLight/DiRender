@@ -39,7 +39,7 @@ spp = 32
     type = "matte"
     albedo = [0.8,0.1,0.1]
     emission = [0.1,0.8,0.0]
-    texture = ""
+    texture = "constant"
     [[objects.transform]]
     matrix4 = [1.0,0.0,0.0,0.0,
             0.0,1.0,0.0,0.0,
@@ -54,7 +54,7 @@ spp = 32
     name = "matte_blue"
     type = "matte"
     albedo = [0.1,0.1,0.9]
-    texture = ""
+    texture = "constant"
     [[objects.transform]]
     matrix4 = [1.0,0.0,0.0,0.0,
             0.0,1.0,0.0,-50.0,

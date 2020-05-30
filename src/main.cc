@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   parse_scene(filename, &scene, &spp);
   // triangle test
   std::shared_ptr<Material> Red =
-      std::make_shared<MatteMaterial>(Vector3f{0.9, 0.0, 0.0});
+      std::make_shared<MatteMaterial>(std::make_shared<CheckerTexture>());
   auto trans = std::make_shared<Transform>();
   int vertexIndices[] = {0, 1, 2};
   Point3f arr[] = {{-10, -1, -5}, {1, -1, 0}, {5, 5, -5}};
@@ -32,12 +32,14 @@ int main(int argc, char **argv) {
 
   scene.add(tri_prim);
   // triangle end
+#ifdef NDEBUG
   int nthreads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << nthreads << std::endl;
-#ifdef NDEBUG
   DR::Render rd(spp, nthreads);
 #else
-  DR::Render rd(1, nthreads);
+  std::cout << "Running in Debug Mode: MultiThread Mode has been off."
+            << std::endl;
+  DR::Render rd(1, 1);
 #endif
   HRTimer timer;
   timer.start();

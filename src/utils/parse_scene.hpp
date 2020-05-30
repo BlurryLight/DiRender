@@ -7,6 +7,8 @@
 #include <material/matte_material.h>
 #include <math/geometry.hpp>
 #include <shapes/sphere.h>
+#include <texture/checker_texture.h>
+#include <texture/constant_texture.h>
 
 NAMESPACE_BEGIN(DR)
 inline void parse_scene(std::string filename, Scene *scene, int *spp) {
@@ -72,17 +74,38 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
       Transform::TransformTable.insert({*trans_inv, trans_inv});
       auto material_toml = materials_vec[i];
       std::shared_ptr<Material> mat_ptr = nullptr;
+      // material parse
       if (material_toml.at("type").as_string() == "matte") {
-        auto albedo = toml::get<std::vector<float>>(material_toml.at("albedo"));
+        // constant texture
+        std::shared_ptr<Texture> texture_ptr = nullptr;
+        std::string texture_type = material_toml.at("texture").as_string();
+        if (texture_type == "constant") {
+          auto albedo =
+              toml::get<std::vector<float>>(material_toml.at("albedo"));
+          texture_ptr = std::make_shared<ConstantTexture>(
+              Vector3f{albedo[0], albedo[1], albedo[2]});
+        } else if (texture_type == "checker") {
+          auto albedo_list = toml::get<std::vector<std::vector<float>>>(
+              material_toml.at("albedo"));
+          texture_ptr = std::make_shared<CheckerTexture>(
+              Vector3f{albedo_list[0][0], albedo_list[0][1], albedo_list[0][2]},
+              Vector3f{albedo_list[1][0], albedo_list[1][1],
+                       albedo_list[1][2]});
+        } else {
+          throw std::runtime_error("Unsupported texture type:" + texture_type);
+          std::exit(-1);
+        }
         Vector3f emission{};
         if (material_toml.count("emission")) {
           auto tmp =
               toml::get<std::vector<float>>(material_toml.at("emission"));
           emission = {tmp[0], tmp[1], tmp[2]};
         }
-        mat_ptr = std::make_shared<MatteMaterial>(
-            Vector3f{albedo[0], albedo[1], albedo[2]}, emission);
+
+        mat_ptr = std::make_shared<MatteMaterial>(texture_ptr, emission);
       }
+
+      // shape parse
       auto shape_toml = shapes_vec[i].at("type").as_string();
       std::shared_ptr<Shape> shape_ptr = nullptr;
       if (shape_toml == "sphere") {
@@ -101,30 +124,10 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
           std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
       objects.push_back(object_ptr);
     }
-    //  for (int i = 0; i < 100; i++) {
-    //    // clang-format off
-    //    Matrix4 mat4(1.0, 0.0, 0.0, 0.0,
-    //                 0.0, 1.0, 0.0, 0.0,
-    //                 0.0, 0.0, 1.0, -2.0,
-    //                 0.0, 0.0, 0.0, 1.0);
-
-    //    mat4.m[0][3] += (get_random_float() * 2  - 1) * 10;
-    //    mat4.m[1][3] += (get_random_float() * 2  - 1) * 10;
-    //    mat4.m[2][3] += (get_random_float() * 2  - 1) * 10;
-    //  auto trans = std::make_shared<Transform>(mat4);
-    //  auto trans_inv =
-    //  std::make_shared<Transform>(Transform::Inverse(*trans)); auto shape_ptr
-    //  = std::make_shared<Sphere>(trans, trans_inv, 0, get_random_float() * 5);
-    //  auto mat_ptr = std::make_shared<MatteMaterial>(
-    //          Vector3f{get_random_float(),get_random_float(),get_random_float()});
-    //  auto object_ptr = std::make_shared<GeometricPrimitive>(shape_ptr,
-    //  mat_ptr);
-    //   objects.push_back(object_ptr);
-    //  }
     auto bvh_tree = std::make_shared<BVHTree>(objects);
     scene->add(bvh_tree);
-  } catch (...) {
-
+  } catch (const std::exception &e) {
+    std::cerr << "Exception captured: " << '\n' << e.what() << std::endl;
     return;
   }
 }

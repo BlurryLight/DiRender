@@ -1,12 +1,13 @@
 #pragma once
 #include <material/material.h>
+#include <texture/texture.h>
 NAMESPACE_BEGIN(DR)
 class MatteMaterial : public Material
 {
 public:
-  MatteMaterial(Vector3f albedo) : albedo_(albedo) {}
-  MatteMaterial(Vector3f albedo, Vector3f emission)
-      : albedo_(albedo), emission_(emission) {}
+  MatteMaterial(std::shared_ptr<Texture> texture) : texture_(texture) {}
+  MatteMaterial(std::shared_ptr<Texture> texture, Vector3f emission)
+      : texture_(texture), emission_(emission) {}
   Vector3f evalBxDF(const vec3 &r_in, const Intersection &isect,
                     const vec3 &r_out) const override;
   std::pair<Vector3f, float>
@@ -20,7 +21,7 @@ public:
   }
 
 private:
-  Vector3f albedo_;
+  std::shared_ptr<Texture> texture_;
   Vector3f emission_;
 };
 NAMESPACE_END(DR)
