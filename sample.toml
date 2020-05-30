@@ -53,8 +53,8 @@ spp = 32
     [[objects.material]]
     name = "matte_blue"
     type = "matte"
-    albedo = [0.1,0.1,0.9]
-    texture = "constant"
+    albedo = [[0.1,0.1,0.9],[0.1,0.9,0.1]]
+    texture = "checker"
     [[objects.transform]]
     matrix4 = [1.0,0.0,0.0,0.0,
             0.0,1.0,0.0,-50.0,

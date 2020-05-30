@@ -45,8 +45,12 @@ bool Sphere::Intersect(const Ray &ray, float *time, Intersection *isect) const {
     if (isect != nullptr) {
       isect->happened = true;
       isect->coords = ray.at(t0);
-      isect->normal =
-          ((*LocalToWorld)(objRay.at(t0) - Point3f{0.0f})).normalize();
+      auto local_normal = (objRay.at(t0) - Point3f{0.0f}).normalize();
+      // from https://en.wikipedia.org/wiki/UV_mapping
+      float u = 0.5 + std::atan2(local_normal.z, local_normal.x) * k1_2Pi;
+      float v = 0.5 - std::asin(local_normal.y) * k1_Pi;
+      isect->texcoords = {u, v};
+      isect->normal = ((*LocalToWorld)(local_normal)).normalize();
       isect->t = t0;
     }
     return true;
