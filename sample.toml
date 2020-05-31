@@ -32,37 +32,53 @@ spp = 8
 
 
 [objects]
-#    [[objects.name]]
-#    name = "sphere_red"
-#    [[objects.material]]
-#    name = "matte_red"
-#    type = "matte"
-#    albedo = [0.8,0.1,0.1]
-#    emission = [0.1,0.8,0.0]
-#    texture = "constant"
-#    [[objects.transform]]
-#    matrix4 = [1.0,0.0,0.0,0.0,
-#            0.0,1.0,0.0,0.0,
-#            0.0,0.0,1.0,-2.0,
-#            0.0,0.0,0.0,1.0]
-#    [[objects.shape]]
-#    type="sphere"
-#
-#    [[objects.name]]
-#    name = "sphere_blue"
-#    [[objects.material]]
-#    name = "matte_blue"
-#    type = "matte"
-#    albedo = [[0.1,0.1,0.9],[0.1,0.9,0.1]]
-#    texture = "checker"
-#    [[objects.transform]]
-#    matrix4 = [1.0,0.0,0.0,0.0,
-#            0.0,1.0,0.0,-50.0,
-#            0.0,0.0,1.0,-2.0,
-#            0.0,0.0,0.0,1.0]
-#    [[objects.shape]]
-#    type="sphere"
-#    radius = 49.0
+    #[[objects.name]]
+    #name = "sphere_red"
+    #[[objects.material]]
+    #name = "matte_red"
+    #type = "matte"
+    #albedo = [0.8,0.1,0.1]
+    #emission = [0.1,0.8,0.0]
+    #texture = "constant"
+    #[[objects.transform]]
+    #matrix4 = [1.0,0.0,0.0,0.0,
+    #        0.0,1.0,0.0,0.0,
+    #        0.0,0.0,1.0,-2.0,
+    #        0.0,0.0,0.0,1.0]
+    #[[objects.shape]]
+    #type="sphere"
+
+    [[objects.name]]
+    name = "sphere_blue"
+    [[objects.material]]
+    name = "checker"
+    type = "matte"
+    albedo = [[0.1,0.1,0.9],[0.1,0.9,0.1]]
+    texture = "checker"
+    [[objects.transform]]
+    matrix4 = [1.0,0.0,0.0,0.0,
+           0.0,1.0,0.0,-50.0,
+           0.0,0.0,1.0,-2.0,
+           0.0,0.0,0.0,1.0]
+    [[objects.shape]]
+    type="sphere"
+    radius = 49.0
+
+    [[objects.name]]
+    name = "cube"
+    [[objects.material]]
+    name = "checker"
+    type = "matte"
+    albedo = [[0.9,0.1,0.9],[0.1,0.9,0.1]]
+    texture = "checker"
+    [[objects.transform]]
+    matrix4 = [1.0,0.0,0.0,0.0,
+            0.0,1.0,0.0,0.0,
+            0.0,0.0,1.0,-2.0,
+            0.0,0.0,0.0,1.0]
+    [[objects.shape]]
+    type="obj"
+    path="cube.obj"
 
     
 

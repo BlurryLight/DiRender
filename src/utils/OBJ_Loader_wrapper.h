@@ -4,9 +4,11 @@
 #include <cores/primitive.h>
 #include <memory>
 #include <shapes/triangle.h>
+#include <texture/texture.h>
 NAMESPACE_BEGIN(DR)
 struct Model {
-  Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path);
+  Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path,
+        std::shared_ptr<DR::Material> material);
   std::shared_ptr<Primitive> model_ptr = nullptr;
 
 private:

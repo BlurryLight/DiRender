@@ -13,7 +13,8 @@
 #pragma GCC diagnostic pop
 #endif
 using namespace DR;
-Model::Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path) {
+Model::Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path,
+             std::shared_ptr<Material> material) {
   objl::Loader loader;
   if (!loader.LoadFile(path)) {
     std::cerr << path << "cannot be loaded!" << std::endl;
@@ -47,8 +48,6 @@ Model::Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path) {
         uvs, nullptr));
   }
   std::vector<std::shared_ptr<Primitive>> tris;
-  std::shared_ptr<Material> mat = std::make_shared<MatteMaterial>(
-      std::make_shared<ConstantTexture>(Vector3f{1.0, 0.0, 0.0}));
   for (uint mesh_index = 0; mesh_index < meshes.size(); mesh_index++) {
     for (int tri_index = 0; tri_index < meshes[mesh_index]->nTriangles;
          tri_index++) {
@@ -56,7 +55,8 @@ Model::Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path) {
           LocalToWorld,
           std::make_shared<Transform>(Transform::Inverse(*LocalToWorld)), false,
           meshes[mesh_index], tri_index);
-      tris.emplace_back(std::make_shared<GeometricPrimitive>(tri_shape, mat)
+      tris.emplace_back(
+          std::make_shared<GeometricPrimitive>(tri_shape, material)
 
       );
     }

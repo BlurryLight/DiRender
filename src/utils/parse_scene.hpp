@@ -9,6 +9,7 @@
 #include <shapes/sphere.h>
 #include <texture/checker_texture.h>
 #include <texture/constant_texture.h>
+#include <utils/OBJ_Loader_wrapper.h>
 
 NAMESPACE_BEGIN(DR)
 inline void parse_scene(std::string filename, Scene *scene, int *spp) {
@@ -118,11 +119,15 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
         trans = Transform::TransformTable.at(*trans);
         trans_inv = Transform::TransformTable.at(*trans_inv);
         shape_ptr = std::make_shared<Sphere>(trans, trans_inv, reverse, radius);
+        auto object_ptr =
+            std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
+        objects.push_back(object_ptr);
+      } else if (shape_toml == "obj") {
+        trans = Transform::TransformTable.at(*trans);
+        std::string path = shapes_vec[i].at("path").as_string();
+        Model model(trans, path, mat_ptr);
+        objects.push_back(model.model_ptr);
       }
-
-      auto object_ptr =
-          std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
-      objects.push_back(object_ptr);
     }
     auto bvh_tree = std::make_shared<BVHTree>(objects);
     scene->add(bvh_tree);
