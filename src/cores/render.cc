@@ -10,11 +10,12 @@ using namespace DR;
 
 static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
                          int depth = 0) {
-  float russian_roulette = 1.0f;
+  float russian_roulette = 0.8f;
   if (!prim->Intersect_test(r)) {
-    Vector3f unit_vec = r.direction_.normalize();
-    auto t = 0.5f * (unit_vec.y + 1.0f);
-    return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
+    return {0};
+    //    Vector3f unit_vec = r.direction_.normalize();
+    //    auto t = 0.5f * (unit_vec.y + 1.0f);
+    //    return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
   }
   if (depth > 4)
     return {0};
@@ -27,9 +28,11 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
     Ray r_new(isect.coords, new_direction);
     auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
     if (pdf > 0.0f) {
-      return isect.mat_ptr->evalEmitted(r.direction_, isect) +
-             multiply(brdf, cast_ray(r_new, prim, depth + 1)) *
-                 dot(r_new.direction_, isect.normal) / (pdf * russian_roulette);
+      auto tmp = isect.mat_ptr->evalEmitted(r.direction_, isect) +
+                 multiply(brdf, cast_ray(r_new, prim, depth + 1)) *
+                     dot(r_new.direction_, isect.normal) /
+                     (pdf * russian_roulette);
+      return tmp;
     }
     // reach here when pdf == 0.0f
     // should never happen

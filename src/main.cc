@@ -17,12 +17,6 @@ int main(int argc, char **argv) {
 
   int spp = 32;
   parse_scene(filename, &scene, &spp);
-//  Matrix4 mat(6.0);
-//  mat.m[2][3] = -1.0f;
-//  mat.m[3][3] = 1.0f;
-//  auto trans = std::make_shared<Transform>(mat);
-//  Model model(trans, "bunny.obj");
-//  scene.add(model.model_ptr);
 #ifdef NDEBUG
   int nthreads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << nthreads << std::endl;

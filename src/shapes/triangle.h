@@ -4,35 +4,6 @@
 #include <utils/di_global.h>
 NAMESPACE_BEGIN(DR)
 #include <vector>
-
-inline bool rayTriangleIntersect(const Point3f &v0, const Point3f &v1,
-                                 const Point3f &v2, const Point3f &orig,
-                                 const Vector3f &dir, float &tnear, float &u,
-                                 float &v) {
-  // TODO: Implement this function that tests whether the triangle
-  // that's specified bt v0, v1 and v2 intersects with the ray (whose
-  // origin is *orig* and direction is *dir*)
-  // Also don't forget to update tnear, u and v.
-  Vector3f E1 = v1 - v0;
-  Vector3f E2 = v2 - v0;
-  Vector3f S = orig - v0;
-  Vector3f S1 = cross(dir, E2);
-  Vector3f S2 = cross(S, E1);
-  Vector3f tbb =
-      1 / (dot(S1, E1)) * Vector3f{dot(S2, E2), dot(S1, S), dot(S2, dir)};
-  auto t = tbb.x;
-  auto b1 = tbb.y;
-  auto b2 = tbb.z;
-  if (t > 0 && ((1 > b1) && (b1 > 0)) && ((1 > b2) && (b2 > 0)) &&
-      (b1 + b2 <= 1.0f + std::numeric_limits<float>::epsilon())) {
-    tnear = t;
-    u = b1;
-    v = b2;
-
-    return true;
-  }
-  return false;
-}
 struct TriangleMesh {
   const int nTriangles, nVertices;
   std::vector<int> vertexIndices; // 记录ith三角形所对应的vertex序号
@@ -114,43 +85,33 @@ public:
 
   bool Intersect(const Ray &ray, float *time = nullptr,
                  Intersection *isect = nullptr) const override {
-    if (dot(ray.direction_, mesh_->normals->at(vertexIndex_[0])) > 0.0f) {
-      return false;
-    }
 
     const Point3f &p0 = mesh_->vertices->at(vertexIndex_[0]);
     const Point3f &p1 = mesh_->vertices->at(vertexIndex_[1]);
     const Point3f &p2 = mesh_->vertices->at(vertexIndex_[2]);
-    float u, v, tnear;
-    if (!rayTriangleIntersect(p0, p1, p2, ray.origin_, ray.direction_, tnear, u,
-                              v)) {
+
+    Vector3f edge1 = p1 - p0;
+    Vector3f edge2 = p2 - p0;
+
+    Vector3f pvec = cross(ray.direction_, edge2); // S1
+    float det = dot(edge1, pvec);
+    if (almost_equal(std::abs(det), 0))
       return false;
-    }
 
-    //    const Vector3f &edge1 = mesh_->edges->at(3 * triIndex_);
-    //    const Vector3f &edge2 = mesh_->edges->at(3 * triIndex_ + 1);
-    //    Vector3f edge1 = p1 - p0;
-    //    Vector3f edge2 = p2 - p0;
-    //    Vector3f pvec = cross(ray.direction_, edge2); // S1
-    //    float det = dot(edge1, pvec);
-    //    if (almost_equal(det, 0))
-    //      return false;
+    float invDet = 1 / det;
+    Vector3f tvec = ray.origin_ - p0;
+    float u = dot(tvec, pvec);
+    u *= invDet;
+    if (u < 0 || u > 1.0f)
+      return false;
 
-    //    Vector3f tvec = ray.origin_ - p0;
-    //    float u = dot(tvec, pvec);
-    //    if (u < 0 || u > det)
-    //      return false;
+    Vector3f qvec = cross(tvec, edge1);
+    float v = dot(ray.direction_, qvec);
+    v *= invDet;
+    if (v < 0 || u + v > 1.0f)
+      return false;
 
-    //    Vector3f qvec = cross(tvec, edge1);
-    //    float v = dot(ray.direction_, qvec);
-    //    if (v < 0 || u + v > det)
-    //      return false;
-
-    //    float invDet = 1 / det;
-
-    //    float tnear = dot(edge2, qvec) * invDet;
-    //    u *= invDet;
-    //    v *= invDet;
+    float tnear = dot(edge2, qvec) * invDet;
     if (tnear > 1e-3) {
       if (time) {
         *time = tnear;

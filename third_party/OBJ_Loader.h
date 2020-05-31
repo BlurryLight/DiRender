@@ -1,5 +1,7 @@
 // OBJ_Loader.h - A Single Header OBJ Model Loader
 
+// Modified Version: Normal calculation has been modified to Counter-clock-wise
+
 #pragma once
 
 // Iostream - STD I/O Library
@@ -821,14 +823,18 @@ namespace objl
 			// best they get for not compiling a mesh with normals	
 			if (noNormal)
 			{
-				Vector3 A = oVerts[0].Position - oVerts[1].Position;
-				Vector3 B = oVerts[2].Position - oVerts[1].Position;
+                          // Modified by BlurryLight 2020/5/13
+                          // Original:
+                          //				Vector3 A = oVerts[0].Position -
+                          //oVerts[1].Position; 				Vector3 B = oVerts[2].Position -
+                          //oVerts[1].Position; Modified:
+                          Vector3 A = oVerts[1].Position - oVerts[0].Position;
+                          Vector3 B = oVerts[2].Position - oVerts[0].Position;
 
-				Vector3 normal = math::CrossV3(A, B);
+                          Vector3 normal = math::CrossV3(A, B);
 
-				for (int i = 0; i < int(oVerts.size()); i++)
-				{
-					oVerts[i].Normal = normal;
+                          for (int i = 0; i < int(oVerts.size()); i++) {
+                            oVerts[i].Normal = normal;
 				}
 			}
 		}

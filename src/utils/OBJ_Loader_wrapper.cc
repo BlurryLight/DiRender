@@ -38,6 +38,7 @@ Model::Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path,
       normals[i].x = mesh.Vertices[i].Normal.X;
       normals[i].y = mesh.Vertices[i].Normal.Y;
       normals[i].z = mesh.Vertices[i].Normal.Z;
+      normals[i] = normals[i].normalize();
 
       uvs[i].x = mesh.Vertices[i].TextureCoordinate.X;
       uvs[i].y = mesh.Vertices[i].TextureCoordinate.Y;

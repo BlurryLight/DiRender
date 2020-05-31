@@ -1,0 +1,134 @@
+title = "SIMPLE SCENE"
+spp = 32
+[cameras]
+    [[cameras.camera]]
+    origin = [278.0,273.0,-800.0]
+    up = [0.0,1.0,0.0]
+    lookat = [278.0,273.0,-790.0]
+    fov = 45.0
+    film_height = 400
+    film_width = 400
+    type = "pinhole"
+
+    # [[cameras.camera]]
+    # origin = [1.0,2.0,0.0]
+    # up = [0.0,1.0,0.0]
+    # lookat = [0.0,0.0,-1.0]
+    # fov = 90.0
+    # film_height = 400
+    # film_width = 400
+    # type = "pinhole"
+
+    # [[cameras.camera]]
+    # origin = [0.0,0.0,5.0]
+    # up = [0.0,1.0,0.0]
+    # lookat = [0.0,0.0,-1.0]
+    # fov = 90.0
+    # film_height = 400
+    # film_width = 400
+    # type = "pinhole"
+
+
+
+
+[objects]
+  [[objects.name]]
+  name = "tall_box"
+  [[objects.material]]
+  name = "matte_white"
+  type = "matte"
+  albedo = [0.725,0.71,0.68]
+  texture = "constant"
+  [[objects.transform]]
+  matrix4 = [1.0,0.0,0.0,0.0,
+         0.0,1.0,0.0,0.0,
+         0.0,0.0,1.0,0.0,
+         0.0,0.0,0.0,1.0]
+  [[objects.shape]]
+  type="obj"
+  path="tallbox.obj"
+
+
+  
+  [[objects.name]]
+  name = "small_box"
+  [[objects.material]]
+  name = "matte_white"
+  type = "matte"
+  albedo = [0.725,0.71,0.68]
+  texture = "constant"
+  [[objects.transform]]
+  matrix4 = [1.0,0.0,0.0,0.0,
+        0.0,1.0,0.0,0.0,
+        0.0,0.0,1.0,0.0,
+        0.0,0.0,0.0,1.0]
+  [[objects.shape]]
+  type="obj"
+  path="shortbox.obj"
+
+
+   [[objects.name]]
+   name = "left"
+   [[objects.material]]
+   name = "matte_red"
+   type = "matte"
+   albedo = [0.63,0.065,0.05]
+   texture = "constant"
+   [[objects.transform]]
+   matrix4 = [1.0,0.0,0.0,0.0,
+         0.0,1.0,0.0,0.0,
+         0.0,0.0,1.0,0.0,
+         0.0,0.0,0.0,1.0]
+   [[objects.shape]]
+   type="obj"
+   path="left.obj"
+
+
+ [[objects.name]]
+ name = "right"
+ [[objects.material]]
+ name = "matte_green"
+ type = "matte"
+ albedo = [0.14,0.45,0.91]
+ texture = "constant"
+ [[objects.transform]]
+ matrix4 = [1.0,0.0,0.0,0.0,
+       0.0,1.0,0.0,0.0,
+       0.0,0.0,1.0,0.0,
+       0.0,0.0,0.0,1.0]
+ [[objects.shape]]
+ type="obj"
+ path="right.obj"
+
+  [[objects.name]]
+  name = "floor"
+  [[objects.material]]
+  name = "matte_white"
+  type = "matte"
+  albedo = [0.725,0.71,0.68]
+  texture = "constant"
+  [[objects.transform]]
+  matrix4 = [1.0,0.0,0.0,0.0,
+        0.0,1.0,0.0,0.0,
+        0.0,0.0,1.0,0.0,
+        0.0,0.0,0.0,1.0]
+  [[objects.shape]]
+  type="obj"
+  path="floor.obj"
+
+  [[objects.name]]
+  name = "light"
+  [[objects.material]]
+  name = "matte_light"
+  type = "matte"
+  albedo = [0.65,0.65,0.68]
+  emission = [15.0,15.0,15.0]
+  texture = "constant"
+  [[objects.transform]]
+  matrix4 = [1.0,0.0,0.0,0.0,
+        0.0,1.0,0.0,0.0,
+        0.0,0.0,1.0,0.0,
+        0.0,0.0,0.0,1.0]
+  [[objects.shape]]
+  type="obj"
+  path="light.obj"
