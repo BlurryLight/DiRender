@@ -9,6 +9,7 @@
 using namespace DR;
 
 static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
+                         const std::vector<std::shared_ptr<Primitive>> &lights,
                          int depth = 0) {
   float russian_roulette = 0.8f;
   if (!prim->Intersect_test(r)) {
@@ -17,27 +18,79 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
     //    auto t = 0.5f * (unit_vec.y + 1.0f);
     //    return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
   }
-  if (depth > 4)
+  if (depth > 5)
     return {0};
+
   Intersection isect;
-  if (get_random_float() < russian_roulette && prim->Intersect(r, &isect)) {
+  if (!prim->Intersect(r, &isect))
+    return {};
+
+  // Shadow ray
+  Intersection light_pos;
+  float light_pdf = 0;
+  int try_count = 0;
+  int size = lights.size();
+  while (almost_equal(light_pdf, 0.0f) && try_count < 5) {
+    int index = std::floor(size * get_random_float());
+    std::tie(light_pos, light_pdf) = lights.at(index)->sample(isect.coords);
+    try_count++;
+  }
+  //  Vector3f light_direction = (light_pos.coords - isect.coords).normalize();
+  //  Ray shadowray(isect.coords, light_direction);
+  //  Intersection shadowray_inter;
+  //  Vector3f L_dir = {0};
+  //  if (prim->Intersect(shadowray, &shadowray_inter)) {
+  //    float distance2 = (isect.coords -
+  //    shadowray_inter.coords).squared_length(); auto emission =
+  //    shadowray_inter.mat_ptr->evalEmitted(shadowray.direction_,
+  //                                                         shadowray_inter);
+  //    auto brdf =
+  //        isect.mat_ptr->evalBxDF(r.direction_, isect, shadowray.direction_);
+  //    L_dir = multiply(emission, brdf) * dot(shadowray.direction_,
+  //    isect.normal) *
+  //            dot(-shadowray.direction_, shadowray_inter.normal);
+  //    L_dir /= distance2;
+  //    L_dir /= light_pdf;
+  //    if (L_dir.length() > 5) {
+  //      int i = 0;
+  //      ignore(i);
+  //    }
+  //  }
+
+  Vector3f L_in = {0};
+  if (get_random_float() < russian_roulette || depth == 0) {
     Vector3f new_direction;
     float pdf;
-    std::tie(new_direction, pdf) =
-        isect.mat_ptr->sampleScatter(r.direction_, isect);
+    if (get_random_float() < 0.8) {
+      std::tie(new_direction, pdf) =
+          isect.mat_ptr->sampleScatter(r.direction_, isect);
+    } else {
+      new_direction = (light_pos.coords - isect.coords).normalize();
+      pdf = light_pdf;
+    }
     Ray r_new(isect.coords, new_direction);
     auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
     if (pdf > 0.0f) {
-      auto tmp = isect.mat_ptr->evalEmitted(r.direction_, isect) +
-                 multiply(brdf, cast_ray(r_new, prim, depth + 1)) *
-                     dot(r_new.direction_, isect.normal) /
-                     (pdf * russian_roulette);
-      return tmp;
-    }
-    // reach here when pdf == 0.0f
-    // should never happen
-    return {};
+      L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
+
+      if (L_in.length() < 0.1f) {
+        auto part1 = cast_ray(r_new, prim, lights, depth + 1);
+        auto part2 = multiply(brdf, part1);
+        L_in += part2 * dot(r_new.direction_, isect.normal) /
+                (pdf * russian_roulette);
+      }
+      if (L_in.x < 0 || L_in.y < 0 || L_in.z < 0 || L_in.has_nan() ||
+          std::isinf(L_in.x) || std::isinf(L_in.y) || std::isinf(L_in.z)) {
+        std::cerr << "Error" << std::endl;
+        ignore(0);
+      }
+      return L_in;
+    } else
+      // reach here when pdf == 0.0f
+      // should never happen
+      return {};
   }
+  ignore(0);
   return {};
 }
 static int count = 0;
@@ -51,9 +104,10 @@ static void UpdateProgrss(int num_of_tiles) {
 }
 
 static void render_tile(std::shared_ptr<Camera> cam,
-                        std::shared_ptr<Primitive> prim, int height, int width,
-                        int blockheight, int blockwidth, int blockheightId,
-                        int blockwidthId, int spp) {
+                        std::shared_ptr<Primitive> prim,
+                        const std::vector<std::shared_ptr<Primitive>> &lights,
+                        int height, int width, int blockheight, int blockwidth,
+                        int blockheightId, int blockwidthId, int spp) {
   UpdateProgrss(cam->film_ptr_->tile_width_nums *
                 cam->film_ptr_->tile_height_nums);
   for (int i = 0; i < blockheight; i++) {
@@ -67,7 +121,7 @@ static void render_tile(std::shared_ptr<Camera> cam,
         float v = float(height - 1 - trueI + get_random_float()) / (height);
         auto r = cam->get_ray(u, v);
         cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) +=
-            cast_ray(r, prim, 0) / spp;
+            cast_ray(r, prim, lights, 0) / spp;
       }
     }
   }
@@ -76,14 +130,14 @@ static void render_tile(std::shared_ptr<Camera> cam,
 void Render::render(const Scene &scene) {
 
   std::shared_ptr<Primitive> hit_list = nullptr;
-  if (scene.Prims_.size() > 0) {
-    if (scene.Prims_.size() > 1) {
+  if (scene.prims_.size() > 0) {
+    if (scene.prims_.size() > 1) {
       std::vector<std::shared_ptr<Primitive>> prims;
-      for (auto &i : scene.Prims_)
+      for (auto &i : scene.prims_)
         prims.push_back(i);
       hit_list = std::make_shared<LinearList>(prims);
     } else {
-      hit_list = scene.Prims_.at(0); // only one object : maybe a bvh tree
+      hit_list = scene.prims_.at(0); // only one object : maybe a bvh tree
     }
   } else {
     throw std::runtime_error("Scene has no primitive to render!");
@@ -98,12 +152,13 @@ void Render::render(const Scene &scene) {
         // parallel
 #ifdef NDEBUG
         futures.emplace_back(this->pool_.enqueue_task(
-            render_tile, cam, hit_list, cam->film_ptr_->height,
-            cam->film_ptr_->width, cam->film_ptr_->tile_height,
-            cam->film_ptr_->tile_width, i, j, spp_));
+            render_tile, cam, hit_list, scene.light_shapes_,
+            cam->film_ptr_->height, cam->film_ptr_->width,
+            cam->film_ptr_->tile_height, cam->film_ptr_->tile_width, i, j,
+            spp_));
 #else
         // single thread
-        render_tile(cam, hit_list, cam->film_ptr_->height,
+        render_tile(cam, hit_list, scene.light_shapes_, cam->film_ptr_->height,
                     cam->film_ptr_->width, cam->film_ptr_->tile_height,
                     cam->film_ptr_->tile_width, i, j, spp_);
 #endif

@@ -76,6 +76,7 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
       auto material_toml = materials_vec[i];
       std::shared_ptr<Material> mat_ptr = nullptr;
       // material parse
+      bool has_emission = false;
       if (material_toml.at("type").as_string() == "matte") {
         // constant texture
         std::shared_ptr<Texture> texture_ptr = nullptr;
@@ -101,6 +102,7 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
           auto tmp =
               toml::get<std::vector<float>>(material_toml.at("emission"));
           emission = {tmp[0], tmp[1], tmp[2]};
+          has_emission = true;
         }
 
         mat_ptr = std::make_shared<MatteMaterial>(texture_ptr, emission);
@@ -127,6 +129,9 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
         std::string path = shapes_vec[i].at("path").as_string();
         Model model(trans, path, mat_ptr);
         objects.push_back(model.model_ptr);
+        if (has_emission) {
+          scene->light_shapes_.push_back(model.model_ptr);
+        }
       }
     }
     auto bvh_tree = std::make_shared<BVHTree>(objects);

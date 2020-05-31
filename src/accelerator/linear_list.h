@@ -12,6 +12,12 @@ public:
   bool Intersect_test(const Ray &ray) const override;
   bool Intersect(const Ray &ray, Intersection *isect) const override;
   LinearList(std::vector<std::shared_ptr<Primitive>> prims) : prims_(prims) {}
+  std::pair<Intersection, float> sample() const override {
+    return prims_[0]->sample();
+  }
+  std::pair<Intersection, float> sample(const Point3f &ref) const override {
+    return prims_[0]->sample(ref);
+  }
 
 private:
   std::vector<std::shared_ptr<Primitive>> prims_;

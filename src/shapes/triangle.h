@@ -141,7 +141,8 @@ public:
     float pdf;
     std::tie(pos, pdf) = sample();
     Ray ray(ref, pos.coords - ref);
-    if (this->Intersect(ray)) {
+    if (this->Intersect(ray) || Bounds3::Inside(ref, this->WorldBounds())) {
+      pdf *= (pos.coords - ref).length();
       return {pos, pdf};
     } else {
       return {pos, 0.0f};

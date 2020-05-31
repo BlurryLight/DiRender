@@ -13,9 +13,10 @@ struct Scene {
 
   void add(std::shared_ptr<Camera> cam) { cams_.push_back(std::move(cam)); }
   void add(std::shared_ptr<Primitive> prim) {
-    Prims_.push_back(std::move(prim));
+    prims_.push_back(std::move(prim));
   }
   std::vector<std::shared_ptr<Camera>> cams_;
-  std::vector<std::shared_ptr<Primitive>> Prims_;
+  std::vector<std::shared_ptr<Primitive>> prims_;
+  std::vector<std::shared_ptr<Primitive>> light_shapes_;
 };
 NAMESPACE_END(DR)
