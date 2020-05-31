@@ -10,14 +10,14 @@ using namespace DR;
 
 static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
                          int depth = 0) {
-  float russian_roulette = 0.8f;
+  float russian_roulette = 1.0f;
   if (!prim->Intersect_test(r)) {
     Vector3f unit_vec = r.direction_.normalize();
     auto t = 0.5f * (unit_vec.y + 1.0f);
     return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
   }
   if (depth > 4)
-    return {};
+    return {0};
   Intersection isect;
   if (get_random_float() < russian_roulette && prim->Intersect(r, &isect)) {
     Vector3f new_direction;
@@ -60,8 +60,8 @@ static void render_tile(std::shared_ptr<Camera> cam,
       if (trueJ >= width || trueI >= height)
         return;
       for (int k = 0; k < spp; k++) {
-        float u = float(trueJ + get_random_float()) / (width - 1);
-        float v = float(height - 1 - trueI + get_random_float()) / (height - 1);
+        float u = float(trueJ + get_random_float()) / (width);
+        float v = float(height - 1 - trueI + get_random_float()) / (height);
         auto r = cam->get_ray(u, v);
         cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) +=
             cast_ray(r, prim, 0) / spp;

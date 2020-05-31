@@ -4,7 +4,7 @@ using namespace DR;
 
 Bounds3::Bounds3() {
   pMin_ = Point3f{kFloatMax, kFloatMax, kFloatMax};
-  pMax_ = Point3f{kFloatMin, kFloatMin, kFloatMin};
+  pMax_ = Point3f{kFloatLowest, kFloatLowest, kFloatLowest};
 }
 
 Bounds3::Bounds3(const Bounds3 &other) {

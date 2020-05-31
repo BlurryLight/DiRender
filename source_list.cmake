@@ -51,6 +51,8 @@ set(UTILS_SOURCE
     ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.cc
     ${CMAKE_SOURCE_DIR}/src/utils/stb_image_wrapper.h
     ${CMAKE_SOURCE_DIR}/src/utils/stb_image_wrapper.cc
+    ${CMAKE_SOURCE_DIR}/src/utils/OBJ_Loader_wrapper.h
+    ${CMAKE_SOURCE_DIR}/src/utils/OBJ_Loader_wrapper.cc
     )
 set(MATERIAL_SOURCE
     ${CMAKE_SOURCE_DIR}/src/material/material.h
@@ -61,6 +63,7 @@ set(MATERIAL_SOURCE
 set(THIRD_PARTY_SOURCE
     ${CMAKE_SOURCE_DIR}/third_party/stb_image_write.h
     ${CMAKE_SOURCE_DIR}/third_party/stb_image.h
+    ${CMAKE_SOURCE_DIR}/third_party/OBJ_Loader.h
 )
 
 set(TEXTURE_SOURCE

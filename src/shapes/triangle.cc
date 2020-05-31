@@ -4,7 +4,7 @@ using namespace DR;
 
 TriangleMesh::TriangleMesh(std::shared_ptr<Transform> LocalToWorld,
                            int nTriangles, int nVertices,
-                           const int *vertexIndices, const Point3f *vertices,
+                           const uint *vertexIndices, const Point3f *vertices,
                            const Normal3f *normals, const Point2f *uvs,
                            const int *faceIndices)
     : nTriangles(nTriangles), nVertices(nVertices) {
@@ -39,7 +39,7 @@ TriangleMesh::TriangleMesh(std::shared_ptr<Transform> LocalToWorld,
     this->normals = std::make_unique<std::vector<Normal3f>>();
     this->normals->resize(nVertices);
     for (int i = 0; i < nVertices; ++i) {
-      this->normals->at(i) = (*LocalToWorld)(normals[i], false);
+      this->normals->at(i) = (*LocalToWorld)(normals[i], false).normalize();
     }
   }
   if (faceIndices) {
