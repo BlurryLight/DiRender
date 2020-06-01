@@ -8,3 +8,8 @@ Not so tiny path tracer
 - Windows MSVC 2019
 
 ![CI](https://github.com/BlurryLight/DiRender/workflows/CI/badge.svg)
+
+## Milestone
+
+- Cornel Box(*Unknown reason for white noise*)
+![cornel_box](images/cornel_box_path_tracing.jpg)

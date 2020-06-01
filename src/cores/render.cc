@@ -49,15 +49,14 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
     }
     pdf = distance2 * fabs(1 / cosine) * light_pdf;
   }
-    Ray r_new(isect.coords, new_direction);
-    auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
-    L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
+  Ray r_new(isect.coords, new_direction);
+  auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
+  L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
 
-    auto part1 = cast_ray(r_new, prim, lights, depth + 1);
-    auto part2 = multiply(brdf, part1);
-    L_in += part2 * fabs(dot(r_new.direction_, isect.normal)) / (pdf);
-
-    return L_in;
+  auto part1 = cast_ray(r_new, prim, lights, depth + 1);
+  auto part2 = multiply(brdf, part1);
+  L_in += part2 * dot(r_new.direction_, isect.normal) / (pdf);
+  return L_in;
 }
 static int count = 0;
 static std::mutex mutex;
