@@ -19,6 +19,24 @@ struct Film {
   uint tile_height_nums = std::ceil(height / tile_height);
   uint tile_width_nums = std::ceil(width / tile_width);
   void write(const std::string&filename,PicType type);
+  void write_ppm(const std::string &filename) {
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(
+        fopen(filename.c_str(), "wb"), &fclose);
+    (void)fprintf(fp.get(), "P6\n%d %d\n255\n", height, width);
+    for (uint i = 0; i < width * height; ++i) {
+      static unsigned char color[3];
+      color[0] =
+          (unsigned char)(255 *
+                          std::pow(clamp(0.0f, 1.0f, framebuffer_[i].x), 0.6f));
+      color[1] =
+          (unsigned char)(255 *
+                          std::pow(clamp(0.0f, 1.0f, framebuffer_[i].y), 0.6f));
+      color[2] =
+          (unsigned char)(255 *
+                          std::pow(clamp(0.0f, 1.0f, framebuffer_[i].z), 0.6f));
+      fwrite(color, 1, 3, fp.get());
+    }
+  }
 };
 
 class Camera {
@@ -44,7 +62,7 @@ inline void Film::write(const std::string&filename,PicType type)
     for(uint j =0;j<3;j++)
     {
       auto tmp = static_cast<uint8_t>(
-          std::pow(clamp(0.0f, 1.0f, framebuffer_[i][j]), 0.6) * 255.0f);
+          std::pow(clamp(0.0f, 1.0f, framebuffer_[i][j]), 0.6) * 254.0f);
       data[3 * i + j] = tmp;
     }
   }

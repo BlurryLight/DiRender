@@ -11,87 +11,53 @@ using namespace DR;
 static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
                          const std::vector<std::shared_ptr<Primitive>> &lights,
                          int depth = 0) {
-  float russian_roulette = 0.8f;
-  if (!prim->Intersect_test(r)) {
-    return {0};
-    //    Vector3f unit_vec = r.direction_.normalize();
-    //    auto t = 0.5f * (unit_vec.y + 1.0f);
-    //    return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
-  }
+  //  float russian_roulette = 0.8f;
+  //  if (!prim->Intersect_test(r)) {
+  //    return {0.9, 0.9, 0.0};
+  //    //    Vector3f unit_vec = r.direction_.normalize();
+  //    //    auto t = 0.5f * (unit_vec.y + 1.0f);
+  //    //    return (1.0 - t) * vec3(1.0f) + t * vec3(0.5, 0.7, 1.0);
+  //  }
   if (depth > 5)
     return {0};
 
   Intersection isect;
   if (!prim->Intersect(r, &isect))
-    return {};
+    return {0};
 
   // Shadow ray
   Intersection light_pos;
   float light_pdf = 0;
-  int try_count = 0;
   int size = lights.size();
-  while (almost_equal(light_pdf, 0.0f) && try_count < 5) {
-    int index = std::floor(size * get_random_float());
-    std::tie(light_pos, light_pdf) = lights.at(index)->sample(isect.coords);
-    try_count++;
+  while (almost_equal(light_pdf, 0.0f)) {
+    int index = std::floor(size * get_random_float(0.0, 0.99));
+    std::tie(light_pos, light_pdf) = lights.at(index)->sample();
   }
-  //  Vector3f light_direction = (light_pos.coords - isect.coords).normalize();
-  //  Ray shadowray(isect.coords, light_direction);
-  //  Intersection shadowray_inter;
-  //  Vector3f L_dir = {0};
-  //  if (prim->Intersect(shadowray, &shadowray_inter)) {
-  //    float distance2 = (isect.coords -
-  //    shadowray_inter.coords).squared_length(); auto emission =
-  //    shadowray_inter.mat_ptr->evalEmitted(shadowray.direction_,
-  //                                                         shadowray_inter);
-  //    auto brdf =
-  //        isect.mat_ptr->evalBxDF(r.direction_, isect, shadowray.direction_);
-  //    L_dir = multiply(emission, brdf) * dot(shadowray.direction_,
-  //    isect.normal) *
-  //            dot(-shadowray.direction_, shadowray_inter.normal);
-  //    L_dir /= distance2;
-  //    L_dir /= light_pdf;
-  //    if (L_dir.length() > 5) {
-  //      int i = 0;
-  //      ignore(i);
-  //    }
-  //  }
-
   Vector3f L_in = {0};
-  if (get_random_float() < russian_roulette || depth == 0) {
-    Vector3f new_direction;
-    float pdf;
-    if (get_random_float() < 0.8) {
-      std::tie(new_direction, pdf) =
-          isect.mat_ptr->sampleScatter(r.direction_, isect);
-    } else {
-      new_direction = (light_pos.coords - isect.coords).normalize();
-      pdf = light_pdf;
+  Vector3f new_direction;
+  float pdf;
+  if (get_random_float() < 0.5) {
+    std::tie(new_direction, pdf) =
+        isect.mat_ptr->sampleScatter(r.direction_, isect);
+  } else {
+    new_direction = (light_pos.coords - isect.coords).normalize();
+    float distance2 = (light_pos.coords - isect.coords).length();
+    float cosine = dot(-new_direction, light_pos.normal);
+    if (cosine < 0.01f) {
+
+      return isect.mat_ptr->evalEmitted(r.direction_, isect);
     }
+    pdf = distance2 * fabs(1 / cosine) * light_pdf;
+  }
     Ray r_new(isect.coords, new_direction);
     auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
-    if (pdf > 0.0f) {
-      L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
+    L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
 
-      if (L_in.length() < 0.1f) {
-        auto part1 = cast_ray(r_new, prim, lights, depth + 1);
-        auto part2 = multiply(brdf, part1);
-        L_in += part2 * dot(r_new.direction_, isect.normal) /
-                (pdf * russian_roulette);
-      }
-      if (L_in.x < 0 || L_in.y < 0 || L_in.z < 0 || L_in.has_nan() ||
-          std::isinf(L_in.x) || std::isinf(L_in.y) || std::isinf(L_in.z)) {
-        std::cerr << "Error" << std::endl;
-        ignore(0);
-      }
-      return L_in;
-    } else
-      // reach here when pdf == 0.0f
-      // should never happen
-      return {};
-  }
-  ignore(0);
-  return {};
+    auto part1 = cast_ray(r_new, prim, lights, depth + 1);
+    auto part2 = multiply(brdf, part1);
+    L_in += part2 * fabs(dot(r_new.direction_, isect.normal)) / (pdf);
+
+    return L_in;
 }
 static int count = 0;
 static std::mutex mutex;
@@ -102,12 +68,10 @@ static void UpdateProgrss(int num_of_tiles) {
             << (float)count / num_of_tiles * 100.0 << "%" << '\r';
   fflush(stdout);
 }
-
-static void render_tile(std::shared_ptr<Camera> cam,
-                        std::shared_ptr<Primitive> prim,
-                        const std::vector<std::shared_ptr<Primitive>> &lights,
-                        int height, int width, int blockheight, int blockwidth,
-                        int blockheightId, int blockwidthId, int spp) {
+bool render_tile(std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
+                 const std::vector<std::shared_ptr<Primitive>> &lights,
+                 int height, int width, int blockheight, int blockwidth,
+                 int blockheightId, int blockwidthId, int spp) {
   UpdateProgrss(cam->film_ptr_->tile_width_nums *
                 cam->film_ptr_->tile_height_nums);
   for (int i = 0; i < blockheight; i++) {
@@ -115,18 +79,19 @@ static void render_tile(std::shared_ptr<Camera> cam,
       int trueJ = blockwidth * blockwidthId + j;
       int trueI = blockheight * blockheightId + i;
       if (trueJ >= width || trueI >= height)
-        return;
+        continue;
       for (int k = 0; k < spp; k++) {
         float u = float(trueJ + get_random_float()) / (width);
         float v = float(height - 1 - trueI + get_random_float()) / (height);
         auto r = cam->get_ray(u, v);
-        cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) +=
-            cast_ray(r, prim, lights, 0) / spp;
+        auto tmp = cast_ray(r, prim, lights, 0) / spp;
+        cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) += tmp;
       }
     }
   }
+  return true;
 }
-
+//#define NDEBUG
 void Render::render(const Scene &scene) {
 
   std::shared_ptr<Primitive> hit_list = nullptr;
@@ -146,12 +111,14 @@ void Render::render(const Scene &scene) {
 
   int index = 0;
   for (const auto &cam : scene.cams_) {
-    std::vector<std::future<void>> futures;
+    std::vector<std::future<bool>> futures;
+    futures.reserve(cam->film_ptr_->tile_width_nums *
+                    cam->film_ptr_->tile_height_nums);
     for (uint i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
       for (uint j = 0; j < cam->film_ptr_->tile_width_nums; j++) {
         // parallel
 #ifdef NDEBUG
-        futures.emplace_back(this->pool_.enqueue_task(
+        futures.push_back(this->pool_.enqueue_task(
             render_tile, cam, hit_list, scene.light_shapes_,
             cam->film_ptr_->height, cam->film_ptr_->width,
             cam->film_ptr_->tile_height, cam->film_ptr_->tile_width, i, j,
@@ -165,11 +132,22 @@ void Render::render(const Scene &scene) {
       }
     }
 #ifdef NDEBUG
-    for (auto &i : futures)
-      i.wait();
+    size_t index_test = 0;
+    try {
+      for (index_test = 0; index_test < futures.size(); index_test++) {
+        auto &&result = futures.at(index_test);
+        result.get();
+      }
+    } catch (std::exception &e) {
+      std::cout << e.what() << std::endl;
+      std::cout << "size:" << futures.size() << std::endl;
+      std::cout << "Index test:" << index_test << std::endl;
+    }
 #endif
     cam->film_ptr_->write("output_" + std::to_string(index++) +
-                              std::string(MapTypeToSuffix()(PicType::kPNG)),
-                          PicType::kPNG);
+                              std::string(MapTypeToSuffix()(PicType::kJPG)),
+                          PicType::kJPG);
+    //    cam->film_ptr_->write_ppm("output" + std::to_string(index++) +
+    //    ".ppm");
   }
 }

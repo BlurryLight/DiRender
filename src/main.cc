@@ -9,6 +9,7 @@
 #include <utils/high_resolution_timer.h>
 #include <utils/parse_scene.hpp>
 using namespace DR;
+//#define NDEBUG
 int main(int argc, char **argv) {
   DR::Scene scene;
   std::string filename{"scene.toml"};
