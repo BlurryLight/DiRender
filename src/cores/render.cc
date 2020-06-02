@@ -29,25 +29,27 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
   Intersection light_pos;
   float light_pdf = 0;
   int size = lights.size();
-  while (almost_equal(light_pdf, 0.0f)) {
-    int index = std::floor(size * get_random_float(0.0, 0.99));
-    std::tie(light_pos, light_pdf) = lights.at(index)->sample();
-  }
+  int index = std::floor(size * get_random_float(0.0, 0.99));
+  // we hope the sample is visible from the isect.coords
+  // if return {pos,0.0}, the sample is not visible.
+  std::tie(light_pos, light_pdf) = lights.at(index)->sample(isect.coords);
   Vector3f L_in = {0};
   Vector3f new_direction;
   float pdf;
-  if (get_random_float() < 0.5) {
+  if (light_pdf == 0.0f ||
+      get_random_float() <
+          0.5) { // if not visible, we simply let the ray scatter
     std::tie(new_direction, pdf) =
         isect.mat_ptr->sampleScatter(r.direction_, isect);
   } else {
     new_direction = (light_pos.coords - isect.coords).normalize();
     float distance2 = (light_pos.coords - isect.coords).length();
-    float cosine = dot(-new_direction, light_pos.normal);
+    float cosine = std::fabs(dot(-new_direction, light_pos.normal));
     if (cosine < 0.01f) {
 
       return isect.mat_ptr->evalEmitted(r.direction_, isect);
     }
-    pdf = distance2 * fabs(1 / cosine) * light_pdf;
+    pdf = distance2 * (1 / cosine) * light_pdf;
   }
   Ray r_new(isect.coords, new_direction);
   auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
@@ -55,7 +57,8 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
 
   auto part1 = cast_ray(r_new, prim, lights, depth + 1);
   auto part2 = multiply(brdf, part1);
-  L_in += part2 * dot(r_new.direction_, isect.normal) / (pdf);
+  L_in += part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
+          (pdf + 1e-7); // avoid zero
   return L_in;
 }
 static int count = 0;

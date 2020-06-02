@@ -13,3 +13,5 @@ Not so tiny path tracer
 
 - Cornel Box(*Unknown reason for white noise*)
 ![cornel_box](images/cornel_box_path_tracing.jpg)
+
+
