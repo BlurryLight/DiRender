@@ -1,3 +1,4 @@
+#pragma once
 #include <chrono>
 #include <utils/di_global.h>
 

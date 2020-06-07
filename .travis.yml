@@ -34,7 +34,7 @@ before_script:
   
 script:
   - mkdir build && cd ./build
-  - cmake -DCMAKE_BUILD_TYPE=RELEASE -GNinja .. 
+  - cmake -DCMAKE_BUILD_TYPE=RELEASE -GNinja -DBUILD_TESTS=ON -DEXPERIMENTAL_UNITY_BUILD=ON .. 
   - ninja
   - ./test/runTests
   - ./DiRender ../sample.toml
