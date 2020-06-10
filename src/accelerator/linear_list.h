@@ -18,6 +18,13 @@ public:
   std::pair<Intersection, float> sample(const Point3f &ref) const override {
     return prims_[0]->sample(ref);
   }
+  float Area() const override {
+    float sum = 0.0f;
+    for (uint i = 0; i < prims_.size(); i++) {
+      sum += prims_[i]->Area();
+    }
+    return sum;
+  }
 
 private:
   std::vector<std::shared_ptr<Primitive>> prims_;

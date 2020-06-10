@@ -16,6 +16,7 @@ struct Primitive {
   virtual Bounds3 WorldBounds() const = 0;
   virtual bool Intersect(const Ray &, Intersection *) const { return false; };
   virtual bool Intersect_test(const Ray &) const { return false; };
+  virtual float Area() const = 0;
 
   virtual std::pair<Intersection, float> sample() const = 0;
   virtual std::pair<Intersection, float> sample(const Point3f &) const = 0;
@@ -46,6 +47,7 @@ struct GeometricPrimitive : public Primitive {
   sample(const Point3f &ref) const override {
     return this->shape_->sample(ref);
   }
+  virtual float Area() const override { return shape_->Area(); }
 
 private:
   std::shared_ptr<Shape> shape_;
@@ -71,6 +73,7 @@ struct TransformedPrimitive : public Primitive
   std::pair<Intersection, float> sample(const Point3f &ref) const override {
     return this->prim_->sample(ref);
   }
+  float Area() const override { return prim_->Area(); }
 
 private:
   std::shared_ptr<Primitive> prim_;

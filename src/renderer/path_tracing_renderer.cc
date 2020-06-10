@@ -2,15 +2,14 @@
 #include <cameras/pinhole_camera.h>
 #include <cores/primitive.h>
 #include <cores/ray.hpp>
-#include <cores/render.h>
 #include <material/matte_material.h>
+#include <renderer/path_tracing_renderer.h>
 #include <shapes/sphere.h>
 #include <tuple> //for std::tie
 using namespace DR;
-
-static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
-                         const std::vector<std::shared_ptr<Primitive>> &lights,
-                         int depth = 0) {
+Vector3f PathTracingRenderer::cast_ray(
+    const Ray &r, std::shared_ptr<Primitive> prim,
+    const std::vector<std::shared_ptr<Primitive>> &lights, int depth = 0) {
   //  float russian_roulette = 0.8f;
   //  if (!prim->Intersect_test(r)) {
   //    return {0.9, 0.9, 0.0};
@@ -43,13 +42,13 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
         isect.mat_ptr->sampleScatter(r.direction_, isect);
   } else {
     new_direction = (light_pos.coords - isect.coords).normalize();
-    float distance2 = (light_pos.coords - isect.coords).length();
+    float distance2 = (light_pos.coords - isect.coords).squared_length();
     float cosine = std::fabs(dot(-new_direction, light_pos.normal));
     if (cosine < 0.01f) {
 
       return isect.mat_ptr->evalEmitted(r.direction_, isect);
     }
-    pdf = distance2 * (1 / cosine) * light_pdf;
+    pdf = distance2 * (1 / cosine) * (light_pdf / lights.size());
   }
   Ray r_new(isect.coords, new_direction);
   auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
@@ -58,22 +57,14 @@ static Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
   auto part1 = cast_ray(r_new, prim, lights, depth + 1);
   auto part2 = multiply(brdf, part1);
   L_in += part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
-          (pdf + 1e-7); // avoid zero
+          (pdf + kEpsilon); // avoid zero
   return L_in;
 }
-static int count = 0;
-static std::mutex mutex;
-static void UpdateProgrss(int num_of_tiles) {
-  std::unique_lock<std::mutex> lk(mutex);
-  count++;
-  std::cout << "Tiles Complete:" << count << " Total: " << num_of_tiles << " "
-            << (float)count / num_of_tiles * 100.0 << "%" << '\r';
-  fflush(stdout);
-}
-bool render_tile(std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
-                 const std::vector<std::shared_ptr<Primitive>> &lights,
-                 int height, int width, int blockheight, int blockwidth,
-                 int blockheightId, int blockwidthId, int spp) {
+void PathTracingRenderer::render_tile(
+    std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
+    const std::vector<std::shared_ptr<Primitive>> &lights, int height,
+    int width, int blockheight, int blockwidth, int blockheightId,
+    int blockwidthId, int spp) {
   UpdateProgrss(cam->film_ptr_->tile_width_nums *
                 cam->film_ptr_->tile_height_nums);
   for (int i = 0; i < blockheight; i++) {
@@ -91,10 +82,9 @@ bool render_tile(std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
       }
     }
   }
-  return true;
 }
 //#define NDEBUG
-void Render::render(const Scene &scene) {
+void PathTracingRenderer::render(const Scene &scene) {
 
   std::shared_ptr<Primitive> hit_list = nullptr;
   if (scene.prims_.size() > 0) {
@@ -113,7 +103,7 @@ void Render::render(const Scene &scene) {
 
   int index = 0;
   for (const auto &cam : scene.cams_) {
-    std::vector<std::future<bool>> futures;
+    std::vector<std::future<void>> futures;
     futures.reserve(cam->film_ptr_->tile_width_nums *
                     cam->film_ptr_->tile_height_nums);
     for (uint i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
@@ -121,8 +111,9 @@ void Render::render(const Scene &scene) {
         // parallel
 #ifdef NDEBUG
         futures.push_back(this->pool_.enqueue_task(
-            render_tile, cam, hit_list, scene.light_shapes_,
-            cam->film_ptr_->height, cam->film_ptr_->width,
+            // Interesting syntax here
+            &PathTracingRenderer::render_tile, this, cam, hit_list,
+            scene.light_shapes_, cam->film_ptr_->height, cam->film_ptr_->width,
             cam->film_ptr_->tile_height, cam->film_ptr_->tile_width, i, j,
             spp_));
 #else

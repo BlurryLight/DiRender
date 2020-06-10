@@ -122,7 +122,7 @@ spp = 32
   name = "matte_light"
   type = "matte"
   albedo = [0.65,0.65,0.68]
-  emission = [1.0,1.0,1.0]
+  emission = [15.0,15.0,15.0]
   texture = "constant"
   [[objects.transform]]
   matrix4 = [1.0,0.0,0.0,0.0,

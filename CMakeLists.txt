@@ -22,7 +22,7 @@ if(EXPERIMENTAL_UNITY_BUILD)
     set(SOURCE_HEADERS ${CMAKE_BINARY_DIR}/module_unity_build.cpp)
 else(EXPERIMENTAL_UNITY_BUILD)
     #只有在不是unity-build且不是MSVC的环境下，才启动-Werror
-    if (not MSVC)
+    if (NOT MSVC)
         add_compile_options(-Werror)
     endif()
 

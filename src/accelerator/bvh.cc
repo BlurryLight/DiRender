@@ -88,6 +88,10 @@ BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims) {
     node->left_ = nullptr;
     node->right_ = nullptr;
     node->nPrimitives = prims.size();
+    node->area = 0.0f;
+    for (uint i = 0; i < prims.size(); i++) {
+      node->area += prims[i]->Area();
+    }
     return node;
   }
   if (prims.size() <= 2 * this->maxPrimsInNode) {
@@ -96,6 +100,7 @@ BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims) {
     node->right_ = recursiveBuild(std::vector<std::shared_ptr<Primitive>>(
         prims.cbegin() + maxPrimsInNode, prims.cend()));
     node->bounds = Bounds3::Union(node->left_->bounds, node->right_->bounds);
+    node->area = node->left_->area + node->right_->area;
     return node;
   }
   // split
@@ -138,6 +143,7 @@ BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims) {
         std::vector<std::shared_ptr<Primitive>>{vec_mid, vec_end};
     node->left_ = recursiveBuild(left_vector);
     node->right_ = recursiveBuild(right_vector);
+    node->area = node->left_->area + node->right_->area;
     node->bounds = Bounds3::Union(node->left_->bounds, node->right_->bounds);
   }
   return node;

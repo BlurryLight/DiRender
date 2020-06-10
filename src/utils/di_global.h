@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 // macros
 // namespace
 #if !defined(NAMESPACE_BEGIN)
@@ -10,6 +11,7 @@
 #endif
 NAMESPACE_BEGIN(DR)
 using uint = unsigned int;
+using byte = std::uint8_t;
 // suppress the unused-parameter warning
 template <class T> void ignore(const T &) {}
 

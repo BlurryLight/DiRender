@@ -20,6 +20,7 @@ public:
   sample(const Point3f &ref) const override {
     return this->sample_a_node(root_, ref);
   }
+  float Area() const override { return root_->area; }
 
 private:
   struct BvhNode;

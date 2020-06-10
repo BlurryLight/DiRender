@@ -10,8 +10,6 @@ set(CORES_SOURCE
     ${CMAKE_SOURCE_DIR}/src/cores/bounds.h
     ${CMAKE_SOURCE_DIR}/src/cores/intersection.hpp
     ${CMAKE_SOURCE_DIR}/src/cores/ray.hpp
-    ${CMAKE_SOURCE_DIR}/src/cores/render.cc
-    ${CMAKE_SOURCE_DIR}/src/cores/render.h
     ${CMAKE_SOURCE_DIR}/src/cores/scene.cc
     ${CMAKE_SOURCE_DIR}/src/cores/scene.h
     ${CMAKE_SOURCE_DIR}/src/cores/primitive.h
@@ -72,6 +70,13 @@ set(TEXTURE_SOURCE
     ${CMAKE_SOURCE_DIR}/src/texture/checker_texture.h
     )
 
+set(RENDERER_SOURCE
+    ${CMAKE_SOURCE_DIR}/src/renderer/renderer.h
+    ${CMAKE_SOURCE_DIR}/src/renderer/path_tracing_renderer.h
+    ${CMAKE_SOURCE_DIR}/src/renderer/path_tracing_renderer.cc
+    ${CMAKE_SOURCE_DIR}/src/renderer/direct_light_renderer.h
+    ${CMAKE_SOURCE_DIR}/src/renderer/direct_light_renderer.cc
+    )
 
 set(SOURCE_HEADERS   ${THIRD_PARTY_SOURCE}  ${ACCELERATOR_SOURCE} ${CORES_SOURCE} ${MATH_SOURCE} ${SAMPLER_SOURCE}
-    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE} ${MATERIAL_SOURCE} ${TEXTURE_SOURCE})
+    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE} ${MATERIAL_SOURCE} ${TEXTURE_SOURCE} ${RENDERER_SOURCE})

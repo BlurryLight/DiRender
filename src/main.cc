@@ -1,14 +1,14 @@
 #include <accelerator/linear_list.h>
 #include <cameras/pinhole_camera.h>
-#include <cores/render.h>
 #include <material/matte_material.h>
 #include <math/geometry.hpp>
+#include <renderer/direct_light_renderer.h>
+#include <renderer/path_tracing_renderer.h>
 #include <shapes/sphere.h>
 #include <shapes/triangle.h>
 #include <utils/OBJ_Loader_wrapper.h>
 #include <utils/high_resolution_timer.h>
 #include <utils/parse_scene.hpp>
-using namespace DR;
 //#define NDEBUG
 int main(int argc, char **argv) {
   DR::Scene scene;
@@ -17,17 +17,19 @@ int main(int argc, char **argv) {
     filename = argv[1];
 
   int spp = 32;
-  parse_scene(filename, &scene, &spp);
+  DR::parse_scene(filename, &scene, &spp);
 #ifdef NDEBUG
   int nthreads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << nthreads << std::endl;
-  DR::Render rd(spp, nthreads);
+  //  DR::PathTracingRenderer rd(spp, nthreads);
+  DR::DirectLightRenderer rd(spp, nthreads);
 #else
   std::cout << "Running in Debug Mode: MultiThread Mode has been off."
             << std::endl;
-  DR::Render rd(1, 1);
+  //  DR::PathTracingRenderer rd(1, 1);
+  DR::DirectLightRenderer rd(1, 1);
 #endif
-  HRTimer timer;
+  DR::HRTimer timer;
   timer.start();
   rd.render(scene);
   timer.end();
