@@ -14,8 +14,8 @@ struct Film {
   std::vector<Vector3f> framebuffer_;
   uint height = 400;
   uint width = 400;
-  uint tile_height = 4;
-  uint tile_width = 4;
+  uint tile_height = 16;
+  uint tile_width = 16;
   uint tile_height_nums = std::ceil(height / tile_height);
   uint tile_width_nums = std::ceil(width / tile_width);
   void write(const std::string&filename,PicType type);
