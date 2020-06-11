@@ -10,8 +10,8 @@ using namespace DR;
 Vector3f PathTracingRenderer::cast_ray(
     const Ray &r, std::shared_ptr<Primitive> prim,
     const std::vector<std::shared_ptr<Primitive>> &lights, int depth = 0) {
-  //  float russian_roulette = 0.8f;
-  if (depth > 5)
+  float russian_roulette = 0.8f;
+  if (depth > 5 || (depth != 0 && get_random_float() > russian_roulette))
     return {0};
 
   Intersection isect;
@@ -59,7 +59,7 @@ Vector3f PathTracingRenderer::cast_ray(
   auto part1 = cast_ray(r_new, prim, lights, depth + 1);
   auto part2 = multiply(brdf, part1);
   L_in += part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
-          (pdf + kEpsilon); // avoid zero
+          (pdf * russian_roulette + kEpsilon); // avoid zero
   return L_in;
 }
 void PathTracingRenderer::render_tile(

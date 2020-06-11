@@ -35,8 +35,8 @@ spp = 256
   [[objects.name]]
   name = "tall_box"
   [[objects.material]]
-  name = "matte_white"
-  type = "matte"
+  name = "glass_white"
+  type = "glass"
   albedo = [0.725,0.71,0.68]
   texture = "constant"
   [[objects.transform]]

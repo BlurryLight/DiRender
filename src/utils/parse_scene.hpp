@@ -4,6 +4,7 @@
 #include <accelerator/linear_list.h>
 #include <cameras/pinhole_camera.h>
 #include <cores/scene.h>
+#include <material/glass_material.h>
 #include <material/matte_material.h>
 #include <math/geometry.hpp>
 #include <shapes/sphere.h>
@@ -77,7 +78,8 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
       std::shared_ptr<Material> mat_ptr = nullptr;
       // material parse
       bool has_emission = false;
-      if (material_toml.at("type").as_string() == "matte") {
+      if (material_toml.at("type").as_string() == "matte" ||
+          material_toml.at("type").as_string() == "glass") {
         // constant texture
         std::shared_ptr<Texture> texture_ptr = nullptr;
         std::string texture_type = material_toml.at("texture").as_string();
@@ -105,7 +107,11 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
           has_emission = true;
         }
 
-        mat_ptr = std::make_shared<MatteMaterial>(texture_ptr, emission);
+        if (material_toml.at("type").as_string() == "matte") {
+          mat_ptr = std::make_shared<MatteMaterial>(texture_ptr, emission);
+        } else {
+          mat_ptr = std::make_shared<GlassMaterial>(texture_ptr, emission);
+        }
       }
 
       // shape parse

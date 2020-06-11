@@ -33,7 +33,11 @@ int main(int argc, char **argv) {
   timer.start();
   rd.render(scene);
   timer.end();
+  std::cout << std::endl;
   std::cout << timer.elapsed() << " ms" << std::endl;
+  std::cout << timer.elapsed() / 1000 << " s" << std::endl;
+  std::cout << timer.elapsed() / (1000 * 60) << " mins" << std::endl;
+  std::cout << timer.elapsed() / (1000 * 60 * 60) << " hours" << std::endl;
   return 0;
 }
 

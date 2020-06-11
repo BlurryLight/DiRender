@@ -4,7 +4,10 @@
 using namespace DR;
 TEST(MATRIX4, basic) {
   // ctor & dtor
-  { auto mat4 = Matrix4();ignore(mat4); }
+  {
+    auto mat4 = Matrix4();
+    ignore(mat4);
+  }
 
   {
     auto mat = Matrix4(2.0f);

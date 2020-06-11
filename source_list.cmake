@@ -56,6 +56,12 @@ set(MATERIAL_SOURCE
     ${CMAKE_SOURCE_DIR}/src/material/material.h
     ${CMAKE_SOURCE_DIR}/src/material/matte_material.h
     ${CMAKE_SOURCE_DIR}/src/material/matte_material.cc
+    ${CMAKE_SOURCE_DIR}/src/material/metal_material.h
+    ${CMAKE_SOURCE_DIR}/src/material/metal_material.cc
+    ${CMAKE_SOURCE_DIR}/src/material/glass_material.h
+    ${CMAKE_SOURCE_DIR}/src/material/glass_material.cc
+    ${CMAKE_SOURCE_DIR}/src/material/dielectric_material.h
+    ${CMAKE_SOURCE_DIR}/src/material/dielectric_material.cc
     )
 
 set(THIRD_PARTY_SOURCE
