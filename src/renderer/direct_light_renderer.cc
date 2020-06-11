@@ -16,6 +16,9 @@ Vector3f DirectLightRenderer::cast_ray(
   Intersection light_pos;
   float light_pdf = 0;
   int size = lights.size();
+  if (size == 0) {
+    throw std::runtime_error("DirectLightRenderer needs at least one light!");
+  }
   // uniform sample lights
   int index = std::floor(size * get_random_float(0.0, 0.99));
   // we hope the sample is visible from the isect.coords

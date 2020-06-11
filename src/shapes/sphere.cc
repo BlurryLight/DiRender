@@ -77,6 +77,11 @@ std::pair<Intersection, float> Sphere::sample() const {
 std::pair<Intersection, float> Sphere::sample(const Point3f &ref) const {
   auto center = (*LocalToWorld)(Point3f{0.0f});
   float distance_squared = (center - ref).squared_length();
+  Intersection result;
+  if (distance_squared <= radius_ * radius_) // point is inside or on the sphere
+  {
+    return {result, 0.0};
+  }
   float cos_theta_max = sqrt(1 - radius_ * radius_ / distance_squared);
   float solid_angle = 2 * kPi * (1 - cos_theta_max);
 
@@ -91,7 +96,6 @@ std::pair<Intersection, float> Sphere::sample(const Point3f &ref) const {
   float y = sin(phi) * sqrt(1 - z * z);
 
   auto localPoint = Point3f{x, y, z};
-  Intersection result;
   result.coords = (*LocalToWorld)(radius_ * localPoint);
   result.normal = (*LocalToWorld)(static_cast<Normal3f>(localPoint),
                                   this->reverseOrientation);

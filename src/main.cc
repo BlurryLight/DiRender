@@ -21,13 +21,13 @@ int main(int argc, char **argv) {
 #ifdef NDEBUG
   int nthreads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << nthreads << std::endl;
-  //  DR::PathTracingRenderer rd(spp, nthreads);
-  DR::DirectLightRenderer rd(spp, nthreads);
+  DR::PathTracingRenderer rd(spp, nthreads);
+//  DR::DirectLightRenderer rd(spp, nthreads);
 #else
   std::cout << "Running in Debug Mode: MultiThread Mode has been off."
             << std::endl;
-  //  DR::PathTracingRenderer rd(1, 1);
-  DR::DirectLightRenderer rd(1, 1);
+  DR::PathTracingRenderer rd(1, 1);
+//  DR::DirectLightRenderer rd(1, 1);
 #endif
   DR::HRTimer timer;
   timer.start();

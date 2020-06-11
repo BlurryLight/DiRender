@@ -124,6 +124,9 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
         auto object_ptr =
             std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
         objects.push_back(object_ptr);
+        if (has_emission) {
+          scene->light_shapes_.push_back(object_ptr);
+        }
       } else if (shape_toml == "obj") {
         trans = Transform::TransformTable.at(*trans);
         std::string path = shapes_vec[i].at("path").as_string();

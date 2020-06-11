@@ -38,7 +38,7 @@ spp = 8
     name = "matte_red"
     type = "matte"
     albedo = [0.8,0.1,0.1]
-    emission = [1.1,0.8,1.0]
+    emission = [20.0,0.7,0.7]
     texture = "constant"
     [[objects.transform]]
     matrix4 = [1.0,0.0,0.0,0.0,
