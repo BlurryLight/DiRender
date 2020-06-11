@@ -17,6 +17,9 @@ Vector3f PathTracingRenderer::cast_ray(
   Intersection isect;
   if (!prim->Intersect(r, &isect))
     return {0};
+  auto emission = isect.mat_ptr->evalEmitted(r.direction_, isect);
+  if (emission.squared_length() > 0.0f) // no more bounce when hitting a light
+    return {1};
 
   // Shadow ray
   Intersection light_pos;
@@ -25,42 +28,54 @@ Vector3f PathTracingRenderer::cast_ray(
   if (size == 0) {
     throw std::runtime_error("PathTracingRenderer needs at least one light!");
   }
-
   int index = std::floor(size * get_random_float(0.0, 0.99));
-  // we hope the sample is visible from the isect.coords
-  // if return {pos,0.0}, the sample is not visible.
-  std::tie(light_pos, light_pdf) = lights.at(index)->sample(isect.coords);
+  std::tie(light_pos, light_pdf) = lights.at(index)->sample();
   Vector3f L_in = {0};
-  Vector3f new_direction;
-  float pdf;
-  if (light_pdf == 0.0f ||
-      get_random_float() <
-          0.5) { // if not visible, we simply let the ray scatter
-    std::tie(new_direction, pdf) =
-        isect.mat_ptr->sampleScatter(r.direction_, isect);
-  } else {
-    float emit_area = 0;
-    for (const auto &i : lights) {
-      emit_area += i->Area();
+  Vector3f L_shadowray = {0};
+  if (!isect.mat_ptr->specular) {
+    Vector3f shadowray_direction =
+        (light_pos.coords - isect.coords).normalize();
+    Ray shadow_ray(isect.coords, shadowray_direction);
+    Intersection shadow_intersection;
+    prim->Intersect(shadow_ray, &shadow_intersection);
+    if (shadow_intersection.happened) {
+      auto shadow_emission = shadow_intersection.mat_ptr->evalEmitted(
+          shadowray_direction, shadow_intersection);
+      if (shadow_emission.squared_length() > 0.0f) //命中光源
+      {
+        float emit_area = 0;
+        for (const auto &i : lights) {
+          emit_area += i->Area();
+        }
+        light_pdf = 1 / emit_area;
+        float distance2 = (light_pos.coords - isect.coords).squared_length();
+        float cosine2 =
+            std::max(dot(-shadowray_direction, light_pos.normal), 0.0f);
+        float cosine1 = std::max(dot(shadowray_direction, isect.normal), 0.0f);
+        auto brdf =
+            isect.mat_ptr->evalBxDF(r.direction_, isect, shadowray_direction);
+        L_shadowray = multiply(brdf, shadow_emission) * cosine1 * cosine2;
+        L_shadowray /= (distance2 * light_pdf);
+      }
     }
-    light_pdf = 1 / emit_area;
-    new_direction = (light_pos.coords - isect.coords).normalize();
-    float distance2 = (light_pos.coords - isect.coords).squared_length();
-    float cosine = std::fabs(dot(-new_direction, light_pos.normal));
-    if (cosine < 0.01f) {
-      return isect.mat_ptr->evalEmitted(r.direction_, isect);
-    }
-    pdf = distance2 * (1 / cosine) * (light_pdf);
   }
-  Ray r_new(isect.coords, new_direction);
+
+  Vector3f scatter_direction;
+  float scatter_pdf = 0.0f;
+  std::tie(scatter_direction, scatter_pdf) =
+      isect.mat_ptr->sampleScatter(r.direction_, isect);
+  Ray r_new(isect.coords, scatter_direction);
   auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
-  L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
 
   auto part1 = cast_ray(r_new, prim, lights, depth + 1);
   auto part2 = multiply(brdf, part1);
-  L_in += part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
-          (pdf * russian_roulette + kEpsilon); // avoid zero
-  return L_in;
+  L_in = part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
+         (scatter_pdf * russian_roulette + kEpsilon); // avoid zero
+  if (L_in.length() > 1) {
+    int i = 0;
+    ignore(i);
+  }
+  return L_in + L_shadowray;
 }
 void PathTracingRenderer::render_tile(
     std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,

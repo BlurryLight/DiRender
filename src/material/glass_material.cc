@@ -3,8 +3,10 @@ using namespace DR;
 
 Vector3f GlassMaterial::evalBxDF(const vec3 &r_in, const Intersection &isect,
                                  const vec3 &r_out) const {
-  if (!almost_equal(dot(reflect(r_in, isect.normal), r_out), 1.0))
+  auto tmp = dot(reflect(r_in, isect.normal), r_out);
+  if (std::fabs(tmp - 1.0f) > 1e-2) {
     return {};
+  }
   return this->texture_->evalValue(isect);
 }
 

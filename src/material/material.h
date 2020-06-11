@@ -18,6 +18,7 @@ struct Material
     ignore(isect);
     return {};
   }
+  bool specular = false;
 };
 
 

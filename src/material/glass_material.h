@@ -5,9 +5,13 @@ NAMESPACE_BEGIN(DR)
 // perfect mirrror
 class GlassMaterial : public Material {
 public:
-  GlassMaterial(std::shared_ptr<Texture> texture) : texture_(texture) {}
+  GlassMaterial(std::shared_ptr<Texture> texture) : texture_(texture) {
+    this->specular = true;
+  }
   GlassMaterial(std::shared_ptr<Texture> texture, Vector3f emission)
-      : texture_(texture), emission_(emission) {}
+      : texture_(texture), emission_(emission) {
+    this->specular = true;
+  }
   Vector3f evalBxDF(const vec3 &r_in, const Intersection &isect,
                     const vec3 &r_out) const override;
   std::pair<Vector3f, float>
