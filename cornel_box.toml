@@ -89,7 +89,7 @@ spp = 256
  [[objects.material]]
  name = "matte_green"
  type = "matte"
- albedo = [0.14,0.45,0.91]
+ albedo = [0.14,0.45,0.091]
  texture = "constant"
  [[objects.transform]]
  matrix4 = [1.0,0.0,0.0,0.0,
@@ -121,8 +121,8 @@ spp = 256
   [[objects.material]]
   name = "matte_light"
   type = "matte"
-  albedo = [0.65,0.65,0.68]
-  emission = [30.0,30.0,30.0]
+  albedo = [0.65,0.65,0.65]
+  emission = [47.8,38.6,31.1]
   texture = "constant"
   [[objects.transform]]
   matrix4 = [1.0,0.0,0.0,0.0,
