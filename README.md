@@ -11,7 +11,7 @@ Not so tiny path tracer
 
 ## Milestone
 
-- Cornel Box(*Unknown reason for white noise*)
-![cornel_box](images/cornel_box_path_tracing.jpg)
+- Cornel Box(Materials)
+![cornel_box](images/cornel_box_material.jpg)
 
 
