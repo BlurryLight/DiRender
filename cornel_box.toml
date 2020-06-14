@@ -35,7 +35,7 @@ spp = 256
   [[objects.name]]
   name = "tall_box"
   [[objects.material]]
-  name = "glass_white"
+  name = "matte_white"
   type = "glass"
   albedo = [0.725,0.71,0.68]
   texture = "constant"
@@ -132,3 +132,20 @@ spp = 256
   [[objects.shape]]
   type="obj"
   path="light.obj"
+
+  [[objects.name]]
+  name = "sphere"
+  [[objects.material]]
+  name = "matte_white"
+  type = "dielectric"
+  albedo = [1.0,1.0,1.0]
+  ior = 1.5
+  texture = "constant"
+  [[objects.transform]]
+  matrix4 = [1.0,0.0,0.0,228.0,
+        0.0,1.0,0.0,223.0,
+        0.0,0.0,1.0,200.0,
+        0.0,0.0,0.0,1.0]
+  [[objects.shape]]
+  type="sphere"
+  radius = 50.0

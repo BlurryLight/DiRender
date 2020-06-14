@@ -14,6 +14,42 @@ inline Vector3f reflect(const Vector3f &in, const Vector3f &normal) {
   return in - 2 * dot(in, normal) * normal;
 }
 
+inline std::pair<Vector3f, bool>
+refract(const Vector3f &in, const Vector3f &normal, float ni_over_nt) {
+
+  float IdotN = dot(in, normal);
+  float discriminant = 1.0 - ni_over_nt * ni_over_nt * (1 - IdotN * IdotN);
+  if (discriminant > 0) {
+    auto refracted = ni_over_nt * in +
+                     (ni_over_nt * IdotN - std::sqrt(discriminant)) * normal;
+    return {refracted, true};
+  }
+  return {{0}, false};
+  //  Vector3f outNormal = normal;
+  //  float eta_i = 1, eta_t = ior;
+  //  float IdotN = in.dot(normal);
+  //  if (IdotN > 0) {
+  //    outNormal = -normal;
+  //    std::swap(eta_i, eta_t);
+  //  } else {
+  //    IdotN = -IdotN;
+  //  }
+  //  float eta = eta_i / eta_t;
+  //  float discriminant = 1.0 - eta * eta * (1 - IdotN * IdotN);
+  //  if (discriminant > 0) {
+  //    auto refracted =
+  //        eta * in + (eta * IdotN - std::sqrt(discriminant)) * outNormal;
+  //    return {refracted, true};
+  //  }
+  //  return {{0}, false};
+}
+
+inline float schlick(float cosine, float iof) {
+  float r0 = (1 - iof) / (1 + iof);
+  r0 = r0 * r0;
+  return r0 + (1 - r0) * std::pow((1 - cosine), 5);
+}
+
 // coords,pdf
 inline std::pair<Point3f, float> uniform_sample_sphere() {
   static float pdf = 1.0f / (4 * kPi);

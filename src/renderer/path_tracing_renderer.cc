@@ -69,12 +69,8 @@ Vector3f PathTracingRenderer::cast_ray(
 
   auto part1 = cast_ray(r_new, prim, lights, depth + 1);
   auto part2 = multiply(brdf, part1);
-  L_in = part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
+  L_in = part2 * std::fabs(dot(r_new.direction_, isect.normal)) /
          (scatter_pdf * russian_roulette + kEpsilon); // avoid zero
-  if (L_in.length() > 1) {
-    int i = 0;
-    ignore(i);
-  }
   return L_in + L_shadowray;
 }
 void PathTracingRenderer::render_tile(
