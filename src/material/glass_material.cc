@@ -3,11 +3,11 @@ using namespace DR;
 
 Vector3f GlassMaterial::evalBxDF(const vec3 &r_in, const Intersection &isect,
                                  const vec3 &r_out) const {
-  auto tmp = dot(reflect(r_in, isect.normal), r_out);
-  if (std::fabs(tmp - 1.0f) > 1e-2) {
+
+  if (!almost_equal(dot(-r_in, isect.normal), dot(r_out, isect.normal))) {
     return {};
   }
-  return this->texture_->evalValue(isect);
+  return this->texture_->evalValue(isect) / dot(r_out, isect.normal);
 }
 
 std::pair<Vector3f, float>
