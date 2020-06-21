@@ -12,7 +12,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev"]
+          packages: ['g++-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
@@ -21,7 +21,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-7']
-          packages: ['clang-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev"]
+          packages: ['clang-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CXX=clang++-7"
         
