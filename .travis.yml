@@ -21,10 +21,10 @@ matrix:
       compiler: clang
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-8']
-          packages: ['clang-8','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
+          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-9']
+          packages: ['clang-9','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
-        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
+        - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
         - NAME=Linux_CLANG8
         
         
