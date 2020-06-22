@@ -15,6 +15,7 @@ matrix:
           packages: ['g++-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - NAME=Linux-GCC
 
     - os: linux
       compiler: clang
@@ -24,6 +25,7 @@ matrix:
           packages: ['clang-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CXX=clang++-7"
+        - NAME=Linux-CLANG
         
         
         
@@ -38,6 +40,11 @@ script:
   - ninja
   - ./test/runTests
   - ./DiRender ../sample.toml
+  - cd -
+after_success:
+  - python3 scripts/wechat_push.py -t $NAME-DiRender-Success
+after_failure:
+  - python3 scripts/wechat_push.py -t $NAME-DiRender-Failed
 
 branches:
   only:

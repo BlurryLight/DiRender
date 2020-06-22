@@ -2,10 +2,10 @@
 
 #include "../third_party/OBJ_Loader.h"
 #include "third_party/glad/glad.h"
+#include "third_party/glm/glm/glm.hpp"
+#include "third_party/glm/glm/gtc/matrix_transform.hpp"
 #include <GLFW/glfw3.h>
 #include <fstream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <map>
 #include <memory>

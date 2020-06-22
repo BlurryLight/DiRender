@@ -7,9 +7,6 @@
 #include "third_party/imgui/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui_impl_opengl3.h"
 
-// GLFW
-#include <GLFW/glfw3.h>
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
