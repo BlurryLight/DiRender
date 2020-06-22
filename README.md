@@ -11,7 +11,7 @@ Not so tiny path tracer
 
 ## Milestone
 
-- Cornel Box(Materials)
-![cornel_box](images/cornel_box_material.jpg)
+- Cornel Box
+![cornel_box](images/cornel_box.jpg)
 
 
