@@ -12,8 +12,6 @@ std::pair<Vector3f, float>
 MatteMaterial::sampleScatter(const vec3 &r_in,
                              const Intersection &isect) const {
   ignore(r_in);
-  Point3f sample_point;
-  float pdf;
-  std::tie(sample_point, pdf) = cosine_sample_hemisphere();
+  auto [sample_point, pdf] = cosine_sample_hemisphere();
   return {toWorld(static_cast<Vector3f>(sample_point), isect.normal), pdf};
 }

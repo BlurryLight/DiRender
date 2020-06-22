@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(TEST LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
 set(GOOGLETEST_ROOT third_party/gtest/googletest CACHE STRING "Google Test source root")
 if(MSVC)
     #make Windows happy

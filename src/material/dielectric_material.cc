@@ -11,7 +11,6 @@ std::pair<Vector3f, float>
 DielectricMaterial::sampleScatter(const vec3 &r_in,
                                   const Intersection &isect) const {
   Vector3f outNormal = isect.normal;
-  Vector3f refracted;
   Vector3f reflected;
   float reflected_prob;
   ignore(reflected_prob);
@@ -28,8 +27,7 @@ DielectricMaterial::sampleScatter(const vec3 &r_in,
     cosine = -r_in.dot(outNormal);
     ni_over_nt = 1.0 / eta_;
   }
-  bool refract_flag;
-  std::tie(refracted, refract_flag) = refract(r_in, outNormal, ni_over_nt);
+  auto [refracted, refract_flag] = refract(r_in, outNormal, ni_over_nt);
   if (refract_flag) {
     reflected_prob = schlick(cosine, eta_);
   } else {
