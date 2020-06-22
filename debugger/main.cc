@@ -1,10 +1,11 @@
 
 
 // GLAD
-#include "glad/glad.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "glsupport.h"
+#include "third_party/glad/glad.h"
+#include "third_party/imgui/imgui.h"
+#include "third_party/imgui/imgui_impl_glfw.h"
+#include "third_party/imgui/imgui_impl_opengl3.h"
 
 // GLFW
 #include <GLFW/glfw3.h>
@@ -25,7 +26,7 @@ int main() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   GLFWwindow *window =
-      glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LEARNOPENGL", NULL, NULL);
+      glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "DiDebugger", NULL, NULL);
 
   if (window == NULL) {
     std::cerr << "GLFW INIT FAILED" << std::endl;
@@ -52,87 +53,10 @@ int main() {
   ImGui_ImplOpenGL3_Init(glsl_verson);
   bool show_demo_window = true;
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-  // v shader
-  int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  std::fstream fs;
-  std::string vshader;
-  fs.open("simple.vert");
-  if (fs.good()) {
-    std::stringstream ss;
-    ss << fs.rdbuf();
-    vshader = ss.str();
-  } else {
-    std::cerr << "FAILED TO INIT VSHADER" << std::endl;
-    return -1;
-  }
-  fs.close();
-
-  std::cout << vshader << std::endl;
-  const char *vshader_source = vshader.c_str();
-  glShaderSource(vertexShader, 1, &vshader_source, NULL);
-  glCompileShader(vertexShader);
-
-  int success = 0;
-  char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    std::cerr << "FAILED TO COMPILE VSHADER" << infoLog << std::endl;
-    return -1;
-  }
-
-  GLuint fragmentShader;
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  std::string fshader;
-  fs.open("simple.frag");
-  if (fs.good()) {
-    std::stringstream ss;
-    ss << fs.rdbuf();
-    fshader = ss.str();
-  } else {
-    std::cerr << "FAILED TO INIT fSHADER" << fs.is_open() << std::endl;
-    return -1;
-  }
-
-  fs.close();
-
-  std::cout << fshader << std::endl;
-  std::cout << fshader << std::endl;
-  const char *fshader_source = fshader.c_str();
-  glShaderSource(fragmentShader, 1, &fshader_source, NULL);
-  glCompileShader(fragmentShader);
-
-  GLint succ;
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &succ);
-  if (!succ) {
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    printf("OpenGL version is (%s)\n", glGetString(GL_VERSION));
-    std::cerr << "FAILED TO COMPILE FSHADER" << infoLog << std::endl;
-    std::cout << infoLog << std::endl;
-    return -1;
-  }
-
-  int linkedShader;
-  linkedShader = glCreateProgram();
-  glAttachShader(linkedShader, vertexShader);
-  glAttachShader(linkedShader, fragmentShader);
-  glLinkProgram(linkedShader);
-
-  success = 0;
-  glGetProgramiv(linkedShader, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(linkedShader, 512, NULL, infoLog);
-    std::cerr << "FAILED TO LINK SHADERS" << infoLog << std::endl;
-    return -1;
-  }
-
-  glUseProgram(linkedShader);
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
+  // shader
+  DR::Shader shader("simple.vert", "simple.frag");
+  DR::Model model("cube.obj");
   // data
-  float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
-
   unsigned int VBO, VAO;
 
   glGenVertexArrays(1, &VAO);
@@ -141,10 +65,17 @@ int main() {
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, model.BufferDataSize(), model.vertices.data(),
+               GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -178,9 +109,9 @@ int main() {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(linkedShader);
+    shader.use();
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, model.size());
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
