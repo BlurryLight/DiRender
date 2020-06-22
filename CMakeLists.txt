@@ -18,6 +18,7 @@ target_link_libraries(DiRender Threads::Threads)
 if (MSVC)
     target_compile_options(DiRender PRIVATE /W4)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-stdlib=libc++) #global flags
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic -Wno-unknown-warning-option )
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic )
