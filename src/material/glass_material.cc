@@ -4,7 +4,7 @@ using namespace DR;
 Vector3f GlassMaterial::evalBxDF(const vec3 &r_in, const Intersection &isect,
                                  const vec3 &r_out) const {
 
-  if (!almost_equal(dot(-r_in, isect.normal), dot(r_out, isect.normal))) {
+  if (!almost_equal(dot(-r_in, isect.normal), dot(r_out, isect.normal), 10)) {
     return {};
   }
   return this->texture_->evalValue(isect) / dot(r_out, isect.normal);

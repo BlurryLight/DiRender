@@ -4,8 +4,7 @@ Vector3f DielectricMaterial::evalBxDF(const vec3 &r_in,
                                       const Intersection &isect,
                                       const vec3 &r_out) const {
   ignore(r_in);
-  ignore(r_out);
-  return this->texture_->evalValue(isect);
+  return this->texture_->evalValue(isect) / std::fabs(dot(isect.normal, r_out));
 }
 
 std::pair<Vector3f, float>
