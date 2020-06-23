@@ -24,7 +24,7 @@ add_subdirectory(third_party/glfw)
 add_subdirectory(third_party/glm)
 
 # Executable definition and properties
-add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCE} )
+add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SOURCE} ${UTILS_SOURCE} )
     #${SOURCE_HEADERS})
 target_include_directories(${PROJECT_NAME} PRIVATE "../src")
 target_include_directories(${PROJECT_NAME} PRIVATE "third_party/")

@@ -47,11 +47,16 @@ set(UTILS_SOURCE
     ${CMAKE_SOURCE_DIR}/src/utils/parse_scene.hpp
     ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.h
     ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.cc
+    ${CMAKE_SOURCE_DIR}/src/utils/resource_path_searcher.h
+    ${CMAKE_SOURCE_DIR}/src/utils/resource_path_searcher.cc
+    )
+set(SPECIAL_SOURCE #Include twice may cause link error
+
     ${CMAKE_SOURCE_DIR}/src/utils/stb_image_wrapper.h
     ${CMAKE_SOURCE_DIR}/src/utils/stb_image_wrapper.cc
     ${CMAKE_SOURCE_DIR}/src/utils/OBJ_Loader_wrapper.h
     ${CMAKE_SOURCE_DIR}/src/utils/OBJ_Loader_wrapper.cc
-    )
+)
 set(MATERIAL_SOURCE
     ${CMAKE_SOURCE_DIR}/src/material/material.h
     ${CMAKE_SOURCE_DIR}/src/material/matte_material.h
@@ -85,4 +90,4 @@ set(RENDERER_SOURCE
     )
 
 set(SOURCE_HEADERS   ${THIRD_PARTY_SOURCE}  ${ACCELERATOR_SOURCE} ${CORES_SOURCE} ${MATH_SOURCE} ${SAMPLER_SOURCE}
-    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE} ${MATERIAL_SOURCE} ${TEXTURE_SOURCE} ${RENDERER_SOURCE})
+    ${SHAPES_SOURCE} ${CAMERAS_SOURCE} ${UTILS_SOURCE} ${MATERIAL_SOURCE} ${TEXTURE_SOURCE} ${RENDERER_SOURCE} ${SPECIAL_SOURCE})

@@ -11,6 +11,8 @@ option(DI_BUILD_TESTS "Build test programs" ON)
 option(DI_BUILD_DEBUGGER "Build a real-time debugger" ON)
 
 # main target
+add_compile_definitions(ROOT_DIR="${CMAKE_SOURCE_DIR}")
+message(${CMAKE_SOURCE_DIR})
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})
 target_include_directories(DiRender PRIVATE "src")
 target_link_libraries(DiRender Threads::Threads)

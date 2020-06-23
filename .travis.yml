@@ -42,9 +42,9 @@ script:
   - ./DiRender ../sample.toml
   - cd -
 after_success:
-  - python3 scripts/wechat_push.py -t $NAME_DiRender_Success
+  - python3 scripts/wechat_push.py -t ${NAME}DiRenderSuccess`date +%s`
 after_failure:
-  - python3 scripts/wechat_push.py -t $NAME_DiRender_Failed
+  - python3 scripts/wechat_push.py -t ${NAME}DiRenderFailed`date +%s`
 
 branches:
   only:
