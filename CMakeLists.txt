@@ -10,9 +10,6 @@ option(EXPERIMENTAL_UNITY_BUILD "UNITY_BUILD to reduce compilation time" OFF)
 option(DI_BUILD_TESTS "Build test programs" ON)
 option(DI_BUILD_DEBUGGER "Build a real-time debugger" ON)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-stdlib=libc++)
-endif()
 # main target
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})
 target_include_directories(DiRender PRIVATE "src")
