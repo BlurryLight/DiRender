@@ -15,17 +15,17 @@ matrix:
           packages: ['g++-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - NAME=Linux-GCC
+        - NAME=Linux_GCC
 
     - os: linux
       compiler: clang
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-7']
-          packages: ['clang-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
+          packages: ['clang-7','libstdc++-7-dev','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
-        - MATRIX_EVAL="CXX=clang++-7"
-        - NAME=Linux-CLANG
+        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+        - NAME=Linux_CLANG
         
         
         
@@ -42,9 +42,9 @@ script:
   - ./DiRender ../sample.toml
   - cd -
 after_success:
-  - python3 scripts/wechat_push.py -t $NAME-DiRender-Success
+  - python3 scripts/wechat_push.py -t $NAME_DiRender_Success
 after_failure:
-  - python3 scripts/wechat_push.py -t $NAME-DiRender-Failed
+  - python3 scripts/wechat_push.py -t $NAME_DiRender_Failed
 
 branches:
   only:
