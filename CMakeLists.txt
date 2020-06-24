@@ -14,7 +14,7 @@ option(DI_BUILD_DEBUGGER "Build a real-time debugger" ON)
 # global clang
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-        add_compile_definitions(-DFILESYSTEM_TS)
+        add_definitions(-DFILESYSTEM_TS)
         link_libraries(c++fs)
     endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
 endif (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
