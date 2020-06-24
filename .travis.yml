@@ -22,10 +22,12 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-7']
-          packages: ['clang-7','libstdc++-7-dev','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
+          packages: ['clang-7','libc++-7-dev','libc++abi-7-dev','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
         - NAME=Linux_CLANG
+        - CPATH=/usr/local/clang-7.0.0/include/c++/v1
+        - LD_LIBRARY_PATH=/usr/local/clang-7.0.0/lib
         
         
         
