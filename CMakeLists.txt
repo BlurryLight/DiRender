@@ -10,29 +10,46 @@ option(EXPERIMENTAL_UNITY_BUILD "UNITY_BUILD to reduce compilation time" OFF)
 option(DI_BUILD_TESTS "Build test programs" ON)
 option(DI_BUILD_DEBUGGER "Build a real-time debugger" ON)
 
+
+# global clang
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        add_compile_definitions(-DFILESYSTEM_TS)
+        link_libraries(c++fs)
+    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+endif (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
+
+# global gcc
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        add_definitions(-DFILESYSTEM_TS)
+        link_libraries(c++fs)
+    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+endif (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
+        add_definitions(-DFILESYSTEM_TS)
+        link_libraries(stdc++fs)
+    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
+endif()
+
 # main target
 add_compile_definitions(ROOT_DIR="${CMAKE_SOURCE_DIR}")
 message(${CMAKE_SOURCE_DIR})
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})
 target_include_directories(DiRender PRIVATE "src")
 target_link_libraries(DiRender PRIVATE Threads::Threads)
+
 # Flags are added only with the main target
 if (MSVC)
     target_compile_options(DiRender PRIVATE /W4)
 #clang
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic -Wno-unknown-warning-option )
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-        target_compile_definitions(DiRender PRIVATE -DFILESYSTEM_TS)
-        target_link_libraries(DiRender PRIVATE c++fs)
-    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
 #gcc
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic )
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
-        target_compile_definitions(DiRender PRIVATE -DFILESYSTEM_TS)
-        target_link_libraries(DiRender PRIVATE stdc++fs)
-    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
 endif()
 
 if(EXPERIMENTAL_UNITY_BUILD)
