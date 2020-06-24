@@ -1,12 +1,24 @@
 #pragma once
+
+#ifndef FILESYSTEM_TS
 #include <filesystem>
+namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
 #include <string>
 #include <utils/di_global.h>
 #include <vector>
 NAMESPACE_BEGIN(DR)
 class ResourcePathSearcher {
 private:
+#ifndef FILESYSTEM_TS
   using Path = std::filesystem::path;
+#else
+  using Path = std::experimental::filesystem::path;
+#endif
   std::vector<Path> search_paths_;
 
 public:

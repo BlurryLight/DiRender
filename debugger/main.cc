@@ -63,9 +63,10 @@ int main() {
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
   // shader
   ResourcePathSearcher resourcesPath;
-  resourcesPath.add_path(ResourcePathSearcher::root_path / "models");
-  resourcesPath.add_path(ResourcePathSearcher::root_path / "debugger" /
-                         "shaders");
+  resourcesPath.add_path(
+      (ResourcePathSearcher::root_path / "models").u8string());
+  resourcesPath.add_path(
+      (ResourcePathSearcher::root_path / "debugger" / "shaders").u8string());
   DR::Shader shader(resourcesPath.find_path("simple.vert"),
                     resourcesPath.find_path("simple.frag"));
   DR::Model model(resourcesPath.find_path("cube.obj"));

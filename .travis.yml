@@ -1,31 +1,47 @@
 language: cpp
 
-# ubuntu 16.04 version
-sudo: required
-dist: xenial
 
 matrix:
   include:
-
     - os: linux
-      compiler: gcc
+      dist: xenial
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-        - NAME=Linux_GCC
+        - NAME=XENIAL_GCC
 
     - os: linux
-      compiler: clang
+      dist: xenial
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-xenial-7']
-          packages: ['clang-7','libstdc++-7-dev','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
+          packages: ['clang-7','g++-7','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
       env:
         - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-        - NAME=Linux_CLANG
+        - NAME=XENIAL_CLANG
+
+    - os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-10','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
+      env:
+        - MATRIX_EVAL="CC=gcc-10 && CXX=g++-10"
+        - NAME=BIONIC_GCC
+
+    - os: linux
+      dist: bionic
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-bionic-10']
+          packages: ['clang-10','g++-10','cmake','ninja-build',"libxrandr-dev","libxinerama-dev","libxcursor-dev","libxi-dev","mesa-common-dev"]
+      env:
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
+        - NAME=BIONIC_CLANG
         
         
         
