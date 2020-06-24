@@ -34,7 +34,7 @@ matrix:
         - NAME=BIONIC_GCC
 
     - os: linux
-      dist: xenial
+      dist: bionic
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-bionic-10']
