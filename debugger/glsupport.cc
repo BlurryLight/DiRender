@@ -402,7 +402,7 @@ DR::Shader::Shader(const char *vertexPath, const char *fragmentPath,
     glDeleteShader(geometry);
 }
 
-void DR::Shader::use() { glUseProgram(ID); }
+void DR::Shader::use() const { glUseProgram(ID); }
 
 void DR::Shader::setBool(const std::string &name, bool value) const {
   glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
@@ -486,6 +486,14 @@ void DR::Shader::checkCompileErrors(GLuint shader, std::string type) {
   }
 }
 
+void Model::draw(const Shader &shader) const {
+  shader.use();
+  for (const auto &it : meshes_) {
+    glBindVertexArray(it.vao);
+    glDrawArrays(GL_TRIANGLES, 0, it.size());
+  }
+}
+
 Model::Model(const std::string &path) {
 
   loader_ = std::make_unique<objl::Loader>();
@@ -495,8 +503,32 @@ Model::Model(const std::string &path) {
   }
   for (size_t i = 0; i < loader_->LoadedMeshes.size(); i++) {
     objl::Mesh curMesh = loader_->LoadedMeshes[i];
+    Model::Mesh tmpMesh;
     for (size_t j = 0; j < curMesh.Vertices.size(); j++) {
-      vertices.push_back(curMesh.Vertices[j]);
+      tmpMesh.vertices_.push_back(curMesh.Vertices[j]);
     }
+    for (size_t j = 0; j < curMesh.Indices.size(); j++) {
+      tmpMesh.indices_.push_back(curMesh.Indices[j]);
+    }
+    glGenVertexArrays(1, &tmpMesh.vao);
+    glGenBuffers(1, &tmpMesh.vbo);
+    glBindVertexArray(tmpMesh.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, tmpMesh.vbo);
+    glBufferData(GL_ARRAY_BUFFER, tmpMesh.BufferDataSize(),
+                 tmpMesh.vertices_.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                          (void *)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                          (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                          (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    this->meshes_.push_back(tmpMesh);
   }
 }

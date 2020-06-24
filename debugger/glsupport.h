@@ -37,13 +37,22 @@ class Shader;
 struct Vertex;
 struct Texture;
 struct Model {
-  std::vector<objl::Vertex> vertices;
+private:
   std::unique_ptr<objl::Loader> loader_;
+  struct Mesh {
+    std::vector<objl::Vertex> vertices_;
+    std::vector<uint> indices_;
+    unsigned int vao, vbo;
+    size_t BufferDataSize() const {
+      return sizeof(objl::Vertex) * vertices_.size();
+    }
+    size_t size() const { return indices_.size(); }
+  };
+
+public:
+  std::vector<Mesh> meshes_;
+  void draw(const Shader &shader) const;
   Model(const std::string &path);
-  size_t BufferDataSize() const {
-    return sizeof(objl::Vertex) * vertices.size();
-  }
-  size_t size() const { return vertices.size(); }
 };
 
 // funcs
@@ -118,7 +127,7 @@ public:
       : Shader(vertexPath.c_str(), fragmentPath.c_str()) {}
   // activate the shader
   // ------------------------------------------------------------------------
-  void use();
+  void use() const;
   // utility uniform functions
   // ------------------------------------------------------------------------
   void setBool(const std::string &name, bool value) const;
