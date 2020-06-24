@@ -1,7 +1,7 @@
 #include <iostream>
 #include <utils/resource_path_searcher.h>
 using namespace DR;
-auto ResourcePathSearcher::root_path = Path(
+std::filesystem::path ResourcePathSearcher::root_path = Path(
     ROOT_DIR); // ROOT_DIR is defined by CMake, which is the project root dir
 ResourcePathSearcher::ResourcePathSearcher() {
   search_paths_.push_back(root_path);

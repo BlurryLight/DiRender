@@ -1,5 +1,11 @@
 #pragma once
+
+#ifndef FILESYSTEM_TS
 #include <filesystem>
+#else
+#include <experimental/filesystem>
+#endif
+
 #include <string>
 #include <utils/di_global.h>
 #include <vector>

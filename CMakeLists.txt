@@ -19,10 +19,20 @@ target_link_libraries(DiRender Threads::Threads)
 # Flags are added only with the main target
 if (MSVC)
     target_compile_options(DiRender PRIVATE /W4)
+#clang
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic -Wno-unknown-warning-option )
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        target_compile_definitions()
+        target_link_libraries(DiRender PRIVATE c++fs)
+    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+#gcc
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic )
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
+        target_compile_definitions(DiRender PRIVATE -DFILESYSTEM_TS)
+        target_link_libraries(DiRender PRIVATE stdc++fs)
+    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
 endif()
 
 if(EXPERIMENTAL_UNITY_BUILD)
