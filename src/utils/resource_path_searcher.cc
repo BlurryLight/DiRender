@@ -19,7 +19,8 @@ std::string ResourcePathSearcher::find_path(const std::string &filename) const {
     auto path = p / filename;
     if (std::filesystem::exists(path)) {
       std::cout << "Resource: " << path << " found!" << std::endl;
-      return path.is_absolute() ? path : std::filesystem::absolute(path);
+      return path.is_absolute() ? path.string()
+                                : std::filesystem::absolute(path).string();
     }
   }
   throw std::runtime_error("ResourcePathSearch cannot find " +
@@ -37,7 +38,8 @@ ResourcePathSearcher::find_path(std ::vector<std::string> filenames) const {
     auto path = p / ps;
     if (std::filesystem::exists(path)) {
       std::cout << "Resource: " << path << " found!" << std::endl;
-      return path.is_absolute() ? path : std::filesystem::absolute(path);
+      return path.is_absolute() ? path.string()
+                                : std::filesystem::absolute(path).string();
     }
   }
   throw std::runtime_error("ResourcePathSearch cannot find " +

@@ -15,7 +15,7 @@ add_compile_definitions(ROOT_DIR="${CMAKE_SOURCE_DIR}")
 message(${CMAKE_SOURCE_DIR})
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})
 target_include_directories(DiRender PRIVATE "src")
-target_link_libraries(DiRender Threads::Threads)
+target_link_libraries(DiRender PRIVATE Threads::Threads)
 # Flags are added only with the main target
 if (MSVC)
     target_compile_options(DiRender PRIVATE /W4)
