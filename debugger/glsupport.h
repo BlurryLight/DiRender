@@ -14,14 +14,11 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-namespace DR {
-// Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
-enum Camera_Movement {
-  FORWARD,
-  BACKWARD,
-  LEFT,
-  RIGHT
-};
+namespace DR_D // DR_Debugger
+{
+// Defines several possible options for camera movement. Used as abstraction
+// to stay away from window-system specific input methods
+enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT };
 
 // Default camera values
 constexpr static float YAW = -90.0f;
@@ -41,7 +38,7 @@ private:
   std::unique_ptr<objl::Loader> loader_;
   struct Mesh {
     std::vector<objl::Vertex> vertices_;
-    std::vector<uint> indices_;
+    std::vector<GLuint> indices_;
     unsigned int vao, vbo;
     size_t BufferDataSize() const {
       return sizeof(objl::Vertex) * vertices_.size();
@@ -79,6 +76,7 @@ public:
   glm::vec3 Position;
   glm::vec3 Front;
   glm::vec3 Up;
+  glm::vec3 LookAt;
   glm::vec3 Right;
   glm::vec3 WorldUp;
   // Euler Angles
@@ -91,11 +89,9 @@ public:
 
   // Constructor with vectors
   Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW,
-         float pitch = PITCH);
-  // Constructor with scalar values
-  Camera(float posX, float posY, float posZ, float upX, float upY, float upZ,
-         float yaw, float pitch);
+         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
+         glm::vec3 lookat = glm::vec3(0.0f, 0.0f, -1.0f), float fov = ZOOM,
+         float yaw = YAW, float pitch = PITCH);
 
   // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
   glm::mat4 GetViewMatrix();
@@ -176,4 +172,4 @@ struct Texture {
   std::string path;
 };
 
-} // namespace DR
+} // namespace DR_D

@@ -7,25 +7,26 @@
 #include "third_party/imgui/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui_impl_opengl3.h"
 #include <utils/di_global.h>
+#include <utils/parse_scene.hpp>
 #include <utils/resource_path_searcher.h>
 
 #include <fstream>
 #include <iostream>
 #include <sstream>
-using namespace DR;
+using namespace DR_D;
 static const GLuint SCR_WIDTH = 800;
 static const GLuint SCR_HEIGHT = 600;
-DR::Camera cam(glm::vec3(0.0f, 0.0f, 3.0f));
 
 static float deltaTime = 0.0f;
 static float lastFrame = 0.0f;
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window, Camera &cam);
 void framebuffer_size_callback(GLFWwindow *, int width, int height);
 int main() {
   if (!glfwInit()) {
     std::cerr << "FATAL INIT FAILED" << std::endl;
     return -1;
   }
+
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -62,25 +63,37 @@ int main() {
   bool show_demo_window = true;
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
   // shader
-  ResourcePathSearcher resourcesPath;
+  DR::ResourcePathSearcher resourcesPath;
   resourcesPath.add_path(
-      (ResourcePathSearcher::root_path / "models").u8string());
+      (DR::ResourcePathSearcher::root_path / "models").u8string());
   resourcesPath.add_path(
-      (ResourcePathSearcher::root_path / "debugger" / "shaders").u8string());
-  DR::Shader shader(resourcesPath.find_path("simple.vert"),
-                    resourcesPath.find_path("simple.frag"));
-  DR::Model model(resourcesPath.find_path("cube.obj"));
-  // data
-  // set
+      (DR::ResourcePathSearcher::root_path / "debugger" / "shaders")
+          .u8string());
+  DR_D::Shader shader(resourcesPath.find_path("simple.vert"),
+                      resourcesPath.find_path("simple.frag"));
+  DR_D::Model model(resourcesPath.find_path("cube.obj"));
+
+  auto toml_scene_data = toml::parse(resourcesPath.find_path("sample.toml"));
+  auto cam_data = DR::impl::parse_camera_data_impl(toml_scene_data);
+
+  // Now we only cares 0th camera
+  auto [origin, up, lookat, fov, height, width, type] = cam_data.at(0);
+
+  DR_D::Camera cam(glm::vec3(origin.x, origin.y, origin.z),
+                   glm::vec3(up.x, up.y, up.z),
+                   glm::vec3(lookat.x, lookat.y, lookat.z), fov);
+
+  // shader uniform set
   shader.use();
   shader.setMat4("model", glm::mat4(1.0f));
 
+  // main loop
   while (!glfwWindowShouldClose(window)) {
 
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
-    processInput(window);
+    processInput(window, cam);
 
     glfwPollEvents();
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -93,8 +106,8 @@ int main() {
       static float f = 0.0f;
       static int counter = 0;
 
-      ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!"
-                                     // and append into it.
+      ImGui::Begin("Background Color"); // Create a window called "Hello,
+                                        // world!" and append into it.
 
       ImGui::ColorEdit3(
           "clear color",
@@ -133,7 +146,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window, Camera &cam) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 

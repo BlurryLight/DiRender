@@ -15,8 +15,12 @@
 
 NAMESPACE_BEGIN(DR)
 NAMESPACE_BEGIN(impl)
+
 template <typename T>
-inline void parse_camera_data(Scene *scene, const T &data) {
+// This function is also called by debugger to render in OpenGL
+inline auto parse_camera_data_impl(const T &data) {
+  std::vector<std::tuple<Point3f, vec3, vec3, float, float, float, std::string>>
+      res;
   const auto &cams_toml = toml::find(data, "cameras");
   const auto &cam_vec_toml =
       toml::find<std::vector<toml::table>>(cams_toml, "camera");
@@ -37,10 +41,22 @@ inline void parse_camera_data(Scene *scene, const T &data) {
       up[i] = up_toml[i];
       lookat[i] = lookat_toml[i];
     }
+    std::string type = toml::get<std::string>(cam_toml.at("type"));
+    std::tuple<Point3f, vec3, vec3, float, float, float, std::string> tmp{
+        origin, up, lookat, fov_toml, height_toml, width_toml, type};
+    res.emplace_back(tmp);
+  }
+  return res;
+}
+template <typename T>
+inline void parse_camera_data(Scene *scene, const T &data) {
+  auto res = parse_camera_data_impl(data);
+  for (const auto &cam_data : res) {
+    auto [origin, up, lookat, fov, height, width, type] = cam_data;
     std::shared_ptr<Camera> cam = nullptr;
-    if (cam_toml.at("type").as_string() == "pinhole") {
-      cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov_toml,
-                                            height_toml, width_toml);
+    if (type == "pinhole") {
+      cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov, height,
+                                            width);
     }
     scene->add(cam);
   }

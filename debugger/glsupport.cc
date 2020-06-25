@@ -1,14 +1,14 @@
 #include "glsupport.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../third_party/stb_image.h"
-using namespace DR;
+using namespace DR_D;
 static unsigned int cubeVAO = 0;
 static unsigned int cubeVBO = 0;
 static unsigned int quadVAO = 0;
 static unsigned int quadVBO = 0;
 static unsigned int sphereVAO = 0;
 static unsigned int sphereIndexSize = 0;
-void DR::renderQuad() {
+void DR_D::renderQuad() {
   if (quadVAO == 0) {
     float quadVertices[] = {
         // positions        // texture Coords
@@ -34,7 +34,7 @@ void DR::renderQuad() {
   glBindVertexArray(0);
 }
 
-void DR::renderCube() {
+void DR_D::renderCube() {
   // initialize (if necessary)
   if (cubeVAO == 0) {
     float vertices[] = {
@@ -106,7 +106,7 @@ void DR::renderCube() {
   glBindVertexArray(0);
 }
 
-void DR::renderSphere() {
+void DR_D::renderSphere() {
   if (sphereVAO == 0) {
     glGenVertexArrays(1, &sphereVAO);
 
@@ -192,8 +192,9 @@ void DR::renderSphere() {
   glBindVertexArray(0);
 }
 
-unsigned int DR::TextureFromFile(const char *path, const std::string &directory,
-                                 bool gamma, bool flip) {
+unsigned int DR_D::TextureFromFile(const char *path,
+                                   const std::string &directory, bool gamma,
+                                   bool flip) {
   std::string filename = std::string(path);
   if (directory != "") {
     filename = directory + '/' + filename;
@@ -243,33 +244,31 @@ unsigned int DR::TextureFromFile(const char *path, const std::string &directory,
   return textureID;
 }
 
-DR::Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
-      MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+DR_D::Camera::Camera(glm::vec3 position, glm::vec3 up, glm::vec3 lookat,
+                     float fov, float yaw, float pitch)
+    : MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(fov) {
   Position = position;
   WorldUp = up;
+  LookAt = lookat;
+  Front = lookat - position;
+  if (Front.z > 0)
+    // when the position is in negative-z and the direction vector is towards
+    // positive-z
+    // the yaw must be 90' rather than -90'
+    // the default value is -90',which towards the negative-z
+    // so the fabs is necessary
+    yaw = std::fabs(yaw);
   Yaw = yaw;
   Pitch = pitch;
   updateCameraVectors();
 }
 
-DR::Camera::Camera(float posX, float posY, float posZ, float upX, float upY,
-                   float upZ, float yaw, float pitch)
-    : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
-      MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
-  Position = glm::vec3(posX, posY, posZ);
-  WorldUp = glm::vec3(upX, upY, upZ);
-  Yaw = yaw;
-  Pitch = pitch;
-  updateCameraVectors();
-}
-
-glm::mat4 DR::Camera::GetViewMatrix() {
+glm::mat4 DR_D::Camera::GetViewMatrix() {
   return glm::lookAt(Position, Position + Front, Up);
 }
 
-void DR::Camera::ProcessKeyboard(DR::Camera_Movement direction,
-                                 float deltaTime) {
+void DR_D::Camera::ProcessKeyboard(DR_D::Camera_Movement direction,
+                                   float deltaTime) {
   float velocity = MovementSpeed * deltaTime;
   if (direction == FORWARD)
     Position += Front * velocity;
@@ -281,8 +280,8 @@ void DR::Camera::ProcessKeyboard(DR::Camera_Movement direction,
     Position += Right * velocity;
 }
 
-void DR::Camera::ProcessMouseMovement(float xoffset, float yoffset,
-                                      GLboolean constrainPitch) {
+void DR_D::Camera::ProcessMouseMovement(float xoffset, float yoffset,
+                                        GLboolean constrainPitch) {
   xoffset *= MouseSensitivity;
   yoffset *= MouseSensitivity;
 
@@ -301,16 +300,16 @@ void DR::Camera::ProcessMouseMovement(float xoffset, float yoffset,
   updateCameraVectors();
 }
 
-void DR::Camera::ProcessMouseScroll(float yoffset) {
+void DR_D::Camera::ProcessMouseScroll(float yoffset) {
   if (Zoom >= 1.0f && Zoom <= 45.0f)
     Zoom -= yoffset;
   if (Zoom <= 1.0f)
     Zoom = 1.0f;
-  if (Zoom >= 45.0f)
-    Zoom = 45.0f;
+  if (Zoom >= 90.0f)
+    Zoom = 90.0f;
 }
 
-void DR::Camera::updateCameraVectors() {
+void DR_D::Camera::updateCameraVectors() {
   // Calculate the new Front vector
   glm::vec3 front;
   front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
@@ -325,8 +324,8 @@ void DR::Camera::updateCameraVectors() {
   Up = glm::normalize(glm::cross(Right, Front));
 }
 
-DR::Shader::Shader(const char *vertexPath, const char *fragmentPath,
-                   const char *geometryPath) {
+DR_D::Shader::Shader(const char *vertexPath, const char *fragmentPath,
+                     const char *geometryPath) {
   // 1. retrieve the vertex/fragment source code from filePath
   std::string vertexCode;
   std::string fragmentCode;
@@ -402,65 +401,68 @@ DR::Shader::Shader(const char *vertexPath, const char *fragmentPath,
     glDeleteShader(geometry);
 }
 
-void DR::Shader::use() const { glUseProgram(ID); }
+void DR_D::Shader::use() const { glUseProgram(ID); }
 
-void DR::Shader::setBool(const std::string &name, bool value) const {
+void DR_D::Shader::setBool(const std::string &name, bool value) const {
   glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
 
-void DR::Shader::setInt(const std::string &name, int value) const {
+void DR_D::Shader::setInt(const std::string &name, int value) const {
   glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void DR::Shader::setFloat(const std::string &name, float value) const {
+void DR_D::Shader::setFloat(const std::string &name, float value) const {
   glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void DR::Shader::setVec2(const std::string &name,
-                         const glm::vec2 &value) const {
+void DR_D::Shader::setVec2(const std::string &name,
+                           const glm::vec2 &value) const {
   glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
 }
 
-void DR::Shader::setVec2(const std::string &name, float x, float y) const {
+void DR_D::Shader::setVec2(const std::string &name, float x, float y) const {
   glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
 }
 
-void DR::Shader::setVec3(const std::string &name,
-                         const glm::vec3 &value) const {
+void DR_D::Shader::setVec3(const std::string &name,
+                           const glm::vec3 &value) const {
   glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
 }
 
-void DR::Shader::setVec3(const std::string &name, float x, float y,
-                         float z) const {
+void DR_D::Shader::setVec3(const std::string &name, float x, float y,
+                           float z) const {
   glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
 }
 
-void DR::Shader::setVec4(const std::string &name,
-                         const glm::vec4 &value) const {
+void DR_D::Shader::setVec4(const std::string &name,
+                           const glm::vec4 &value) const {
   glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
 }
 
-void DR::Shader::setVec4(const std::string &name, float x, float y, float z,
-                         float w) {
+void DR_D::Shader::setVec4(const std::string &name, float x, float y, float z,
+                           float w) {
   glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
 }
 
-void DR::Shader::setMat2(const std::string &name, const glm::mat2 &mat) const {
+void DR_D::Shader::setMat2(const std::string &name,
+                           const glm::mat2 &mat) const {
   glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE,
                      &mat[0][0]);
 }
 
-void DR::Shader::setMat3(const std::string &name, const glm::mat3 &mat) const {
+void DR_D::Shader::setMat3(const std::string &name,
+                           const glm::mat3 &mat) const {
   glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE,
                      &mat[0][0]);
 }
 
-void DR::Shader::setMat4(const std::string &name, const glm::mat4 &mat) const {
+void DR_D::Shader::setMat4(const std::string &name,
+                           const glm::mat4 &mat) const {
   glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE,
                      &mat[0][0]);
 }
 
-void DR::Shader::checkCompileErrors(GLuint shader, std::string type) {
+void DR_D::Shader::checkCompileErrors(GLuint shader, std::string type) {
   GLint success;
   GLchar infoLog[1024];
   if (type != "PROGRAM") {
