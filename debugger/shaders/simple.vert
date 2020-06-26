@@ -7,11 +7,19 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+out VS_OUT
+{
+    vec3 Normal;
+    vec2 TexCoords;
+    vec3 WorldPos;
+} vs_out;
+
 void main()
 {
     mat3 inverse_transpose = transpose(inverse(mat3(model)));
-    vec3 Normal = inverse_transpose * aNormal;
-    vec2 TexCoords = aTexCoords;
-    vec4 Pos = projection * view * model * vec4(aPos,1.0);
-    gl_Position = Pos;
+    vs_out.Normal = inverse_transpose * aNormal;
+    vs_out.TexCoords = aTexCoords;
+    vec4 pos = model * vec4(aPos,1.0);
+    vs_out.WorldPos = vec3(pos);
+    gl_Position = projection * view * pos;
 }

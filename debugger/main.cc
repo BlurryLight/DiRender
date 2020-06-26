@@ -60,8 +60,12 @@ int main() {
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_verson);
-  bool show_demo_window = true;
+
+  // IMGUI
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  ImVec4 ambient_color = ImVec4(1.0f, 0.05f, 0.00f, 1.00f);
+  float Blinn_Shininess = 8.0f;
+
   // shader
   DR::ResourcePathSearcher resourcesPath;
   resourcesPath.add_path(
@@ -69,8 +73,10 @@ int main() {
   resourcesPath.add_path(
       (DR::ResourcePathSearcher::root_path / "debugger" / "shaders")
           .u8string());
-  DR_D::Shader shader(resourcesPath.find_path("simple.vert"),
-                      resourcesPath.find_path("simple.frag"));
+  DR_D::Shader SceneShader(resourcesPath.find_path("simple.vert"),
+                           resourcesPath.find_path("BlinnPhong.frag"));
+  DR_D::Shader CamShader(resourcesPath.find_path("simple.vert"),
+                         resourcesPath.find_path("simple.frag"));
   DR_D::Model model(resourcesPath.find_path("cube.obj"));
 
   auto toml_scene_data = toml::parse(resourcesPath.find_path("sample.toml"));
@@ -84,8 +90,7 @@ int main() {
                    glm::vec3(lookat.x, lookat.y, lookat.z), fov);
 
   // shader uniform set
-  shader.use();
-  shader.setMat4("model", glm::mat4(1.0f));
+  //  shader.use();
 
   // main loop
   while (!glfwWindowShouldClose(window)) {
@@ -103,15 +108,14 @@ int main() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     {
-      static float f = 0.0f;
-      static int counter = 0;
-
       ImGui::Begin("Background Color"); // Create a window called "Hello,
                                         // world!" and append into it.
-
       ImGui::ColorEdit3(
           "clear color",
           (float *)&clear_color); // Edit 3 floats representing a color
+
+      ImGui::ColorEdit3("object ambient color", (float *)&ambient_color);
+      ImGui::SliderFloat("Blinn Shininess", &Blinn_Shininess, 0.0f, 128.0f);
 
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                   1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -122,14 +126,33 @@ int main() {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shader.use();
-    shader.setMat4("view", cam.GetViewMatrix());
+    SceneShader.use();
+    SceneShader.setMat4("model", glm::mat4(1.0f));
+    SceneShader.setMat4("view", cam.GetViewMatrix());
     auto projection = glm::perspective(
         glm::radians(cam.Zoom), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
-    shader.setMat4("projection", projection);
-    model.draw(shader);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    SceneShader.setMat4("projection", projection);
+    SceneShader.setVec3(
+        "ambient_color",
+        glm::vec3(ambient_color.x, ambient_color.y, ambient_color.z));
+    SceneShader.setVec3("viewPos", cam.Position);
+    SceneShader.setVec3("lightPos",
+                        glm::vec3(5.0 * glm::cos(glfwGetTime()), 4.0,
+                                  5.0 * glm::sin(glfwGetTime())));
+    SceneShader.setFloat("shininess", Blinn_Shininess);
+    model.draw(SceneShader);
 
+    // Draw camera
+    CamShader.use();
+    auto model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(origin.x, origin.y, origin.z));
+    CamShader.setMat4("model", model);
+    CamShader.setMat4("view", cam.GetViewMatrix());
+    CamShader.setMat4("projection", projection);
+    renderCube();
+
+    //
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
   }
 
