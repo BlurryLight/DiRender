@@ -3,6 +3,8 @@ project(DiRender LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Threads REQUIRED)
+#spdlog
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/spdlog)
 include(${CMAKE_SOURCE_DIR}/source_list.cmake)
 
 #options 
@@ -32,8 +34,8 @@ endif()
 add_compile_definitions(ROOT_DIR="${CMAKE_SOURCE_DIR}")
 message(${CMAKE_SOURCE_DIR})
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})
-target_include_directories(DiRender PRIVATE "src")
-target_link_libraries(DiRender PRIVATE Threads::Threads)
+target_include_directories(DiRender PRIVATE "src" )
+target_link_libraries(DiRender PRIVATE Threads::Threads spdlog::spdlog)
 
 # Flags are added only with the main target
 if (MSVC)

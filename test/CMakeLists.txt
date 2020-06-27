@@ -22,6 +22,8 @@ target_include_directories(runTests PRIVATE
     ../src/
     ${CMAKE_SOURCE_DIR}/${GOOGLETEST_ROOT}
     ${CMAKE_SOURCE_DIR}/${GOOGLETEST_ROOT}/include
+    ${CMAKE_SOURCE_DIR}/third_party
+    ${CMAKE_SOURCE_DIR}/third_party/spdlog/include/
     )
 target_link_libraries(runTests gtest_main Threads::Threads)
 

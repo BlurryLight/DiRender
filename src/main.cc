@@ -10,7 +10,17 @@
 #include <utils/high_resolution_timer.h>
 #include <utils/parse_scene.hpp>
 //#define NDEBUG
+#include <spdlog/async.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 int main(int argc, char **argv) {
+  auto basic_logger =
+      spdlog::basic_logger_mt("basic_logger", "Dirender_log.txt", true);
+  spdlog::set_default_logger(basic_logger);
+  auto ray_logger = spdlog::basic_logger_mt<spdlog::async_factory>(
+      "ray_logger", "Dirender_ray.txt", true);
+  ray_logger->set_pattern("%v");
+
   DR::Scene scene;
   std::string filename{"scene.toml"};
   if (argc > 1)
@@ -38,6 +48,7 @@ int main(int argc, char **argv) {
   std::cout << timer.elapsed() / 1000 << " s" << std::endl;
   std::cout << timer.elapsed() / (1000 * 60) << " mins" << std::endl;
   std::cout << timer.elapsed() / (1000 * 60 * 60) << " hours" << std::endl;
+  basic_logger->info("Elapsed: {} ms", timer.elapsed());
   return 0;
 }
 

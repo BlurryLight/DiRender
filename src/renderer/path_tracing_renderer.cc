@@ -6,10 +6,14 @@
 #include <renderer/path_tracing_renderer.h>
 #include <shapes/sphere.h>
 #include <tuple> //for std::tie
+
+// log
+#include <spdlog/spdlog.h>
 using namespace DR;
 Vector3f PathTracingRenderer::cast_ray(
     const Ray &r, std::shared_ptr<Primitive> prim,
     const std::vector<std::shared_ptr<Primitive>> &lights, int depth = 0) {
+  static auto ray_logger = spdlog::get("ray_logger");
   float russian_roulette = 0.8f;
   if (depth > 5 || (depth != 0 && get_random_float() > russian_roulette))
     return {0};
@@ -17,6 +21,13 @@ Vector3f PathTracingRenderer::cast_ray(
   Intersection isect;
   if (!prim->Intersect(r, &isect))
     return {0};
+#ifndef NDEBUG
+  // ray.origin; isect.coords; isect.normal
+  ray_logger->info(
+      "{:.4f},{:.4f},{:.4f};{:.4f},{:.4f},{:.4f};{:.4f},{:.4f},{:.4f}",
+      r.origin_.x, r.origin_.y, r.origin_.z, isect.coords.x, isect.coords.y,
+      isect.coords.z, isect.normal.x, isect.normal.y, isect.normal.z);
+#endif
   auto emission = isect.mat_ptr->evalEmitted(r.direction_, isect);
   if (emission.squared_length() > 0.0f) // no more bounce when hitting a light
     return {1};
