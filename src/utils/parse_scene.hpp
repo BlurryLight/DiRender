@@ -12,6 +12,8 @@
 #include <texture/checker_texture.h>
 #include <texture/constant_texture.h>
 #include <utils/OBJ_Loader_wrapper.h>
+NAMESPACE_BEGIN(DR_D)
+NAMESPACE_END(DR_D)
 
 NAMESPACE_BEGIN(DR)
 NAMESPACE_BEGIN(impl)
@@ -61,7 +63,6 @@ inline void parse_camera_data(Scene *scene, const T &data) {
     scene->add(cam);
   }
 }
-
 template <typename T>
 inline void parse_material_data(const T &material_toml,
                                 std::shared_ptr<Material> &mat_ptr,

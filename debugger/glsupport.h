@@ -13,6 +13,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utils/parse_scene.hpp>
 #include <vector>
 namespace DR_D // DR_Debugger
 {
@@ -35,6 +36,7 @@ struct Vertex;
 struct Texture;
 struct Model {
 private:
+  enum class Material { kDiffuse, kMirror, kDielectric };
   std::unique_ptr<objl::Loader> loader_;
   struct Mesh {
     std::vector<objl::Vertex> vertices_;
@@ -47,6 +49,8 @@ private:
   };
 
 public:
+  Material mat_ = Material::kDiffuse;
+  glm::vec3 kd{1.0f};
   std::vector<Mesh> meshes_;
   void draw(const Shader &shader) const;
   Model(const std::string &path);
@@ -172,4 +176,134 @@ struct Texture {
   std::string path;
 };
 
+struct Object // DR_Debugger_Object
+{
+  glm::vec3 centroid;
+  // May cause error. Be careful
+  // For example: Sampling a sphere to estimate the normal will get a near zero
+  // normal vector and the estimated value can never represent the true normal
+  // value for the sphere surface. It only works for plane.
+  glm::vec3 normal;
+  std::string name;
+  std::string mat_type;
+  std::string path;
+  glm::mat4 model_mat4;
+  glm::vec3 albedo;
+  glm::vec3 emission{0.0f};
+  float ior = 1.0f;
+  bool has_emission = false;
+  std::unique_ptr<Model> model;
+  void load(std::string model_path) {
+    model = std::make_unique<Model>(model_path);
+    this->centroid = glm::vec3(0);
+    this->normal = glm::vec3(0);
+
+    // sample 20 points to estimate the model centroid and normal
+    int mesh_num = model->meshes_.size();
+    for (int i = 0; i < 20; i++) {
+      int mesh_index = get_random_float(0.0, 0.99) * mesh_num;
+      int mesh_vertex_size = model->meshes_[mesh_index].size();
+      auto vertex =
+          model->meshes_[mesh_index]
+              .vertices_[mesh_vertex_size * get_random_float(0.0, 0.99)]
+              .Position;
+      auto normal =
+          model->meshes_[mesh_index]
+              .vertices_[mesh_vertex_size * get_random_float(0.0, 0.99)]
+              .Normal;
+      this->centroid += glm::vec3(vertex.X, vertex.Y, vertex.Z) / 20.0f;
+      this->normal += glm::vec3(normal.X, normal.Y, normal.Z) / 20.0f;
+    }
+    this->normal = normalize(normal);
+  }
+};
+
 } // namespace DR_D
+
+namespace DR::impl {
+
+template <typename T>
+// This is a wrapper to be called by the debugger
+// return value:
+std::vector<std::shared_ptr<DR_D::Object>>
+parse_objects_wrapper(const T &data) {
+  const auto &objects_toml = toml::find(data, "objects");
+  std::vector<std::shared_ptr<DR_D::Object>> objects;
+  try {
+    const auto &names_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "name");
+    const auto &transforms_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "transform");
+    const auto &materials_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "material");
+    const auto &shapes_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "shape");
+
+    // parse objects
+    for (uint i = 0; i < names_vec.size(); i++) {
+      auto obj_ptr = std::make_shared<DR_D::Object>();
+      // obj_name
+      obj_ptr->name = names_vec[i].at("name").as_string();
+      auto mat_toml =
+          toml::get<std::vector<float>>(transforms_vec[i].at("matrix4"));
+
+      // obj_mat
+      for (int j = 0; j < 16; j++) {
+        // column major
+        obj_ptr->model_mat4[j % 4][j / 4] = mat_toml.at(j);
+      }
+
+      auto material_toml = materials_vec[i];
+      std::string mat_type = toml::get<std::string>(material_toml.at("type"));
+      static std::array<std::string, 3> supported_materials{"matte", "glass",
+                                                            "dielectric"};
+      if (std::find(supported_materials.begin(), supported_materials.end(),
+                    mat_type) != supported_materials.end()) {
+        std::string texture_type = material_toml.at("texture").as_string();
+        vec3 obj_albedo;
+        if (texture_type == "constant") {
+          auto albedo =
+              toml::get<std::vector<float>>(material_toml.at("albedo"));
+          obj_ptr->albedo = glm::vec3{albedo[0], albedo[1], albedo[2]};
+        } else {
+          throw std::runtime_error("Debugger: Unsupported texture type:" +
+                                   texture_type);
+          std::exit(EXIT_FAILURE);
+        }
+        vec3 obj_emission{0};
+        if (material_toml.count("emission")) {
+          auto tmp =
+              toml::get<std::vector<float>>(material_toml.at("emission"));
+          obj_ptr->emission = {tmp[0], tmp[1], tmp[2]};
+          obj_ptr->has_emission = true;
+        }
+
+        if (material_toml.count("ior")) {
+          obj_ptr->ior = toml::get<float>(material_toml.at("ior"));
+        }
+        obj_ptr->mat_type = mat_type;
+      } else {
+        throw std::runtime_error(
+            "Debugger: Unsupported material type: " +
+            toml::get<std::string>(material_toml.at("type")));
+        std::exit(EXIT_FAILURE);
+      }
+      auto shape_toml = shapes_vec[i].at("type").as_string();
+      // shape parse
+      std::string obj_path;
+      if (shape_toml == "obj") {
+        obj_ptr->path = shapes_vec[i].at("path").as_string();
+      } else {
+        throw std::runtime_error("Debugger currently only supports obj files");
+        continue;
+      }
+      objects.push_back(obj_ptr);
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Debugger: Exception captured: " << '\n'
+              << e.what() << std::endl;
+  }
+  return objects;
+}
+
+} // namespace DR::impl

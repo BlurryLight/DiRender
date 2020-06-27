@@ -15,12 +15,19 @@
 #include <sstream>
 using namespace DR_D;
 static const GLuint SCR_WIDTH = 800;
-static const GLuint SCR_HEIGHT = 600;
+static const GLuint SCR_HEIGHT = 800;
 
 static float deltaTime = 0.0f;
 static float lastFrame = 0.0f;
 void processInput(GLFWwindow *window, Camera &cam);
 void framebuffer_size_callback(GLFWwindow *, int width, int height);
+void mouse_callback(GLFWwindow *, double width, double height);
+void key_callback(GLFWwindow *window, int key, int scancode, int action,
+                  int mods);
+static bool firstMouse = true;
+static double lastX, lastY;
+static Camera cam;
+static bool AllowMouseMove = true;
 int main() {
   if (!glfwInit()) {
     std::cerr << "FATAL INIT FAILED" << std::endl;
@@ -42,6 +49,8 @@ int main() {
 
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetCursorPosCallback(window, mouse_callback);
+  glfwSetKeyCallback(window, key_callback);
 
   // glad loads
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -51,6 +60,14 @@ int main() {
 
   // config global OpenGL state
   glEnable(GL_DEPTH_TEST);
+  unsigned int texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, SCR_WIDTH, SCR_HEIGHT, 0,
+               GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
+                         texture, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   const char *glsl_verson = "#version 330";
   IMGUI_CHECKVERSION();
@@ -63,7 +80,6 @@ int main() {
 
   // IMGUI
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-  ImVec4 ambient_color = ImVec4(1.0f, 0.05f, 0.00f, 1.00f);
   float Blinn_Shininess = 8.0f;
 
   // shader
@@ -73,21 +89,38 @@ int main() {
   resourcesPath.add_path(
       (DR::ResourcePathSearcher::root_path / "debugger" / "shaders")
           .u8string());
+  resourcesPath.add_path(
+      (DR::ResourcePathSearcher::root_path / "models" / "cornellbox")
+          .u8string());
   DR_D::Shader SceneShader(resourcesPath.find_path("simple.vert"),
                            resourcesPath.find_path("BlinnPhong.frag"));
+
+  DR_D::Shader LightsShader(resourcesPath.find_path("simple.vert"),
+                            resourcesPath.find_path("lights.frag"));
   DR_D::Shader CamShader(resourcesPath.find_path("simple.vert"),
                          resourcesPath.find_path("simple.frag"));
-  DR_D::Model model(resourcesPath.find_path("cube.obj"));
 
-  auto toml_scene_data = toml::parse(resourcesPath.find_path("sample.toml"));
+  auto toml_scene_data =
+      toml::parse(resourcesPath.find_path("cornel_box.toml"));
   auto cam_data = DR::impl::parse_camera_data_impl(toml_scene_data);
-
+  auto objects = DR::impl::parse_objects_wrapper(toml_scene_data);
+  std::vector<std::shared_ptr<DR_D::Object>> models;
+  std::vector<std::shared_ptr<DR_D::Object>> lights;
+  for (const auto &obj : objects) {
+    obj->load(resourcesPath.find_path(obj->path));
+    if (obj->has_emission) {
+      lights.push_back(obj);
+    } else {
+      models.push_back(obj);
+    }
+  }
   // Now we only cares 0th camera
   auto [origin, up, lookat, fov, height, width, type] = cam_data.at(0);
 
-  DR_D::Camera cam(glm::vec3(origin.x, origin.y, origin.z),
-                   glm::vec3(up.x, up.y, up.z),
-                   glm::vec3(lookat.x, lookat.y, lookat.z), fov);
+  auto tmp = DR_D::Camera(glm::vec3(origin.x, origin.y, origin.z),
+                          glm::vec3(up.x, up.y, up.z),
+                          glm::vec3(lookat.x, lookat.y, lookat.z), fov);
+  cam = tmp;
 
   // shader uniform set
   //  shader.use();
@@ -113,9 +146,30 @@ int main() {
       ImGui::ColorEdit3(
           "clear color",
           (float *)&clear_color); // Edit 3 floats representing a color
+      if (ImGui::CollapsingHeader("Lights")) {
+        for (uint i = 0; i < lights.size(); i++) {
+          {
+            std::string lightname = "lights" + std::to_string(i);
+            if (ImGui::TreeNode(lightname.c_str())) {
+              ImGui::SliderFloat("R", &lights[i]->emission.x, 0.0f, 100.0f);
+              ImGui::SliderFloat("G", &lights[i]->emission.y, 0.0f, 100.0f);
+              ImGui::SliderFloat("B", &lights[i]->emission.z, 0.0f, 100.0f);
+              ImGui::TreePop();
+            }
+          }
+        }
+      }
 
-      ImGui::ColorEdit3("object ambient color", (float *)&ambient_color);
-      ImGui::SliderFloat("Blinn Shininess", &Blinn_Shininess, 0.0f, 128.0f);
+      if (ImGui::CollapsingHeader("Camera")) {
+        ImGui::SliderFloat("Blinn Shininess", &Blinn_Shininess, 0.0f, 128.0f);
+
+        ImGui::SliderFloat("Camera Movementspeed", &cam.MovementSpeed, 0.0f,
+                           100.0f);
+        ImGui::SliderFloat("Camera MouseSensitivity", &cam.MouseSensitivity,
+                           0.0f, 1.0f);
+        ImGui::Text("Cam: (%.3f,%.3f,%.3f)", cam.Position.x, cam.Position.y,
+                    cam.Position.z);
+      }
 
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                   1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -126,28 +180,47 @@ int main() {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    SceneShader.use();
-    SceneShader.setMat4("model", glm::mat4(1.0f));
-    SceneShader.setMat4("view", cam.GetViewMatrix());
     auto projection = glm::perspective(
-        glm::radians(cam.Zoom), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
-    SceneShader.setMat4("projection", projection);
-    SceneShader.setVec3(
-        "ambient_color",
-        glm::vec3(ambient_color.x, ambient_color.y, ambient_color.z));
-    SceneShader.setVec3("viewPos", cam.Position);
-    SceneShader.setVec3("lightPos",
-                        glm::vec3(5.0 * glm::cos(glfwGetTime()), 4.0,
-                                  5.0 * glm::sin(glfwGetTime())));
-    SceneShader.setFloat("shininess", Blinn_Shininess);
-    model.draw(SceneShader);
+        glm::radians(cam.Zoom), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 2000.0f);
+    auto view = cam.GetViewMatrix();
+    SceneShader.use();
+    for (const auto &obj : models) {
+      SceneShader.setMat4("model", obj->model_mat4);
+      SceneShader.setMat4("view", view);
+      SceneShader.setMat4("projection", projection);
+      SceneShader.setVec3("ambient_color", obj->albedo);
+      SceneShader.setVec3("viewPos", cam.Position);
+      for (uint i = 0; i < lights.size(); i++) {
+        SceneShader.setVec3("lights[" + std::to_string(i) + "].Position",
+                            lights[i]->centroid);
+        SceneShader.setVec3("lights[" + std::to_string(i) + "].Color",
+                            lights[i]->emission);
+        SceneShader.setVec3("lights[" + std::to_string(i) + "].Normal",
+                            lights[i]->normal);
+        SceneShader.setFloat("lights[" + std::to_string(i) + "].Linear", 0.007);
+        SceneShader.setFloat("lights[" + std::to_string(i) + "].Quadratic",
+                             0.0002);
+      }
+      SceneShader.setFloat("shininess", Blinn_Shininess);
+      SceneShader.setInt("lightNum", lights.size());
+      obj->model->draw(SceneShader);
+    }
+    // Draw lights
+    LightsShader.use();
+    for (const auto &obj : lights) {
+      LightsShader.setMat4("model", obj->model_mat4);
+      LightsShader.setMat4("view", view);
+      LightsShader.setMat4("projection", projection);
+      LightsShader.setVec3("lightColor", obj->emission);
+      obj->model->draw(LightsShader);
+    }
 
     // Draw camera
     CamShader.use();
     auto model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(origin.x, origin.y, origin.z));
     CamShader.setMat4("model", model);
-    CamShader.setMat4("view", cam.GetViewMatrix());
+    CamShader.setMat4("view", view);
     CamShader.setMat4("projection", projection);
     renderCube();
 
@@ -172,7 +245,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void processInput(GLFWwindow *window, Camera &cam) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
-
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     cam.ProcessKeyboard(FORWARD, deltaTime);
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -181,4 +253,34 @@ void processInput(GLFWwindow *window, Camera &cam) {
     cam.ProcessKeyboard(LEFT, deltaTime);
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     cam.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+  if (AllowMouseMove) {
+    if (firstMouse) {
+      lastX = xpos;
+      lastY = ypos;
+      firstMouse = false;
+    }
+    float xoffset = xpos - lastX;
+    float yoffset =
+        lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    cam.ProcessMouseMovement(xoffset, yoffset);
+  } else {
+    firstMouse = true;
+  }
+};
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action,
+                  int mods) {
+
+  if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+    AllowMouseMove = !AllowMouseMove;
+    std::cout << (AllowMouseMove ? "AllowMouseMove" : "DisallowMouseMove")
+              << std::endl;
+  }
 }
