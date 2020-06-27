@@ -125,6 +125,10 @@ public:
          const char *geometryPath = nullptr);
   Shader(const std::string &vertexPath, const std::string &fragmentPath)
       : Shader(vertexPath.c_str(), fragmentPath.c_str()) {}
+  Shader(const std::string &vertexPath, const std::string &fragmentPath,
+         const std::string &geometryPath)
+      : Shader(vertexPath.c_str(), fragmentPath.c_str(), geometryPath.c_str()) {
+  }
   // activate the shader
   // ------------------------------------------------------------------------
   void use() const;

@@ -2,6 +2,7 @@
 
 // GLAD
 #include "glsupport.h"
+#include "parse_ray_log.hpp"
 #include "third_party/glad/glad.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/imgui/imgui_impl_glfw.h"
@@ -100,6 +101,42 @@ int main() {
   DR_D::Shader CamShader(resourcesPath.find_path("simple.vert"),
                          resourcesPath.find_path("simple.frag"));
 
+  DR_D::Shader RayShader(resourcesPath.find_path("line.vert"),
+                         resourcesPath.find_path("simple.frag"),
+                         resourcesPath.find_path("line.geom"));
+  auto ray_data = parse_ray_log("Dirender_ray.txt");
+  std::vector<float> ray_data_pod;
+  ray_data_pod.reserve(9 * ray_data.size());
+  for (const auto &line : ray_data) {
+    for (int j = 0; j < 3; j++) {
+      ray_data_pod.push_back(line.at(j).x);
+      ray_data_pod.push_back(line.at(j).y);
+      ray_data_pod.push_back(line.at(j).z);
+    }
+  }
+  int rays_begin_index = 0;
+  int rays_to_draw = 10;
+
+  unsigned int ray_vbo, ray_vao;
+  glGenBuffers(1, &ray_vbo);
+  glGenVertexArrays(1, &ray_vao);
+  glBindVertexArray(ray_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, ray_vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * ray_data_pod.size(),
+               ray_data_pod.data(), GL_STATIC_DRAW);
+  // ray.origin
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), 0);
+  // ray.isect.coords
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  // ray.isect.normal
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
+  glBindVertexArray(0);
+
   auto toml_scene_data =
       toml::parse(resourcesPath.find_path("cornel_box.toml"));
   auto cam_data = DR::impl::parse_camera_data_impl(toml_scene_data);
@@ -171,6 +208,10 @@ int main() {
                     cam.Position.z);
       }
 
+      ImGui::SliderInt("Rays begin index", &rays_begin_index, 0,
+                       ray_data.size() - rays_to_draw);
+      ImGui::SliderInt("Rays num", &rays_to_draw, 0,
+                       ray_data.size() - rays_begin_index - 1);
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                   1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
       ImGui::End();
@@ -224,6 +265,13 @@ int main() {
     CamShader.setMat4("projection", projection);
     renderCube();
 
+    // render rays
+    RayShader.use();
+    RayShader.setMat4("model", glm::mat4(1.0));
+    RayShader.setMat4("view", view);
+    RayShader.setMat4("projection", projection);
+    glBindVertexArray(ray_vao);
+    glDrawArrays(GL_POINTS, rays_begin_index, rays_to_draw);
     //
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);

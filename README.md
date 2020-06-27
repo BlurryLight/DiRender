@@ -14,4 +14,7 @@ Not so tiny path tracer
 - Cornel Box
 ![cornel_box](images/cornel_box.jpg)
 
+- Debugger
+![cornel_box debugger](images/debugger.gif)
+
 

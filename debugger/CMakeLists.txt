@@ -7,6 +7,7 @@ set(SOURCES
     main.cc
     glsupport.h
     glsupport.cc
+    parse_ray_log.hpp
     )
 include(../source_list.cmake)
 
