@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utils/cmake_vars.h>
 #include <utils/resource_path_searcher.h>
 using namespace DR;
 fs::path ResourcePathSearcher::root_path = Path(

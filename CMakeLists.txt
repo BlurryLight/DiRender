@@ -30,9 +30,21 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
 endif()
 
+# generate header
+set(ROOT_DIR_VAR ${CMAKE_SOURCE_DIR})
+if (DEFINED CMAKE_BUILD_TYPE)
+    set(BUILD_TYPE_VAR ${CMAKE_BUILD_TYPE})
+else()
+    # In Linux the default is empty.
+    set(BUILD_TYPE_VAR "Debug")
+endif()
+set(BUILD_SYSTEM_VERSION_VAR ${CMAKE_SYSTEM_VERSION})
+set(BUILD_SYSTEM_NAME_VAR ${CMAKE_SYSTEM_NAME})
+string(TIMESTAMP BUILD_UTC_TIMESTAMP_VAR UTC)
+configure_file(${CMAKE_SOURCE_DIR}/src/utils/cmake_vars.h.in ${CMAKE_SOURCE_DIR}/src/utils/cmake_vars.h)
+
+
 # main target
-add_compile_definitions(ROOT_DIR="${CMAKE_SOURCE_DIR}")
-message(${CMAKE_SOURCE_DIR})
 add_executable(DiRender src/main.cc ${SOURCE_HEADERS})
 target_include_directories(DiRender PRIVATE "src" )
 target_link_libraries(DiRender PRIVATE Threads::Threads spdlog::spdlog)

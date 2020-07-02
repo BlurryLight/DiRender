@@ -41,6 +41,7 @@ out
 .vs
 .vscode
 *clangd*
+cmake_vars.h
 
 
 
