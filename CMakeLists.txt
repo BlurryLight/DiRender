@@ -5,13 +5,16 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Threads REQUIRED)
 #spdlog
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/spdlog)
+#include
 include(${CMAKE_SOURCE_DIR}/source_list.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/cmake_filesystem.cmake)
 
 #options 
 option(EXPERIMENTAL_UNITY_BUILD "UNITY_BUILD to reduce compilation time" OFF)
 option(DI_BUILD_TESTS "Build test programs" ON)
 option(DI_BUILD_DEBUGGER "Build a real-time debugger" ON)
 option(DI_USE_GLM "USE GLM for matrix. DO NOT USE. BROKEN" OFF)
+
 # options build
 if(DI_BUILD_TESTS)
     add_subdirectory(test)
@@ -25,23 +28,6 @@ endif(DI_BUILD_TESTS)
 if(DI_BUILD_DEBUGGER)
     add_subdirectory(debugger)
 endif(DI_BUILD_DEBUGGER)
-
-# global clang
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-        add_definitions(-DFILESYSTEM_TS)
-        link_libraries(stdc++fs)
-    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-endif (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
-
-# global gcc
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
-        add_definitions(-DFILESYSTEM_TS)
-        link_libraries(stdc++fs) 
-        # Here clang uses libstdc++ as STL in Linux, which in OSX and FreeBSD should be libc++, and thus it should link c++fs. However, I have neither machine nor time to verify it.
-    endif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
-endif()
 
 # generate header
 set(ROOT_DIR_VAR ${CMAKE_SOURCE_DIR})
