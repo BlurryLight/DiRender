@@ -20,17 +20,15 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - { os: ubuntu-18.04, cpp-version: clang++-7, cc: clang-7}
+          - { os: ubuntu-18.04, cpp-version: clang-7, cc: clang-7}
           - { os: ubuntu-18.04, cpp-version: g++-7, cc: gcc-7}
-          - { os: ubuntu-20.04, cpp-version: clang++-10, cc: clang-10}
+          - { os: ubuntu-20.04, cpp-version: clang-10, cc: clang-10}
           - { os: ubuntu-20.04, cpp-version: g++-10, cc: gcc-10}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
       - name: Install packages
-        run: sudo apt install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-common-dev ${{matrix.cfg.cpp-version}}
+        run: sudo apt install -y ninja-build libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev mesa-common-dev ${{matrix.cfg.cpp-version}}
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v2
@@ -45,7 +43,7 @@ jobs:
           mkdir build
           cd build
           pwd
-          cmake -GNinja -DCMAKE_BUILD_TYPE=RELEASE -DDI_BUILD_TESTS=ON -DDI_BUILD_DEBUGGER=ON ..
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=RELEASE -DDI_BUILD_TESTS=ON -DDI_BUILD_DEBUGGER=ON ..
       - name: build
         run:  cmake --build build --parallel
       - name: run
