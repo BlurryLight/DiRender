@@ -54,7 +54,7 @@ template <typename T>
 inline void parse_camera_data(Scene *scene, const T &data) {
   auto res = parse_camera_data_impl(data);
   for (const auto &cam_data : res) {
-    auto [origin, up, lookat, fov, height, width, type] = cam_data;
+    const auto& [origin, up, lookat, fov, height, width, type] = cam_data;
     std::shared_ptr<Camera> cam = nullptr;
     if (type == "pinhole") {
       cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov, height,

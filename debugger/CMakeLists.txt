@@ -22,6 +22,8 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF  CACHE BOOL "" FORCE)
 add_subdirectory(third_party/glfw)
+
+set(GLM_TEST_ENABLE OFF  CACHE BOOL "" FORCE)
 add_subdirectory(third_party/glm)
 
 # Executable definition and properties
@@ -33,6 +35,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GL
 target_link_libraries(${PROJECT_NAME} PRIVATE
   glad
   glfw
+  glm
   #  ${OPENGL_LIBRARIES}
   ${CMAKE_DL_LIBS}
   )

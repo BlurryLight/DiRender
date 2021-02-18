@@ -52,6 +52,8 @@ public:
 protected:
   std::shared_ptr<Transform> view_trans_;
   std::shared_ptr<Transform> view_trans_inverse_;
+  float fov_;
+  float aspect_raio_;
 };
 
 inline void Film::write(const std::string&filename,PicType type)
@@ -101,8 +103,9 @@ inline Transform Camera::look_at(Point3f origin, Vector3f WorldUp,
 }
 
 inline Camera::Camera(Point3f origin, Vector3f WorldUp, Vector3f target,
-                      float fov, uint height, uint width) {
-  ignore(fov);
+                      float fov, uint height, uint width):
+ fov_(fov),aspect_raio_( float(width) / height)
+{
   auto view_trans = Camera::look_at(origin, WorldUp, target);
   this->view_trans_ = std::make_shared<Transform>(view_trans);
   this->view_trans_inverse_ =

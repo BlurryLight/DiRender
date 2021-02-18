@@ -25,23 +25,6 @@ refract(const Vector3f &in, const Vector3f &normal, float ni_over_nt) {
     return {refracted, true};
   }
   return {{0}, false};
-  //  Vector3f outNormal = normal;
-  //  float eta_i = 1, eta_t = ior;
-  //  float IdotN = in.dot(normal);
-  //  if (IdotN > 0) {
-  //    outNormal = -normal;
-  //    std::swap(eta_i, eta_t);
-  //  } else {
-  //    IdotN = -IdotN;
-  //  }
-  //  float eta = eta_i / eta_t;
-  //  float discriminant = 1.0 - eta * eta * (1 - IdotN * IdotN);
-  //  if (discriminant > 0) {
-  //    auto refracted =
-  //        eta * in + (eta * IdotN - std::sqrt(discriminant)) * outNormal;
-  //    return {refracted, true};
-  //  }
-  //  return {{0}, false};
 }
 
 inline float schlick(float cosine, float iof) {

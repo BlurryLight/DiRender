@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.5)
 project(TEST LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
-set(GOOGLETEST_ROOT third_party/gtest/googletest CACHE STRING "Google Test source root")
+set(GOOGLETEST_ROOT third_party/gtest/ CACHE STRING "Google Test source root")
 if(MSVC)
     #make Windows happy
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 endif(MSVC)
+set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_SOURCE_DIR}/${GOOGLETEST_ROOT} extern)
 
 find_package(Threads REQUIRED)

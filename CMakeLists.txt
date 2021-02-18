@@ -11,7 +11,20 @@ include(${CMAKE_SOURCE_DIR}/source_list.cmake)
 option(EXPERIMENTAL_UNITY_BUILD "UNITY_BUILD to reduce compilation time" OFF)
 option(DI_BUILD_TESTS "Build test programs" ON)
 option(DI_BUILD_DEBUGGER "Build a real-time debugger" ON)
+option(DI_USE_GLM "USE GLM for matrix. DO NOT USE. BROKEN" OFF)
+# options build
+if(DI_BUILD_TESTS)
+    add_subdirectory(test)
+    enable_testing()
+    add_test(
+            NAME runTests
+            COMMAND runTests
+    )
+endif(DI_BUILD_TESTS)
 
+if(DI_BUILD_DEBUGGER)
+    add_subdirectory(debugger)
+endif(DI_BUILD_DEBUGGER)
 
 # global clang
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
@@ -45,9 +58,20 @@ configure_file(${CMAKE_SOURCE_DIR}/src/utils/cmake_vars.h.in ${CMAKE_SOURCE_DIR}
 
 
 # main target
-add_executable(DiRender src/main.cc ${SOURCE_HEADERS})
+add_executable(DiRender src/main.cc ${SOURCE_HEADERS} )
 target_include_directories(DiRender PRIVATE "src" )
 target_link_libraries(DiRender PRIVATE Threads::Threads spdlog::spdlog)
+
+if(DI_USE_GLM)
+    if(NOT DI_BUILD_DEBUGGER)
+    set(GLM_TEST_ENABLE OFF  CACHE BOOL "" FORCE)
+    add_subdirectory(debugger/third_party/glm)
+    endif()
+    message(STATUS "DI_USE_GLM: ${GLM_VERSION}")
+    target_compile_definitions(DiRender PRIVATE DI_USE_GLM)
+    target_include_directories(DiRender PRIVATE "debugger/third_party/glm")
+    target_link_libraries(DiRender PRIVATE glm)
+endif(DI_USE_GLM)
 
 # Flags are added only with the main target
 if (MSVC)
@@ -70,19 +94,3 @@ else(EXPERIMENTAL_UNITY_BUILD)
         target_compile_options(DiRender PRIVATE -Werror)
     endif()
 endif(EXPERIMENTAL_UNITY_BUILD)
-
-
-if(DI_BUILD_TESTS)
-    add_subdirectory(test)
-    enable_testing()
-    add_test(
-        NAME runTests
-        COMMAND runTests
-        )
-endif(DI_BUILD_TESTS)
-
-
-
-if(DI_BUILD_DEBUGGER)
-    add_subdirectory(debugger)
-endif(DI_BUILD_DEBUGGER)

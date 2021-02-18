@@ -19,6 +19,7 @@ set(MATH_SOURCE
     ${CMAKE_SOURCE_DIR}/src/math/geometry.hpp
     ${CMAKE_SOURCE_DIR}/src/math/math_utils.hpp
     ${CMAKE_SOURCE_DIR}/src/math/matrix.hpp
+    ${CMAKE_SOURCE_DIR}/src/math/matrix.cc
     ${CMAKE_SOURCE_DIR}/src/math/vector.hpp
     ${CMAKE_SOURCE_DIR}/src/math/transform.h
     ${CMAKE_SOURCE_DIR}/src/math/transform.cc
