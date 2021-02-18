@@ -1,9 +1,9 @@
 # DiRender
 Not so tiny path tracer
 
-- Linux gcc-7 /clang-7
-
-[![Build Status](https://travis-ci.org/BlurryLight/DiRender.svg?branch=master)](https://travis-ci.org/BlurryLight/DiRender)
+- Linux gcc-7 /clang-7 / gcc-10 / clang-10
+  
+![Linux-CI](https://github.com/BlurryLight/DiRender/workflows/Linux-CI/badge.svg?branch=master)
 
 - Windows MSVC 2019
 
