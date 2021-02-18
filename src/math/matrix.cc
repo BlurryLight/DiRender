@@ -143,7 +143,7 @@ bool DR::Matrix4::is_identity() const {
   }
   return result;
 }
-std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4) {
+std::ostream &DR::operator<<(std::ostream &os, const Matrix4 &mat4) {
   for (const auto &row : mat4.m) {
     os << "[ ";
     for (const auto &elem : row) {

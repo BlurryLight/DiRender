@@ -126,6 +126,14 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
 
   *spp = toml::find<toml::integer>(data, "spp");
   std::cout << "spp: " << *spp << std::endl;
+
+  if(data.contains("background"))
+  {
+    const auto &bg_toml = toml::get<std::vector<float>>(data.at("background"));
+    for(int i = 0 ;i < 3;i++) {
+      scene->background_[i] = bg_toml[i];
+    }
+  }
   const auto &objects_toml = toml::find(data, "objects");
   try {
     const auto &names_vec =

@@ -44,7 +44,7 @@ public:
   static Matrix4 Inverse(const Matrix4 &mat);
   static Matrix4 Transpose(const Matrix4 &mat);
   static Matrix4 Multiply(const Matrix4 &lhs, const Matrix4 &rhs);
-
   friend std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4);
 };
+std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4);
 NAMESPACE_END(DR)

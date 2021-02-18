@@ -7,10 +7,10 @@ Vector3f DirectLightRenderer::cast_ray(
     const std::vector<std::shared_ptr<Primitive>> &lights, int depth) {
   // All rays will be scattered to the light direction when possible
   if (depth > 5)
-    return {0};
+    return background_;
   Intersection isect;
   if (!prim->Intersect(r, &isect))
-    return {0};
+    return background_;
 
   // Shadow ray
   Intersection light_pos;

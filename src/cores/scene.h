@@ -16,5 +16,6 @@ struct Scene {
   std::vector<std::shared_ptr<Camera>> cams_;
   std::vector<std::shared_ptr<Primitive>> prims_;
   std::vector<std::shared_ptr<Primitive>> light_shapes_;
+  Vector3f background_{0};
 };
 NAMESPACE_END(DR)

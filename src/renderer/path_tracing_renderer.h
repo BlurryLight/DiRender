@@ -15,5 +15,6 @@ protected:
                    const std::vector<std::shared_ptr<Primitive>> &lights,
                    int height, int width, int blockheight, int blockwidth,
                    int blockheightId, int blockwidthId, int spp);
+  Vector3f background_{0};
 };
 NAMESPACE_END(DR)

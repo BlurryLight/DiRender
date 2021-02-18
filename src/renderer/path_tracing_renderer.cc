@@ -19,11 +19,11 @@ Vector3f PathTracingRenderer::cast_ray(
     const std::vector<std::shared_ptr<Primitive>> &lights, int depth = 0) {
   float russian_roulette = 0.8f;
   if (depth > 5 || (depth != 0 && get_random_float() > russian_roulette))
-    return {0};
+    return background_;
 
   Intersection isect;
   if (!prim->Intersect(r, &isect))
-    return {0};
+    return background_;
 #ifndef NDEBUG
   // ray.origin; isect.coords; isect.normal
   static auto ray_logger = spdlog::get("ray_logger");
@@ -64,7 +64,7 @@ Vector3f PathTracingRenderer::cast_ray(
         }
         light_pdf = 1 / emit_area;
         float distance2 = (light_pos.coords - isect.coords).squared_length();
-        float cosine2 = 
+        float cosine2 =
             std::max(dot(-shadowray_direction, light_pos.normal), 0.0f);
         float cosine1 = std::max(dot(shadowray_direction, isect.normal), 0.0f);
         auto brdf =
@@ -127,6 +127,9 @@ void PathTracingRenderer::render(const Scene &scene) {
   } else {
     throw std::runtime_error("Scene has no primitive to render!");
   }
+  //set background
+  background_ = scene.background_;
+//  std::cout << "background:"<< background_<<std::endl;
 
   int index = 0;
   for (const auto &cam : scene.cams_) {
@@ -165,7 +168,7 @@ void PathTracingRenderer::render(const Scene &scene) {
     }
 #endif
     cam->film_ptr_->write("output_" + std::to_string(index++) +
-                              std::string(MapTypeToSuffix()(PicType::kJPG)),
+                          std::string(MapTypeToSuffix()(PicType::kJPG)),
                           PicType::kJPG);
     //    cam->film_ptr_->write_ppm("output" + std::to_string(index++) +
     //    ".ppm");
