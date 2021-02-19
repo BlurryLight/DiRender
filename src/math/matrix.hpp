@@ -9,6 +9,7 @@
 #endif
 
 NAMESPACE_BEGIN(DR)
+
 struct Matrix4;
 using mat4 = struct Matrix4;
 struct Matrix4 {
@@ -27,6 +28,8 @@ public:
   Matrix4 &operator=(const Matrix4 &other);
   bool operator==(const Matrix4 &other) const;
   bool operator!=(const Matrix4 &other) const;
+  auto &operator[](int index) { return m[index]; }
+  auto operator[](int index) const { return m[index]; }
   Matrix4 operator*(const Matrix4 &other) const {
     return this->multiply(other);
   }
@@ -40,10 +43,18 @@ public:
   Matrix4 multiply(const Matrix4 &other) const {
     return Matrix4::Multiply(*this, other);
   }
-//  const float *data() const;
+  //  const float *data() const;
   static Matrix4 Inverse(const Matrix4 &mat);
   static Matrix4 Transpose(const Matrix4 &mat);
   static Matrix4 Multiply(const Matrix4 &lhs, const Matrix4 &rhs);
+
+  static Matrix4 Translate(Vector3f vec);
+  static Matrix4 Translate(const Matrix4 &m, Vector3f vec);
+  static Matrix4 Rotate(float rad, Vector3f axis);
+  static Matrix4 Rotate(const Matrix4 &m, float rad, Vector3f vec);
+  static Matrix4 Scale(Vector3f vec);
+  static Matrix4 Scale(const Matrix4 &m, Vector3f vec);
+
   friend std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4);
 };
 std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4);

@@ -94,3 +94,94 @@ TEST(MATRIX4, basic) {
     EXPECT_EQ(mat_inv, Matrix4::Inverse(mat));
   }
 }
+TEST(MATRIX4, Transform) {
+
+  {
+    auto mat = Matrix4(4);
+    auto vec = vec3(1, 1, 1);
+    auto mat_new = Matrix4::Translate(mat, vec);
+    // clang-format off
+    auto ground_truth = mat4( 4,0,0,4,
+                              0,4,0,4,
+                              0,0,4,4,
+                              0,0,0,4);
+    // clang-format on
+    EXPECT_EQ(mat_new, ground_truth);
+  }
+  // rotation by x
+  {
+    auto mat_rot = Matrix4::Rotate(kPi_2, vec3(1.0, 0.0, 0.0));
+    // clang-format off
+      auto ground_truth = mat4( 1,0,0,0,
+                                0,0,-1,0,
+                                0,1,0,0,
+                                0,0,0,1);
+    // clang-format on
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        EXPECT_NEAR(ground_truth[i][j], mat_rot[i][j], 0.01);
+      }
+    }
+  }
+
+  // rotation by y
+  {
+    auto mat_rot = Matrix4::Rotate(kPi_2, vec3(0.0, 1.0, 0.0));
+    // clang-format off
+    auto ground_truth = mat4( 0,0,1,0,
+                              0,1,0,0,
+                              -1,0,0,0,
+                              0,0,0,1);
+    // clang-format on
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        EXPECT_NEAR(ground_truth[i][j], mat_rot[i][j], 0.01);
+      }
+    }
+  }
+
+  // rotation by z
+  {
+    auto mat_rot = Matrix4::Rotate(kPi_2, vec3(0.0, 0.0, 1.0));
+    // clang-format off
+    auto ground_truth = mat4( 0,-1,0,0,
+                              1,0,0,0,
+                              0,0,1,0,
+                              0,0,0,1);
+    // clang-format on
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        EXPECT_NEAR(ground_truth[i][j], mat_rot[i][j], 0.01);
+      }
+    }
+  }
+
+  // rotation by any axis
+  {
+    auto mat_rot = Matrix4::Rotate(kPi_2, vec3(1.0, 1.0, 1.0));
+    // clang-format off
+    auto ground_truth = mat4( 0.333333,-0.244017,0.910684,0,
+                              0.910684,0.333333,-0.244017,0,
+                              -0.244017,0.910684,0.333333,0,
+                              0,0,0,1);
+    // clang-format on
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        EXPECT_NEAR(ground_truth[i][j], mat_rot[i][j], 0.01);
+      }
+    }
+  }
+
+  // scale
+  {
+    auto gt = mat4(0.5);
+    gt[3][3] = 1.0f;
+    auto mat_scale = Matrix4::Scale(vec3(0.5f));
+
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        EXPECT_NEAR(gt[i][j], mat_scale[i][j], 0.01);
+      }
+    }
+  }
+}
