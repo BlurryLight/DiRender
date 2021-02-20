@@ -35,17 +35,15 @@ int main(int argc, char **argv) {
   if (argc > 1)
     filename = argv[1];
 
+  std::unique_ptr<DR::Renderer> rd{nullptr};
+  int spp = 32;
 #ifdef NDEBUG
   int nthreads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << nthreads << std::endl;
-  DR::PathTracingRenderer rd(spp, nthreads);
-//  DR::DirectLightRenderer rd(spp, nthreads);
 #else
   std::cout << "Running in Debug Mode: MultiThread Mode has been off."
             << std::endl;
-
-  std::unique_ptr<DR::Renderer> rd{nullptr};
-  int spp = 32;
+#endif
   if (argc > 2 && !strcmp(argv[2], "txt")) {
     DR::IMPL::parse_scene_txt(filename, &scene, &spp);
     scene.background_ += {1.0};
@@ -58,7 +56,6 @@ int main(int argc, char **argv) {
     rd = std::make_unique<DR::PathTracingRenderer>(1, 1);
 #endif
   }
-#endif
   DR::HRTimer timer;
   timer.start();
   rd->render(scene);
