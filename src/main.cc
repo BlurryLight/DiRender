@@ -2,6 +2,7 @@
 #include <cameras/pinhole_camera.h>
 #include <material/matte_material.h>
 #include <math/geometry.hpp>
+#include <renderer/bling_phong_renderer.h>
 #include <renderer/direct_light_renderer.h>
 #include <renderer/path_tracing_renderer.h>
 #include <shapes/sphere.h>
@@ -10,6 +11,7 @@
 #include <utils/cmake_vars.h>
 #include <utils/high_resolution_timer.h>
 #include <utils/parse_scene.hpp>
+#include <utils/parse_scene_txt.hpp>
 //#define NDEBUG
 #include <spdlog/async.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -33,8 +35,6 @@ int main(int argc, char **argv) {
   if (argc > 1)
     filename = argv[1];
 
-  int spp = 32;
-  DR::parse_scene(filename, &scene, &spp);
 #ifdef NDEBUG
   int nthreads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << nthreads << std::endl;
@@ -43,12 +43,25 @@ int main(int argc, char **argv) {
 #else
   std::cout << "Running in Debug Mode: MultiThread Mode has been off."
             << std::endl;
-  DR::PathTracingRenderer rd(1, 1);
-//  DR::DirectLightRenderer rd(1, 1);
+
+  std::unique_ptr<DR::Renderer> rd{nullptr};
+  int spp = 32;
+  if (argc > 2 && !strcmp(argv[2], "txt")) {
+    DR::IMPL::parse_scene_txt(filename, &scene, &spp);
+    scene.background_ += {1.0};
+    rd = std::make_unique<DR::BlingPhongRenderer>(1, 1);
+  } else {
+    DR::parse_scene(filename, &scene, &spp);
+#ifdef NDEBUG
+    rd = std::make_unique<DR::PathTracingRenderer>(spp, nthreads);
+#else
+    rd = std::make_unique<DR::PathTracingRenderer>(1, 1);
+#endif
+  }
 #endif
   DR::HRTimer timer;
   timer.start();
-  rd.render(scene);
+  rd->render(scene);
   timer.end();
   std::cout << std::endl;
   std::cout << timer.elapsed() << " ms" << std::endl;

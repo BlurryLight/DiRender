@@ -1,5 +1,8 @@
 #include <math/transform.h>
 using namespace DR;
+// FIXME: the table should be managed by Scene class
+// FIXME: the Entry should be
+//  <Transform, const std::shared_ptr<const Transform>>
 std::map<Transform, std::shared_ptr<Transform>> Transform::TransformTable =
     std::map<Transform, std::shared_ptr<Transform>>{};
 

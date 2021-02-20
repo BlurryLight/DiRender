@@ -26,7 +26,7 @@ Vector3f DirectLightRenderer::cast_ray(
   std::tie(light_pos, light_pdf) = lights.at(index)->sample(isect.coords);
   Vector3f L_in = {0};
   Vector3f new_direction;
-  float pdf;
+  float pdf{0};
   if (light_pdf == 0.0f) { // not visible
     ignore(pdf);
     return Vector3f(0.0);

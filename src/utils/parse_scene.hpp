@@ -18,9 +18,8 @@ NAMESPACE_END(DR_D)
 NAMESPACE_BEGIN(DR)
 NAMESPACE_BEGIN(impl)
 
-template <typename T>
 // This function is also called by debugger to render in OpenGL
-inline auto parse_camera_data_impl(const T &data) {
+inline auto parse_camera_data_impl(const toml::value &data) {
   std::vector<std::tuple<Point3f, vec3, vec3, float, float, float, std::string>>
       res;
   const auto &cams_toml = toml::find(data, "cameras");
@@ -50,11 +49,10 @@ inline auto parse_camera_data_impl(const T &data) {
   }
   return res;
 }
-template <typename T>
-inline void parse_camera_data(Scene *scene, const T &data) {
+inline void parse_camera_data(Scene *scene, const toml::value &data) {
   auto res = parse_camera_data_impl(data);
   for (const auto &cam_data : res) {
-    const auto& [origin, up, lookat, fov, height, width, type] = cam_data;
+    const auto &[origin, up, lookat, fov, height, width, type] = cam_data;
     std::shared_ptr<Camera> cam = nullptr;
     if (type == "pinhole") {
       cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov, height,
@@ -63,8 +61,7 @@ inline void parse_camera_data(Scene *scene, const T &data) {
     scene->add(cam);
   }
 }
-template <typename T>
-inline void parse_material_data(const T &material_toml,
+inline void parse_material_data(const toml::value &material_toml,
                                 std::shared_ptr<Material> &mat_ptr,
                                 bool &has_emission) {
   // material parse
@@ -117,7 +114,9 @@ inline void parse_material_data(const T &material_toml,
   throw std::runtime_error("Unsupported material type: " +
                            toml::get<std::string>(material_toml.at("type")));
 }
+
 NAMESPACE_END(impl)
+
 inline void parse_scene(std::string filename, Scene *scene, int *spp) {
   auto data = toml::parse(filename);
 
@@ -127,10 +126,9 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
   *spp = toml::find<toml::integer>(data, "spp");
   std::cout << "spp: " << *spp << std::endl;
 
-  if(data.contains("background"))
-  {
+  if (data.contains("background")) {
     const auto &bg_toml = toml::get<std::vector<float>>(data.at("background"));
-    for(int i = 0 ;i < 3;i++) {
+    for (int i = 0; i < 3; i++) {
       scene->background_[i] = bg_toml[i];
     }
   }
@@ -202,4 +200,5 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
     return;
   }
 }
+
 NAMESPACE_END(DR)
