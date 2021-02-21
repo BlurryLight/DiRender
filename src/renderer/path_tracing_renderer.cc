@@ -10,7 +10,9 @@
 #ifndef NDEBUG
 // log
 // https://github.com/gabime/spdlog/wiki/0.-FAQ#winapi-minmax-macro-definitions
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <spdlog/spdlog.h>
 #endif
 using namespace DR;
@@ -113,7 +115,7 @@ void PathTracingRenderer::render_tile(
 }
 //#define NDEBUG
 void PathTracingRenderer::render(const Scene &scene) {
-
+  scene_ = &scene;
   std::shared_ptr<Primitive> hit_list = nullptr;
   if (scene.prims_.size() > 0) {
     if (scene.prims_.size() > 1) {

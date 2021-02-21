@@ -96,8 +96,14 @@ std::pair<Intersection, float> Sphere::sample(const Point3f &ref) const {
   float y = sin(phi) * sqrt(1 - z * z);
 
   auto localPoint = Point3f{x, y, z};
-  result.coords = (*LocalToWorld)(radius_ * localPoint);
-  result.normal = (*LocalToWorld)(static_cast<Normal3f>(localPoint),
-                                  this->reverseOrientation);
-  return {result, pdf};
+  auto coords = (*LocalToWorld)(radius_ * localPoint);
+  Ray r(ref, coords - ref);
+  if (this->Intersect(r)) {
+    result.coords = coords;
+    result.normal = (*LocalToWorld)(static_cast<Normal3f>(localPoint),
+                                    this->reverseOrientation);
+    return {result, pdf};
+  }
+  // if the sample point is not visible to ref
+  return {result, 0.0};
 }

@@ -66,9 +66,14 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
       vec3 diffuse;
       vec3 specular;
       vec3 emission;
-      vec3 ambient;
       float shininess;
+      vec3 ambient{0.2};
     } mp{};
+
+    struct lightProperty {
+      vec3 emission;
+      vec3 attenuation{1, 0, 0};
+    } lp;
 
     std::vector<std::shared_ptr<Primitive>> objects;
     getline(in, str);
@@ -108,11 +113,9 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
               // FIXME: potential self-assign
               trans = Transform::TransformTable.at(*trans);
               trans_inv = Transform::TransformTable.at(*trans_inv);
-              auto emission = Vector3f{values[4], values[5], values[6]};
-              auto texture_ptr =
-                  std::make_shared<DR::ConstantTexture>(emission);
-              std::shared_ptr<Material> mat_ptr =
-                  std::make_shared<DR::MatteMaterial>(texture_ptr, emission);
+              lp.emission = Vector3f{values[4], values[5], values[6]};
+              auto mat_ptr = std::make_shared<DR::phong_material_for_light>(
+                  lp.emission, lp.attenuation);
               // Point light is not currently supported by my tracer
               // we need to create a shape for it
               float radius = 0.0001f;
@@ -127,12 +130,6 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
             }
           }
         }
-
-        // Material Commands
-        // Ambient, diffuse, specular, shininess properties for each object.
-        // Filling this in is pretty straightforward, so I've left it in
-        // the skeleton, also as a hint of how to do the more complex ones.
-        // Note that no transforms/stacks are applied to the colors.
 
         else if (cmd == "ambient") {
           validinput = readvals(s, 4, values); // colors

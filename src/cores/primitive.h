@@ -41,11 +41,15 @@ struct GeometricPrimitive : public Primitive {
   }
 
   virtual std::pair<Intersection, float> sample() const override {
-    return this->shape_->sample();
+    auto res = this->shape_->sample();
+    res.first.mat_ptr = mat_.get();
+    return res;
   }
   virtual std::pair<Intersection, float>
   sample(const Point3f &ref) const override {
-    return this->shape_->sample(ref);
+    auto res = this->shape_->sample(ref);
+    res.first.mat_ptr = mat_.get();
+    return res;
   }
   virtual float Area() const override { return shape_->Area(); }
 

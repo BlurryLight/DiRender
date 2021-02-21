@@ -27,6 +27,8 @@ protected:
   DR::ThreadPool pool_;
   int count_ = 0;
   std::mutex mutex_;
+  // has no ownership
+  const Scene *scene_;
 };
 
 NAMESPACE_END(DR)
