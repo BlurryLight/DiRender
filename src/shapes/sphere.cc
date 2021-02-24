@@ -6,7 +6,7 @@ static bool solveQuadratic(const float &a, const float &b, const float &c,
   float discr = b * b - 4 * a * c;
   if (discr < 0)
     return false;
-  else if (discr == 0)
+  else if (almost_equal(discr, 0))
     x0 = x1 = -0.5 * b / a;
   else {
     float q = (b > 0) ? -0.5 * (b + sqrt(discr)) : -0.5 * (b - sqrt(discr));
@@ -25,11 +25,13 @@ Bounds3 Sphere::ObjectBounds() const {
 }
 
 bool Sphere::Intersect(const Ray &ray, float *time, Intersection *isect) const {
+  // some code is wrong with the WorldToObject transformation
+  // so I change it to LocaltoWorld
   Intersection result;
-  Ray objRay = (*WorldToObject)(ray);
-  Vector3f L = objRay.origin_ - Point3f{0.0f};
-  float a = dot(objRay.direction_, objRay.direction_);
-  float b = 2 * dot(objRay.direction_, L);
+  auto world_center = (*LocalToWorld)(Point3f(0.0));
+  Vector3f L = ray.origin_ - world_center;
+  float a = dot(ray.direction_, ray.direction_);
+  float b = 2 * dot(ray.direction_, L);
   float c = dot(L, L) - radius_ * radius_;
   float t0, t1;
   if (!solveQuadratic(a, b, c, t0, t1))
@@ -45,7 +47,8 @@ bool Sphere::Intersect(const Ray &ray, float *time, Intersection *isect) const {
     if (isect != nullptr) {
       isect->happened = true;
       isect->coords = ray.at(t0);
-      auto local_normal = (objRay.at(t0) - Point3f{0.0f}).normalize();
+      auto local_normal =
+          ((*WorldToObject)(ray.at(t0)) - Point3f{0.0f}).normalize();
       // from https://en.wikipedia.org/wiki/UV_mapping
       float u = 0.5 + std::atan2(local_normal.z, local_normal.x) * k1_2Pi;
       float v = 0.5 - std::asin(local_normal.y) * k1_Pi;

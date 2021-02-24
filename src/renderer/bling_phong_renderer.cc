@@ -53,49 +53,7 @@ Vector3f BlingPhongRenderer::cast_ray(
     // the isect has been on light
     // because light material is phong_material_for_light
     // just return the emission
+    std::cerr << "Bad cast :" << e.what() << std::endl;
     return dynamic_cast<phong_material_for_light *>(isect.mat_ptr)->emission_;
   }
-
-  //  // Shadow ray
-  //  Intersection light_pos;
-  //  float light_pdf = 0;
-  //  int size = lights.size();
-  //  if (size == 0) {
-  //    throw std::runtime_error("BlingPhongRenderer needs at least one
-  //    light!");
-  //  }
-  //  // uniform sample lights
-  //  int index = std::floor(size * get_random_float(0.0, 0.99));
-  //  // we hope the sample is visible from the isect.coords
-  //  // if return {pos,0.0}, the sample is not visible.
-  //  std::tie(light_pos, light_pdf) = lights.at(index)->sample(isect.coords);
-  //  Vector3f L_in = {0};
-  //  Vector3f new_direction;
-  //  float pdf{0};
-  //  if (light_pdf == 0.0f) { // not visible
-  //    ignore(pdf);
-  //    return Vector3f(0.0);
-  //  } else {
-  //    float emit_area = 0;
-  //    for (const auto &i : lights) {
-  //      emit_area += i->Area();
-  //    }
-  //    light_pdf = 1 / emit_area;
-  //    new_direction = (light_pos.coords - isect.coords).normalize();
-  //    float distance2 = (light_pos.coords - isect.coords).squared_length();
-  //    float cosine = std::fabs(dot(-new_direction, light_pos.normal));
-  //    if (cosine < 0.01f) {
-  //      return isect.mat_ptr->evalEmitted(r.direction_, isect);
-  //    }
-  //    pdf = distance2 * (1 / cosine) * (light_pdf);
-  //  }
-  //  Ray r_new(isect.coords, new_direction);
-  //  auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect,
-  //  r_new.direction_); L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
-  //
-  //  auto part1 = cast_ray(r_new, prim, lights, depth + 1);
-  //  auto part2 = multiply(brdf, part1);
-  //  L_in += part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
-  //          (pdf + kEpsilon); // avoid zero
-  //  return L_in;
 }

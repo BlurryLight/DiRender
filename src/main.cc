@@ -46,7 +46,6 @@ int main(int argc, char **argv) {
 #endif
   if (argc > 2 && !strcmp(argv[2], "txt")) {
     DR::IMPL::parse_scene_txt(filename, &scene, &spp);
-    scene.background_ += {1.0};
 #ifdef NDEBUG
     rd = std::make_unique<DR::BlingPhongRenderer>(spp, nthreads);
 #else

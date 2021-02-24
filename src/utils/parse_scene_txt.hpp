@@ -24,7 +24,7 @@
 namespace DR {
 namespace IMPL {
 inline constexpr int kMaxNumLights = 10;
-inline constexpr int kMaxNumObjects = 20;
+inline constexpr int kMaxNumObjects = 200;
 
 // Function to read the input data values
 // Use is optional, but should be very helpful in parsing.
@@ -32,11 +32,30 @@ bool readvals(std::stringstream &s, const int numvals, float *values) {
   for (int i = 0; i < numvals; i++) {
     s >> values[i];
     if (s.fail()) {
-      std::cout << "Failed reading value " << i << " will skip\n";
+      std::cout << "Failed reading value " << i << " will skip" << s.str()
+                << "\n";
       return false;
     }
   }
   return true;
+}
+
+// copy from
+// https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
+static std::vector<std::string> split(const std::string &str,
+                                      const std::string &delim) {
+  std::vector<std::string> tokens;
+  size_t prev = 0, pos = 0;
+  do {
+    pos = str.find(delim, prev);
+    if (pos == std::string::npos)
+      pos = str.length();
+    std::string token = str.substr(prev, pos - prev);
+    if (!token.empty())
+      tokens.push_back(token);
+    prev = pos + delim.length();
+  } while (pos < str.length() && prev < str.length());
+  return tokens;
 }
 
 inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
@@ -75,7 +94,58 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
       vec3 attenuation{1, 0, 0};
     } lp;
 
+    // parse triangles
+    std::vector<std::string> vertices;
+    std::vector<std::string> indices;
+    std::string vertices_str;
+    int obj_index = 0;
     std::vector<std::shared_ptr<Primitive>> objects;
+    auto write_obj_then_load = [&]() {
+      if (vertices_str.empty()) {
+        for (const auto &line : vertices) {
+          std::string tmp = "v ";
+          auto tokens = split(line, " ");
+          assert(tokens.size() > 2);
+          for (size_t i = 1; i < tokens.size(); i++) {
+            tmp += tokens[i];
+            tmp += " ";
+          }
+          tmp.erase(tmp.end() - 1);
+          tmp += '\n';
+          vertices_str += tmp;
+        }
+      }
+      std::string vertices_index_str;
+      for (const auto &line : indices) {
+        std::string tmp = "f ";
+        auto tokens = split(line, " ");
+        assert(tokens.size() > 2);
+        for (size_t i = 1; i < tokens.size(); i++) {
+          tmp += std::to_string(
+              std::stoi(tokens[i]) +
+              1); // the face id begins with 0 at CSE168,but 1 at obj
+          tmp += " ";
+        }
+        tmp.erase(tmp.end() - 1);
+        tmp += '\n';
+        vertices_index_str += tmp;
+      }
+      vertices.clear();
+      std::string path = "obj_" + std::to_string(obj_index++) + ".obj";
+      std::ofstream obj(path);
+      obj << vertices_str;
+      obj << vertices_index_str;
+      obj.close();
+
+      auto trans =
+          Transform::TransformTable.at(Transform{trans_stack.top().first});
+      auto trans_inv =
+          Transform::TransformTable.at(Transform{trans_stack.top().second});
+      auto mat_ptr = std::make_shared<phong_material>(
+          mp.diffuse, mp.specular, mp.shininess, mp.emission, mp.ambient);
+      Model model(trans, path, mat_ptr);
+      objects.push_back(model.model_ptr);
+    };
     getline(in, str);
     while (in) {
       if ((str.find_first_not_of(" \t\r\n") != std::string::npos) &&
@@ -91,12 +161,12 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
 
         // Process the light, add it to database.
         // Lighting Command
-        if (cmd == "light") {
+        if (cmd == "directional" || cmd == "point") {
           if (numlights >= kMaxNumLights) { // No more Lights
             std::cerr << "Reached Maximum Number of Lights " << numlights
                       << " Will ignore further lights\n";
           } else {
-            validinput = readvals(s, 8, values); // Position/color for lts.
+            validinput = readvals(s, 6, values); // Position/color for lts.
             if (validinput) {
 
               auto translate_mat =
@@ -113,7 +183,7 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
               // FIXME: potential self-assign
               trans = Transform::TransformTable.at(*trans);
               trans_inv = Transform::TransformTable.at(*trans_inv);
-              lp.emission = Vector3f{values[4], values[5], values[6]};
+              lp.emission = Vector3f{values[3], values[4], values[5]};
               auto mat_ptr = std::make_shared<DR::phong_material_for_light>(
                   lp.emission, lp.attenuation);
               // Point light is not currently supported by my tracer
@@ -132,29 +202,32 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
         }
 
         else if (cmd == "ambient") {
-          validinput = readvals(s, 4, values); // colors
+          validinput = readvals(s, 3, values); // colors
           if (validinput) {
+            if (!indices.empty()) {
+              write_obj_then_load();
+            }
             // FIXME: support alpha channel
             for (i = 0; i < 3; i++) {
               mp.ambient[i] = values[i];
             }
           }
         } else if (cmd == "diffuse") {
-          validinput = readvals(s, 4, values);
+          validinput = readvals(s, 3, values);
           if (validinput) {
             for (i = 0; i < 3; i++) {
               mp.diffuse[i] = values[i];
             }
           }
         } else if (cmd == "specular") {
-          validinput = readvals(s, 4, values);
+          validinput = readvals(s, 3, values);
           if (validinput) {
             for (i = 0; i < 3; i++) {
               mp.specular[i] = values[i];
             }
           }
         } else if (cmd == "emission") {
-          validinput = readvals(s, 4, values);
+          validinput = readvals(s, 3, values);
           if (validinput) {
             for (i = 0; i < 3; i++) {
               mp.emission[i] = values[i];
@@ -299,6 +372,10 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
           } else {
             trans_stack.pop();
           }
+        } else if (cmd == "tri") {
+          indices.push_back(str);
+        } else if (cmd == "vertex") {
+          vertices.push_back(str);
         }
 
         else {
@@ -306,6 +383,9 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
         }
       }
       getline(in, str);
+    }
+    if (!indices.empty()) {
+      write_obj_then_load();
     }
     auto bvh_tree = std::make_shared<BVHTree>(objects);
     scene->add(bvh_tree);
