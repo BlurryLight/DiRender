@@ -131,16 +131,26 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
         vertices_index_str += tmp;
       }
       vertices.clear();
+      indices.clear();
       std::string path = "obj_" + std::to_string(obj_index++) + ".obj";
       std::ofstream obj(path);
       obj << vertices_str;
       obj << vertices_index_str;
+      obj << "# Ambient: " << mp.ambient; // for debug use
+      //      obj << "# Transformation" << trans_stack.top().first; // for debug
+      //      use
       obj.close();
+      auto trans_tmp = std::make_shared<Transform>(trans_stack.top().first);
+      auto trans_tmp_inv =
+          std::make_shared<Transform>(trans_stack.top().second);
 
-      auto trans =
-          Transform::TransformTable.at(Transform{trans_stack.top().first});
-      auto trans_inv =
-          Transform::TransformTable.at(Transform{trans_stack.top().second});
+      if (!Transform::TransformTable.count(*trans_tmp)) {
+        Transform::TransformTable.insert({*trans_tmp, trans_tmp});
+        Transform::TransformTable.insert({*trans_tmp_inv, trans_tmp_inv});
+      }
+      auto trans = Transform::TransformTable.at(*trans_tmp);
+      auto trans_inv = Transform::TransformTable.at(*trans_tmp_inv);
+
       auto mat_ptr = std::make_shared<phong_material>(
           mp.diffuse, mp.specular, mp.shininess, mp.emission, mp.ambient);
       Model model(trans, path, mat_ptr);
@@ -325,8 +335,13 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
                 Matrix4::Translate({values[0], values[1], values[2]});
             auto translate_inv = Matrix4::Inverse(translate);
             auto &top = trans_stack.top();
-            top.first = translate * top.first;
-            top.second = top.second * translate_inv;
+
+            std::cout << "translate:" << std::endl;
+            std::cout << translate << std::endl;
+            std::cout << "after translate" << '\n'
+                      << top.first * translate << std::endl;
+            top.first = top.first * translate;
+            top.second = translate_inv * top.second;
           }
         } else if (cmd == "scale") {
           validinput = readvals(s, 3, values);
@@ -340,7 +355,12 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
             auto scale = Matrix4::Scale({values[0], values[1], values[2]});
             auto scale_inv = Matrix4::Inverse(scale);
             auto &top = trans_stack.top();
-            top.first = scale * top.first;
+
+            std::cout << "scale:" << std::endl;
+            std::cout << scale << std::endl;
+            std::cout << "after scale" << '\n'
+                      << top.first * scale << std::endl;
+            top.first = top.first * scale;
             top.second = top.second * scale_inv;
           }
         } else if (cmd == "rotate") {
@@ -351,8 +371,12 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
                 Matrix4::Rotate(rad, {values[0], values[1], values[2]});
             auto rotation_inv = Matrix4::Inverse(rotation);
             auto &top = trans_stack.top();
-            top.first = rotation * top.first;
-            top.second = top.second * rotation_inv;
+            std::cout << "rotation:" << std::endl;
+            std::cout << rotation << std::endl;
+            std::cout << "after rotation" << '\n'
+                      << top.first * rotation << std::endl;
+            top.first = top.first * rotation;
+            top.second = rotation_inv * top.second;
 
             // YOUR CODE FOR HW 2 HERE.
             // values[0..2] are the axis, values[3] is the angle.
@@ -367,6 +391,9 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
         else if (cmd == "pushTransform") {
           trans_stack.push(trans_stack.top());
         } else if (cmd == "popTransform") {
+          if (!indices.empty()) {
+            write_obj_then_load();
+          }
           if (trans_stack.size() <= 1) {
             std::cerr << "Stack has no elements.  Cannot Pop\n";
           } else {

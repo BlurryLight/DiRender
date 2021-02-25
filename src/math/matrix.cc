@@ -152,7 +152,7 @@ std::ostream &DR::operator<<(std::ostream &os, const Matrix4 &mat4) {
   return os;
 }
 Matrix4 Matrix4::Rotate(const Matrix4 &m, float rad, Vector3f vec) {
-  return Matrix4::Rotate(rad, vec) * m;
+  return m * Matrix4::Rotate(rad, vec);
 }
 
 Matrix4 Matrix4::Scale(Vector3f vec) {
@@ -163,7 +163,7 @@ Matrix4 Matrix4::Scale(Vector3f vec) {
   return mat;
 }
 Matrix4 Matrix4::Scale(const Matrix4 &m, Vector3f vec) {
-  return Matrix4::Scale(vec) * m;
+  return m * Matrix4::Scale(vec);
 }
 
 // right hand axis
@@ -227,7 +227,7 @@ Matrix4 Matrix4::Translate(Vector3f vec) {
   return mat;
 }
 Matrix4 Matrix4::Translate(const Matrix4 &m, Vector3f vec) {
-  return Matrix4::Translate(vec) * m;
+  return m * Matrix4::Translate(vec);
 }
 
 #else

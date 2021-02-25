@@ -34,9 +34,7 @@ Point3f Transform::operator()(const Point3f &other) const {
       m_.m[1][0] * x + m_.m[1][1] * y + m_.m[1][2] * z + m_.m[1][3] * 1.0f;
   float tz =
       m_.m[2][0] * x + m_.m[2][1] * y + m_.m[2][2] * z + m_.m[2][3] * 1.0f;
-  float tw =
-      m_.m[3][0] * x + m_.m[3][1] * y + m_.m[3][2] * z + m_.m[3][3] * 1.0f;
-  return {tx / tw, ty / tw, tz / tw};
+  return {tx, ty, tz};
 }
 
 Vector3f Transform::operator()(const Vector3f &other) const {
@@ -77,5 +75,5 @@ Ray Transform::operator()(const Ray &other) const {
   const Transform &M = (*this);
   Point3f o = M(other.origin_);
   Vector3f d = M(other.direction_);
-  return Ray(o, d, other.tMax_, other.tMin_);
+  return Ray(o, d, other.tMax_, other.tMin_, false);
 }
