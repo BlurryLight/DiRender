@@ -2,6 +2,7 @@
 // Created by panda on 2021/2/18.
 //
 #include <math/matrix.hpp>
+#include <spdlog/fmt/fmt.h>
 using namespace DR;
 #ifndef DI_USE_GLM
 bool DR::Matrix4::is_identity() const {
@@ -317,3 +318,17 @@ std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4) {
 }
 
 #endif
+size_t std::hash<DR::Matrix4>::operator()(const DR::Matrix4 &mat) {
+  // clang-format off
+  std::string mat_str = fmt::format(
+      "{:.4f},{:.4f},{:.4f},{:.4f},"
+               "{:.4f},{:.4f},{:.4f},{:.4f},"
+               "{:.4f},{:.4f},{:.4f},{:.4f},"
+               "{:.4f},{:.4f},{:.4f},{:.4f}",
+              mat[0][0], mat[0][1], mat[0][2], mat[0][3],
+              mat[1][0], mat[1][1], mat[1][2], mat[1][3],
+              mat[2][0], mat[2][1], mat[2][2], mat[2][3],
+              mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+  // clang-format on
+  return std::hash<std::string>{}(mat_str);
+}

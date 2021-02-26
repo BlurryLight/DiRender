@@ -1,13 +1,7 @@
-#include <accelerator/linear_list.h>
-#include <cameras/pinhole_camera.h>
-#include <material/matte_material.h>
 #include <math/geometry.hpp>
 #include <renderer/bling_phong_renderer.h>
 #include <renderer/direct_light_renderer.h>
 #include <renderer/path_tracing_renderer.h>
-#include <shapes/sphere.h>
-#include <shapes/triangle.h>
-#include <utils/OBJ_Loader_wrapper.h>
 #include <utils/cmake_vars.h>
 #include <utils/high_resolution_timer.h>
 #include <utils/parse_scene.hpp>

@@ -77,3 +77,9 @@ Ray Transform::operator()(const Ray &other) const {
   Vector3f d = M(other.direction_);
   return Ray(o, d, other.tMax_, other.tMin_, false);
 }
+
+size_t std::hash<DR::Transform>::operator()(const DR::Transform &tf) {
+  auto h1 = std::hash<DR::Matrix4>{}(tf.m_);
+  auto h2 = std::hash<DR::Matrix4>{}(tf.mInv_);
+  return h1 ^ (h2 << 1);
+}

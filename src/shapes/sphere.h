@@ -16,8 +16,6 @@ public:
          std::shared_ptr<Transform> WorldToLocal, bool reverseOrientation,
          float radius)
       : Shape(LocalToWorld, WorldToLocal, reverseOrientation), radius_(radius) {
-    auto mat = (LocalToWorld->m_.multiply(WorldToLocal->m_));
-    ignore(mat);
   }
   ~Sphere() {}
   Bounds3 WorldBounds() const override;

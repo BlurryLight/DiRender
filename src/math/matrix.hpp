@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <functional>
 #include <iostream>
 #include <math/math_utils.hpp>
 #include <math/vector.hpp>
@@ -59,3 +60,10 @@ public:
 };
 std::ostream &operator<<(std::ostream &os, const Matrix4 &mat4);
 NAMESPACE_END(DR)
+
+namespace std {
+template <> class hash<DR::Matrix4> {
+public:
+  size_t operator()(const DR::Matrix4 &mat);
+};
+} // namespace std
