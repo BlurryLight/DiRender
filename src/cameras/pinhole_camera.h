@@ -1,7 +1,7 @@
 #pragma once
 #include <cameras/camera.h>
 NAMESPACE_BEGIN(DR)
-class Scene;
+struct Scene;
 class PinholeCamera : public Camera {
 public:
   Ray get_ray(float u, float v) const override;
