@@ -13,7 +13,8 @@
 #pragma GCC diagnostic pop
 #endif
 using namespace DR;
-Model::Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path,
+Model::Model(observer_ptr<Transform> LocalToWorld,
+             observer_ptr<Transform> WorldToLocal, const std::string &path,
              std::shared_ptr<Material> material) {
   objl::Loader loader;
   if (!loader.LoadFile(path)) {
@@ -53,9 +54,7 @@ Model::Model(std::shared_ptr<Transform> LocalToWorld, const std::string &path,
     for (int tri_index = 0; tri_index < meshes[mesh_index]->nTriangles;
          tri_index++) {
       auto tri_shape = std::make_shared<Triangle>(
-          LocalToWorld,
-          std::make_shared<Transform>(Transform::Inverse(*LocalToWorld)), false,
-          meshes[mesh_index], tri_index);
+          LocalToWorld, WorldToLocal, false, meshes[mesh_index], tri_index);
       tris.emplace_back(
           std::make_shared<GeometricPrimitive>(tri_shape, material)
 

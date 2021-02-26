@@ -21,6 +21,7 @@ constexpr float k1_Pi = 0.31830988618379067154; // 1/pi
 constexpr float k1_2Pi = 0.15915494309189535;
 constexpr float k2_Pi = 0.63661977236758134308; // 2/pi
 constexpr float kSqrt2 = 1.41421356237309504880;
+constexpr float kAbsTolerance = 0.0001;
 
 template <typename T>
 inline T clamp(const T &low, const T &high, const T &value) {
@@ -56,6 +57,14 @@ inline bool almost_equal(float x, float y,
   if (x == y)
     return true;
   return impl::boost_epsilon_difference(x, y) < ulp_num;
+}
+
+inline bool abs_almost_equal(float x, float y,
+                             float precision = kAbsTolerance) // abs tolerance
+{
+  if (x == y)
+    return true;
+  return std::abs(x - y) < precision;
 }
 
 inline float deg2rad(const float &deg) { return deg * kPi / 180.0f; }

@@ -12,15 +12,15 @@ struct TriangleMesh {
   std::unique_ptr<std::vector<Normal3f>> normals = nullptr;
   std::unique_ptr<std::vector<Point2f>> uvs = nullptr;
   std::unique_ptr<std::vector<Vector3f>> edges = nullptr;
-  TriangleMesh(std::shared_ptr<Transform> LocalToWorld, int nTriangles,
+  TriangleMesh(observer_ptr<Transform> LocalToWorld, int nTriangles,
                int nVertices, const DR::uint *vertexIndices,
                const Point3f *vertices, const Normal3f *normals,
                const DR::Point2f *uvs, const int *faceIndices);
 };
 class Triangle final : public Shape {
 public:
-  Triangle(std::shared_ptr<Transform> LocalToWorld,
-           std::shared_ptr<Transform> WorldToLocal, bool reverse,
+  Triangle(observer_ptr<Transform> LocalToWorld,
+           observer_ptr<Transform> WorldToLocal, bool reverse,
            const std::shared_ptr<TriangleMesh> &mesh, int triIndex)
       : Shape(LocalToWorld, WorldToLocal, reverse), mesh_(mesh) {
     vertexIndex_ = &mesh_->vertexIndices[3 * triIndex];

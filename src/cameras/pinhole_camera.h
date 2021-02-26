@@ -1,11 +1,12 @@
 #pragma once
 #include <cameras/camera.h>
 NAMESPACE_BEGIN(DR)
+class Scene;
 class PinholeCamera : public Camera {
 public:
   Ray get_ray(float u, float v) const override;
   PinholeCamera(Point3f origin, Vector3f WorldUp, Vector3f target, float fov,
-                uint height, uint width);
+                uint height, uint width, observer_ptr<Scene> scene);
 
 private:
   Vector3f left_bottom_corner_;

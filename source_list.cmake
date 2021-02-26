@@ -30,6 +30,7 @@ set(SAMPLER_SOURCE
 
 set(CAMERAS_SOURCE
         ${CMAKE_SOURCE_DIR}/src/cameras/camera.h
+        ${CMAKE_SOURCE_DIR}/src/cameras/camera.cc
         ${CMAKE_SOURCE_DIR}/src/cameras/pinhole_camera.cc
         ${CMAKE_SOURCE_DIR}/src/cameras/pinhole_camera.h
         )

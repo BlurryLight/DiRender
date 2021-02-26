@@ -9,12 +9,13 @@ Ray PinholeCamera::get_ray(float u, float v) const {
 }
 
 PinholeCamera::PinholeCamera(Point3f origin, Vector3f WorldUp, Vector3f target,
-                             float fov, uint height, uint width)
-    : Camera(origin, WorldUp, target, fov, height, width) {
+                             float fov, uint height, uint width,
+                             observer_ptr<Scene> scene)
+    : Camera(origin, WorldUp, target, fov, height, width, scene) {
   float theta = deg2rad(fov);
   float h = std::tan(theta / 2.0f);
   h = 2 * h;
-  float w = aspect_raio_ * h;
+  float w = aspect_ratio_ * h;
   horizontal_ = Vector3f{w, 0.0, 0.0};
   vertical_ = Vector3f{0.0, h, 0.0};
   left_bottom_corner_ = Vector3f{0.0f} - horizontal_ * 0.5f - vertical_ * 0.5f -

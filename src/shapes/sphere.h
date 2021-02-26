@@ -12,12 +12,12 @@ public:
     float radius_;
     float r_;
   };
-  Sphere(std::shared_ptr<Transform> LocalToWorld,
-         std::shared_ptr<Transform> WorldToLocal, bool reverseOrientation,
+  Sphere(observer_ptr<Transform> LocalToWorld,
+         observer_ptr<Transform> WorldToLocal, bool reverseOrientation,
          float radius)
       : Shape(LocalToWorld, WorldToLocal, reverseOrientation), radius_(radius) {
   }
-  ~Sphere() {}
+  ~Sphere() = default;
   Bounds3 WorldBounds() const override;
   Bounds3 ObjectBounds() const override;
   bool Intersect(const Ray &ray, float *time = nullptr,

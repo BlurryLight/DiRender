@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 #include <cassert>
 #include <cstdint>
@@ -10,9 +11,28 @@
 #if !defined(NAMESPACE_END)
 #define NAMESPACE_END(name) }
 #endif
+
+// copy from
+// https://stackoverflow.com/questions/3767869/adding-message-to-assert
+#ifdef NDEBUG
+#define assert_msg(condition, message)
+#else
+#define assert_msg(condition, message)                                         \
+  (!(condition))                                                               \
+      ? (std::cerr << "Assertion failed: (" << #condition << "), "             \
+                   << "function " << __FUNCTION__ << ", file " << __FILE__     \
+                   << ", line " << __LINE__ << "." << std::endl                \
+                   << message << std::endl,                                    \
+         abort(), 0)                                                           \
+      : 1
+#endif
+
 NAMESPACE_BEGIN(DR)
 using uint = unsigned int;
 using byte = std::uint8_t;
+
+template <typename T> using observer_ptr = const T *;
+
 // suppress the unused-parameter warning
 template <class T> void ignore(const T &) {}
 

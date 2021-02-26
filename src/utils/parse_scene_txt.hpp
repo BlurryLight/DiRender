@@ -71,14 +71,8 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
     // I need to implement a matrix stack to store transforms.
     // This is done using standard STL Templates
     // trans, trans_inv
-    std::stack<std::pair<mat4, mat4>> trans_stack;
-    trans_stack.push({mat4(1.0), mat4(1.0)}); // identity
-    {
-      auto trans = std::make_shared<Transform>(mat4(1.0));
-      auto trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
-      Transform::TransformTable.insert({*trans, trans});
-      Transform::TransformTable.insert({*trans_inv, trans_inv});
-    }
+    std::stack<mat4> trans_stack;
+    trans_stack.push(mat4(1.0)); // identity
 
     // keep state during parsing
     struct MaterialProperty {
@@ -140,20 +134,13 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
       //      obj << "# Transformation" << trans_stack.top().first; // for debug
       //      use
       obj.close();
-      auto trans_tmp = std::make_shared<Transform>(trans_stack.top().first);
-      auto trans_tmp_inv =
-          std::make_shared<Transform>(trans_stack.top().second);
 
-      if (!Transform::TransformTable.count(*trans_tmp)) {
-        Transform::TransformTable.insert({*trans_tmp, trans_tmp});
-        Transform::TransformTable.insert({*trans_tmp_inv, trans_tmp_inv});
-      }
-      auto trans = Transform::TransformTable.at(*trans_tmp);
-      auto trans_inv = Transform::TransformTable.at(*trans_tmp_inv);
+      auto [trans, trans_inv] =
+          scene->trans_table.get_tf_and_inv(trans_stack.top());
 
       auto mat_ptr = std::make_shared<phong_material>(
           mp.diffuse, mp.specular, mp.shininess, mp.emission, mp.ambient);
-      Model model(trans, path, mat_ptr);
+      Model model(trans, trans_inv, path, mat_ptr);
       objects.push_back(model.model_ptr);
     };
     getline(in, str);
@@ -182,17 +169,8 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
               auto translate_mat =
                   Matrix4::Translate({values[0], values[1], values[2]});
 
-              auto trans = std::make_shared<Transform>(translate_mat);
-              auto trans_inv =
-                  std::make_shared<Transform>(Transform::Inverse(*trans));
-              // check if it is in Transform table, if not insert it
-              if (!Transform::TransformTable.count(*trans)) {
-                Transform::TransformTable.insert({*trans, trans});
-                Transform::TransformTable.insert({*trans_inv, trans_inv});
-              }
-              // FIXME: potential self-assign
-              trans = Transform::TransformTable.at(*trans);
-              trans_inv = Transform::TransformTable.at(*trans_inv);
+              auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(
+                  trans_stack.top() * translate_mat);
               lp.emission = Vector3f{values[3], values[4], values[5]};
               auto mat_ptr = std::make_shared<DR::phong_material_for_light>(
                   lp.emission, lp.attenuation);
@@ -261,8 +239,8 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
             vec3 lookat(values[3], values[4], values[5]);
             vec3 worldup(values[6], values[7], values[8]);
             float fov(values[9]);
-            auto cam = std::make_shared<PinholeCamera>(origin, worldup, lookat,
-                                                       fov, height, width);
+            auto cam = std::make_shared<PinholeCamera>(
+                origin, worldup, lookat, fov, height, width, scene);
             scene->add(cam);
             // YOUR CODE FOR HW 2 HERE
             // Use all of values[0...9]
@@ -288,21 +266,11 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
               bool reverse = false;
               if (validinput) {
                 float radius = values[3];
-                auto model_mat =
+                auto translate_mat4 =
                     Matrix4::Translate({values[0], values[1], values[2]});
-                auto model_mat_ptr = std::make_shared<Transform>(
-                    trans_stack.top().first * model_mat);
-                //逆矩阵是右乘
-                auto model_mat_inv_ptr = std::make_shared<Transform>(
-                    model_mat * trans_stack.top().second);
-                Transform::TransformTable.insert(
-                    {*model_mat_ptr, model_mat_ptr});
-                Transform::TransformTable.insert(
-                    {*model_mat_inv_ptr, model_mat_inv_ptr});
 
-                auto trans = Transform::TransformTable.at({*model_mat_ptr});
-                auto trans_inv =
-                    Transform::TransformTable.at({*model_mat_inv_ptr});
+                auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(
+                    trans_stack.top() * translate_mat4);
 
                 auto mat_ptr = std::make_shared<phong_material>(
                     mp.diffuse, mp.specular, mp.shininess, mp.emission,
@@ -333,15 +301,13 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
             // Also keep in mind what order your matrix is!
             auto translate =
                 Matrix4::Translate({values[0], values[1], values[2]});
-            auto translate_inv = Matrix4::Inverse(translate);
             auto &top = trans_stack.top();
 
             std::cout << "translate:" << std::endl;
             std::cout << translate << std::endl;
             std::cout << "after translate" << '\n'
-                      << top.first * translate << std::endl;
-            top.first = top.first * translate;
-            top.second = translate_inv * top.second;
+                      << top * translate << std::endl;
+            top = top * translate;
           }
         } else if (cmd == "scale") {
           validinput = readvals(s, 3, values);
@@ -353,15 +319,12 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
             // Also keep in mind what order your matrix is!
 
             auto scale = Matrix4::Scale({values[0], values[1], values[2]});
-            auto scale_inv = Matrix4::Inverse(scale);
             auto &top = trans_stack.top();
 
             std::cout << "scale:" << std::endl;
             std::cout << scale << std::endl;
-            std::cout << "after scale" << '\n'
-                      << top.first * scale << std::endl;
-            top.first = top.first * scale;
-            top.second = top.second * scale_inv;
+            std::cout << "after scale" << '\n' << top * scale << std::endl;
+            top = top * scale;
           }
         } else if (cmd == "rotate") {
           validinput = readvals(s, 4, values);
@@ -369,14 +332,12 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
             float rad = deg2rad(values[3]);
             auto rotation =
                 Matrix4::Rotate(rad, {values[0], values[1], values[2]});
-            auto rotation_inv = Matrix4::Inverse(rotation);
             auto &top = trans_stack.top();
             std::cout << "rotation:" << std::endl;
             std::cout << rotation << std::endl;
             std::cout << "after rotation" << '\n'
-                      << top.first * rotation << std::endl;
-            top.first = top.first * rotation;
-            top.second = rotation_inv * top.second;
+                      << top * rotation << std::endl;
+            top = top * rotation;
 
             // YOUR CODE FOR HW 2 HERE.
             // values[0..2] are the axis, values[3] is the angle.

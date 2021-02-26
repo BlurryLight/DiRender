@@ -3,8 +3,8 @@ using namespace DR;
 // FIXME: the table should be managed by Scene class
 // FIXME: the Entry should be
 //  <Transform, const std::shared_ptr<const Transform>>
-std::map<Transform, std::shared_ptr<Transform>> Transform::TransformTable =
-    std::map<Transform, std::shared_ptr<Transform>>{};
+// std::map<Transform, std::shared_ptr<Transform>> Transform::TransformTable =
+//    std::map<Transform, std::shared_ptr<Transform>>{};
 
 bool Transform::operator==(const Transform &other) const {
   return m_ == other.m_ && mInv_ == other.mInv_;
@@ -78,7 +78,7 @@ Ray Transform::operator()(const Ray &other) const {
   return Ray(o, d, other.tMax_, other.tMin_, false);
 }
 
-size_t std::hash<DR::Transform>::operator()(const DR::Transform &tf) {
+size_t std::hash<DR::Transform>::operator()(const Transform &tf) const {
   auto h1 = std::hash<DR::Matrix4>{}(tf.m_);
   auto h2 = std::hash<DR::Matrix4>{}(tf.mInv_);
   return h1 ^ (h2 << 1);

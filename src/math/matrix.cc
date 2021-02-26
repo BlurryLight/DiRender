@@ -5,16 +5,7 @@
 #include <spdlog/fmt/fmt.h>
 using namespace DR;
 #ifndef DI_USE_GLM
-bool DR::Matrix4::is_identity() const {
-  return almost_equal(m[0][0], 1.0f) && almost_equal(m[1][1], 1.0f) &&
-         almost_equal(m[2][2], 1.0f) && almost_equal(m[3][3], 1.0f) &&
-         almost_equal(m[0][1], 0.0f) && almost_equal(m[0][2], 0.0f) &&
-         almost_equal(m[0][3], 0.0f) && almost_equal(m[1][0], 0.0f) &&
-         almost_equal(m[1][2], 0.0f) && almost_equal(m[1][3], 0.0f) &&
-         almost_equal(m[2][0], 0.0f) && almost_equal(m[2][1], 0.0f) &&
-         almost_equal(m[2][3], 0.0f) && almost_equal(m[3][0], 0.0f) &&
-         almost_equal(m[3][1], 0.0f) && almost_equal(m[3][2], 0.0f);
-}
+bool DR::Matrix4::is_identity() const { return *this == mat4(1.0f); }
 
 Matrix4::Matrix4(float diag) : m() {
   for (auto &i : m)
@@ -38,7 +29,7 @@ bool Matrix4::operator==(const Matrix4 &other) const {
   //  return this->m == other.m;
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
-      if (!almost_equal(m[i][j], other.m[i][j]))
+      if (!abs_almost_equal(m[i][j], other.m[i][j]))
         return false;
     }
   }

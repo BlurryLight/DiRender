@@ -56,7 +56,7 @@ inline void parse_camera_data(Scene *scene, const toml::value &data) {
     std::shared_ptr<Camera> cam = nullptr;
     if (type == "pinhole") {
       cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov, height,
-                                            width);
+                                            width, scene);
     }
     scene->add(cam);
   }
@@ -156,10 +156,7 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
       for (int j = 0; j < 16; j++) {
         mat.m[j / 4][j % 4] = mat_toml.at(j);
       }
-      auto trans = std::make_shared<Transform>(mat);
-      auto trans_inv = std::make_shared<Transform>(Transform::Inverse(*trans));
-      Transform::TransformTable.insert({*trans, trans});
-      Transform::TransformTable.insert({*trans_inv, trans_inv});
+      auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(mat);
       auto material_toml = materials_vec[i];
       std::shared_ptr<Material> mat_ptr = nullptr;
       bool has_emission = false;
@@ -174,8 +171,6 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
           radius = shapes_vec[i].at("radius").as_floating();
         if (shapes_vec[i].find("reverse") != shapes_vec[i].end())
           reverse = shapes_vec[i].at("reverse").as_boolean();
-        trans = Transform::TransformTable.at(*trans);
-        trans_inv = Transform::TransformTable.at(*trans_inv);
         shape_ptr = std::make_shared<Sphere>(trans, trans_inv, reverse, radius);
         auto object_ptr =
             std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
@@ -184,9 +179,8 @@ inline void parse_scene(std::string filename, Scene *scene, int *spp) {
           scene->light_shapes_.push_back(object_ptr);
         }
       } else if (shape_toml == "obj") {
-        trans = Transform::TransformTable.at(*trans);
         std::string path = shapes_vec[i].at("path").as_string();
-        Model model(trans, path, mat_ptr);
+        Model model(trans, trans_inv, path, mat_ptr);
         objects.push_back(model.model_ptr);
         if (has_emission) {
           scene->light_shapes_.push_back(model.model_ptr);

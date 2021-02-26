@@ -6,13 +6,17 @@
 
 NAMESPACE_BEGIN(DR)
 struct Intersection;
-class Shape
-{
+class Shape {
 public:
-  Shape(std::shared_ptr<Transform> LocalToWorld,
-        std::shared_ptr<Transform> WorldToLocal, bool reverseOrientation)
+  Shape(observer_ptr<Transform> LocalToWorld,
+        observer_ptr<Transform> WorldToLocal, bool reverseOrientation)
       : LocalToWorld(LocalToWorld), WorldToObject(WorldToLocal),
-        reverseOrientation(reverseOrientation) {}
+        reverseOrientation(reverseOrientation) {
+    assert((LocalToWorld->m_ * WorldToLocal->m_).is_identity());
+    assert((LocalToWorld->mInv_ * WorldToLocal->mInv_).is_identity());
+    assert((LocalToWorld->mInv_ * LocalToWorld->m_).is_identity());
+    assert((WorldToLocal->mInv_ * WorldToLocal->m_).is_identity());
+  }
   virtual ~Shape(){};
   virtual Bounds3 ObjectBounds() const = 0;
   virtual Bounds3 WorldBounds() const = 0;
@@ -24,15 +28,15 @@ public:
     return false;
   };
   virtual float Area() const = 0;
-  virtual std::pair<Intersection,float> sample() const = 0; //sample position and pdf
-  virtual std::pair<Intersection,float> sample(const Point3f& ref) const
-  {
+  virtual std::pair<Intersection, float>
+  sample() const = 0; // sample position and pdf
+  virtual std::pair<Intersection, float> sample(const Point3f &ref) const {
     ignore(ref);
     return sample();
   }
-//  virtual bool HasEmission() = 0; // Should be in Primitive
+  //  virtual bool HasEmission() = 0; // Should be in Primitive
 
-  std::shared_ptr<Transform> LocalToWorld,WorldToObject;
+  observer_ptr<Transform> LocalToWorld = nullptr, WorldToObject = nullptr;
   bool reverseOrientation;
 };
 

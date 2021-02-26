@@ -2,11 +2,10 @@
 #include <shapes/triangle.h>
 using namespace DR;
 
-TriangleMesh::TriangleMesh(std::shared_ptr<Transform> LocalToWorld,
-                           int nTriangles, int nVertices,
-                           const uint *vertexIndices, const Point3f *vertices,
-                           const Normal3f *normals, const Point2f *uvs,
-                           const int *faceIndices)
+TriangleMesh::TriangleMesh(observer_ptr<Transform> LocalToWorld, int nTriangles,
+                           int nVertices, const uint *vertexIndices,
+                           const Point3f *vertices, const Normal3f *normals,
+                           const Point2f *uvs, const int *faceIndices)
     : nTriangles(nTriangles), nVertices(nVertices) {
   if (vertices) {
     this->vertices = std::make_unique<std::vector<Point3f>>();
