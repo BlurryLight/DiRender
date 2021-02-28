@@ -401,6 +401,9 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
           indices.push_back(str);
         } else if (cmd == "vertex") {
           vertices.push_back(str);
+        } else if (cmd == "spp") {
+          validinput = readvals(s, 1, values);
+          *spp = static_cast<int>(values[0]);
         }
 
         else {

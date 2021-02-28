@@ -35,7 +35,9 @@ private:
     ignore(r_in);
     ignore(isect);
     ignore(r_out);
-    return {};
+    // wrong implementation: this is just for debug
+    auto tmp = dot(r_out, isect.normal);
+    return tmp > 0 ? diffuse_ * k1_Pi : Vector3f{};
   }
 };
 
@@ -64,7 +66,9 @@ private:
     ignore(r_in);
     ignore(isect);
     ignore(r_out);
-    return {};
+    // wrong implementation
+    auto tmp = dot(r_out, isect.normal);
+    return tmp > 0 ? emission_ * k1_Pi : Vector3f{};
   }
 };
 NAMESPACE_END(DR)

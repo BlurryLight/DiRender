@@ -36,7 +36,7 @@ Vector3f PathTracingRenderer::cast_ray(
 #endif
   auto emission = isect.mat_ptr->evalEmitted(r.direction_, isect);
   if (emission.squared_length() > 0.0f) // no more bounce when hitting a light
-    return {1};
+    return emission;
 
   // Shadow ray
   Intersection light_pos;

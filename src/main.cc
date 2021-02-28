@@ -41,9 +41,12 @@ int main(int argc, char **argv) {
   if (argc > 2 && !strcmp(argv[2], "txt")) {
     DR::IMPL::parse_scene_txt(filename, &scene, &spp);
 #ifdef NDEBUG
-    rd = std::make_unique<DR::BlingPhongRenderer>(spp, nthreads);
+    rd = std::make_unique<DR::PathTracingRenderer>(spp, nthreads);
+//    rd = std::make_unique<DR::BlingPhongRenderer>(spp, nthreads);
 #else
-    rd = std::make_unique<DR::BlingPhongRenderer>(1, 1);
+
+    rd = std::make_unique<DR::PathTracingRenderer>(1, 1);
+//    rd = std::make_unique<DR::BlingPhongRenderer>(1, 1);
 #endif
   } else {
     DR::parse_scene(filename, &scene, &spp);
