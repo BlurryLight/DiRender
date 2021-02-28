@@ -22,6 +22,8 @@ constexpr float k1_2Pi = 0.15915494309189535;
 constexpr float k2_Pi = 0.63661977236758134308; // 2/pi
 constexpr float kSqrt2 = 1.41421356237309504880;
 constexpr float kAbsTolerance = 0.0001;
+constexpr float kOneMinusEps = (1.0f - kEpsilon);
+constexpr float kZeroPlusEps = (0.0f + kEpsilon);
 
 template <typename T>
 inline T clamp(const T &low, const T &high, const T &value) {

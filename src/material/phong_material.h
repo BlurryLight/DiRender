@@ -41,7 +41,7 @@ private:
 
 class phong_material_for_light : public Material {
 public:
-  phong_material_for_light(vec3 emission, vec3 attenuation);
+  phong_material_for_light(vec3 emission, vec3 attenuation, uint8_t type);
 
   Vector3f evalEmitted(const Vector3f &r_in,
                        const Intersection &isect) const override {
@@ -54,6 +54,8 @@ public:
 
   Vector3f emission_;
   Vector3f attenuation_;
+  std::bitset<8> type_;
+  // 0 for point, 1 for directional, other bits are reserved
 
 private:
   // hide

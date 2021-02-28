@@ -51,14 +51,14 @@ Transform Camera::look_at(Point3f origin, Vector3f WorldUp, Vector3f target) {
 }
 
 Camera::Camera(Point3f origin, Vector3f WorldUp, Vector3f target, float fov,
-               uint height, uint width, observer_ptr<Scene> scene)
+               uint height, uint width, observer_ptr<Scene> scene, bool gamma)
     : position_(origin), fov_(fov), aspect_ratio_(float(width) / height),
       scene_(scene) {
   auto view_trans = Camera::look_at(origin, WorldUp, target);
   auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(view_trans);
   view_trans_ = trans;
   view_trans_inverse_ = trans_inv;
-  film_ptr_ = std::make_unique<Film>(width, height);
+  film_ptr_ = std::make_unique<Film>(width, height, gamma);
 }
 
 void Film::write(const std::string &filename, PicType type) {
@@ -66,8 +66,14 @@ void Film::write(const std::string &filename, PicType type) {
       new uint8_t[height * width * 3]}; // don't support alpha & HDR
   for (uint i = 0; i < height * width; i++) {
     for (uint j = 0; j < 3; j++) {
-      auto tmp = static_cast<uint8_t>(
-          std::pow(clamp(0.0f, 1.0f, framebuffer_[i][j]), 0.6) * 254.0f);
+      uint8_t tmp = 0;
+      if (gamma_) {
+        tmp = static_cast<uint8_t>(
+            std::pow(clamp(0.0f, kOneMinusEps, framebuffer_[i][j]), 0.6) * 255);
+      } else {
+        tmp = static_cast<uint8_t>(
+            clamp(0.0f, kOneMinusEps, framebuffer_[i][j]) * 255);
+      }
       data[3 * i + j] = tmp;
     }
   }

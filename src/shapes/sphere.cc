@@ -26,7 +26,7 @@ Bounds3 Sphere::ObjectBounds() const {
 
 bool Sphere::Intersect(const Ray &ray, float *time, Intersection *isect) const {
   Intersection result;
-  Ray objRay = (Transform::Inverse(*LocalToWorld))(ray);
+  Ray objRay = (*WorldToObject)(ray);
   Vector3f L = objRay.origin_ - Point3f{0.0f};
   float a = dot(objRay.direction_, objRay.direction_);
   float b = 2 * dot(objRay.direction_, L);
@@ -50,7 +50,9 @@ bool Sphere::Intersect(const Ray &ray, float *time, Intersection *isect) const {
       float u = 0.5 + std::atan2(local_normal.z, local_normal.x) * k1_2Pi;
       float v = 0.5 - std::asin(local_normal.y) * k1_Pi;
       isect->texcoords = {u, v};
-      isect->normal = ((*LocalToWorld)(local_normal)).normalize();
+      isect->normal = (isect->coords - (*LocalToWorld)(Point3f{0})).normalize();
+      //      isect->normal =
+      //          ((*LocalToWorld)(static_cast<Normal3f>(local_normal))).normalize();
       isect->t = t0;
     }
     return true;
@@ -75,6 +77,8 @@ std::pair<Intersection, float> Sphere::sample() const {
 }
 
 std::pair<Intersection, float> Sphere::sample(const Point3f &ref) const {
+
+  // always sample a point towards the ref, but it may not be visible
   auto center = (*LocalToWorld)(Point3f{0.0f});
   float distance_squared = (center - ref).squared_length();
   Intersection result;
@@ -82,22 +86,22 @@ std::pair<Intersection, float> Sphere::sample(const Point3f &ref) const {
   {
     return {result, 0.0};
   }
-  float cos_theta_max = sqrt(1 - radius_ * radius_ / distance_squared);
+  float cos_theta_max = std::sqrt(1 - radius_ * radius_ / distance_squared);
   float solid_angle = 2 * kPi * (1 - cos_theta_max);
 
-  float pdf = 1.0 / solid_angle;
+  float pdf = 1.0f / solid_angle;
 
   auto r1 = get_random_float();
   auto r2 = get_random_float();
   float z = 1 + r2 * (cos_theta_max - 1);
 
   auto phi = 2 * kPi * r1;
-  float x = cos(phi) * sqrt(1 - z * z);
-  float y = sin(phi) * sqrt(1 - z * z);
+  float x = std::cos(phi) * std::sqrt(1 - z * z);
+  float y = std::sin(phi) * std::sqrt(1 - z * z);
 
   auto localPoint = Point3f{x, y, z};
   result.coords = (*LocalToWorld)(radius_ * localPoint);
-  result.normal = (*LocalToWorld)(static_cast<Normal3f>(localPoint),
-                                  this->reverseOrientation);
+  result.normal = (result.coords - center).normalize();
+
   return {result, pdf};
 }

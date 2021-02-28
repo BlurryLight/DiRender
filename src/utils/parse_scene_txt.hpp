@@ -24,7 +24,7 @@
 namespace DR {
 namespace IMPL {
 inline constexpr int kMaxNumLights = 10;
-inline constexpr int kMaxNumObjects = 200;
+inline constexpr int kMaxNumObjects = 2'000;
 
 // Function to read the input data values
 // Use is optional, but should be very helpful in parsing.
@@ -172,16 +172,23 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
               auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(
                   trans_stack.top() * translate_mat);
               lp.emission = Vector3f{values[3], values[4], values[5]};
+              uint8_t type;
+              if (cmd == "point")
+                type = 1;
+              else if (cmd == "directional")
+                type = (1 << 1);
+
               auto mat_ptr = std::make_shared<DR::phong_material_for_light>(
-                  lp.emission, lp.attenuation);
+                  lp.emission, lp.attenuation, type);
               // Point light is not currently supported by my tracer
               // we need to create a shape for it
-              float radius = 0.0001f;
+              float radius = 0.001f;
               std::shared_ptr<Shape> shape_ptr =
                   std::make_shared<Sphere>(trans, trans_inv, false, radius);
               std::shared_ptr<Primitive> obj_ptr =
                   std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
               scene->light_shapes_.push_back(obj_ptr);
+              objects.push_back(obj_ptr);
               // YOUR CODE FOR HW 2 HERE.
               // Note that values[0...7] shows the read in values
               ++numlights;

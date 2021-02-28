@@ -195,6 +195,14 @@ public:
     return *this;
   }
 
+  int max_extent() const {
+    if (x > y && x > z) {
+      return 0;
+    } else if (y > z) {
+      return 1;
+    }
+    return 2;
+  }
   inline Vector3f &operator=(const Vector3f &other) {
     x = other.x;
     y = other.y;

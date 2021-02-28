@@ -129,9 +129,9 @@ void PathTracingRenderer::render(const Scene &scene) {
   } else {
     throw std::runtime_error("Scene has no primitive to render!");
   }
-  //set background
+  // set background
   background_ = scene.background_;
-//  std::cout << "background:"<< background_<<std::endl;
+  //  std::cout << "background:"<< background_<<std::endl;
 
   int index = 0;
   for (const auto &cam : scene.cams_) {
@@ -170,8 +170,8 @@ void PathTracingRenderer::render(const Scene &scene) {
     }
 #endif
     cam->film_ptr_->write("output_" + std::to_string(index++) +
-                          std::string(MapTypeToSuffix()(PicType::kJPG)),
-                          PicType::kJPG);
+                              std::string(MapTypeToSuffix()(PicType::kPNG)),
+                          PicType::kPNG);
     //    cam->film_ptr_->write_ppm("output" + std::to_string(index++) +
     //    ".ppm");
   }

@@ -10,8 +10,8 @@ Ray PinholeCamera::get_ray(float u, float v) const {
 
 PinholeCamera::PinholeCamera(Point3f origin, Vector3f WorldUp, Vector3f target,
                              float fov, uint height, uint width,
-                             observer_ptr<Scene> scene)
-    : Camera(origin, WorldUp, target, fov, height, width, scene) {
+                             observer_ptr<Scene> scene, bool gamma)
+    : Camera(origin, WorldUp, target, fov, height, width, scene, gamma) {
   float theta = deg2rad(fov);
   float h = std::tan(theta / 2.0f);
   h = 2 * h;

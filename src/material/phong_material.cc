@@ -24,5 +24,6 @@ phong_material::phong_material(vec3 diffuse, vec3 specular, float shininess,
     : diffuse_(diffuse), specular_(specular), shininess_(shininess),
       emission_(emission), ambient_(ambient) {}
 phong_material_for_light::phong_material_for_light(vec3 emission,
-                                                   vec3 attenuation)
-    : emission_(emission), attenuation_(attenuation) {}
+                                                   vec3 attenuation,
+                                                   uint8_t type)
+    : emission_(emission), attenuation_(attenuation), type_(type) {}
