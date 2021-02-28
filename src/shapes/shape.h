@@ -1,5 +1,6 @@
 #pragma once
 #include <cores/bounds.h>
+#include <cores/intersection.hpp>
 #include <cores/ray.hpp>
 #include <math/transform.h>
 #include <memory>

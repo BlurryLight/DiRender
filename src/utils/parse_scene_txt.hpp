@@ -13,6 +13,7 @@
 #include <material/matte_material.h>
 #include <material/phong_material.h>
 #include <math/matrix.hpp>
+#include <shapes/quad.h>
 #include <shapes/sphere.h>
 #include <sstream>
 #include <stack>
@@ -152,46 +153,75 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
         std::stringstream s(str);
         s >> cmd;
         int i;
-        float values[10]; // Position and color for light, colors for others
+        float values[13]; // Position and color for light, colors for others
         // Up to 10 params for cameras.
         bool validinput; // Validity of input
 
         // Process the light, add it to database.
         // Lighting Command
-        if (cmd == "directional" || cmd == "point") {
+        if (cmd == "directional" || cmd == "point" || cmd == "quadLight") {
           if (numlights >= kMaxNumLights) { // No more Lights
             std::cerr << "Reached Maximum Number of Lights " << numlights
                       << " Will ignore further lights\n";
           } else {
-            validinput = readvals(s, 6, values); // Position/color for lts.
-            if (validinput) {
+            if (cmd == "directional" || cmd == "point") {
+              validinput = readvals(s, 6, values); // Position/color for lts.
+              if (validinput) {
 
-              auto translate_mat =
-                  Matrix4::Translate({values[0], values[1], values[2]});
+                auto translate_mat =
+                    Matrix4::Translate({values[0], values[1], values[2]});
 
-              auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(
-                  trans_stack.top() * translate_mat);
-              lp.emission = Vector3f{values[3], values[4], values[5]};
-              uint8_t type;
-              if (cmd == "point")
-                type = 1;
-              else if (cmd == "directional")
-                type = (1 << 1);
+                auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(
+                    trans_stack.top() * translate_mat);
+                lp.emission = Vector3f{values[3], values[4], values[5]};
+                uint8_t type;
+                if (cmd == "point")
+                  type = 1;
+                else if (cmd == "directional")
+                  type = (1 << 1);
 
-              auto mat_ptr = std::make_shared<DR::phong_material_for_light>(
-                  lp.emission, lp.attenuation, type);
-              // Point light is not currently supported by my tracer
-              // we need to create a shape for it
-              float radius = 0.001f;
-              std::shared_ptr<Shape> shape_ptr =
-                  std::make_shared<Sphere>(trans, trans_inv, false, radius);
-              std::shared_ptr<Primitive> obj_ptr =
-                  std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
-              scene->light_shapes_.push_back(obj_ptr);
-              objects.push_back(obj_ptr);
-              // YOUR CODE FOR HW 2 HERE.
-              // Note that values[0...7] shows the read in values
-              ++numlights;
+                auto mat_ptr = std::make_shared<DR::phong_material_for_light>(
+                    lp.emission, lp.attenuation, type);
+                // Point light is not currently supported by my tracer
+                // we need to create a shape for it
+                float radius = 0.001f;
+                auto shape_ptr =
+                    std::make_shared<Sphere>(trans, trans_inv, false, radius);
+                std::shared_ptr<Primitive> obj_ptr =
+                    std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
+                scene->light_shapes_.push_back(obj_ptr);
+                objects.push_back(obj_ptr);
+                // YOUR CODE FOR HW 2 HERE.
+                // Note that values[0...7] shows the read in values
+                ++numlights;
+              }
+            } else if (cmd == "quadLight") {
+              validinput = readvals(s, 12, values);
+              if (validinput) {
+                Point3f a(values[0], values[1], values[2]);
+                vec3 ab{values[3], values[4], values[5]};
+                vec3 ac{values[6], values[7], values[8]};
+                Point3f b = a + ab;
+                Point3f c = a + ac;
+                //                Point3f d = a + (ab + ac);
+                auto [trans, trans_inv] =
+                    scene->trans_table.get_tf_and_inv(trans_stack.top());
+                lp.emission = Vector3f{values[9], values[10], values[11]};
+                uint8_t type = 1 << 2;
+                auto mat_ptr = std::make_shared<DR::phong_material_for_light>(
+                    lp.emission, lp.attenuation, type);
+                // Point light is not currently supported by my tracer
+                // we need to create a shape for it
+                auto shape_ptr =
+                    std::make_shared<Quad>(trans, trans_inv, a, b, c, false);
+                std::shared_ptr<Primitive> obj_ptr =
+                    std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
+                scene->light_shapes_.push_back(obj_ptr);
+                objects.push_back(obj_ptr);
+                // YOUR CODE FOR HW 2 HERE.
+                // Note that values[0...7] shows the read in values
+                ++numlights;
+              }
             }
           }
         }
