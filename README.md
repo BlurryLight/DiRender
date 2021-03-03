@@ -22,7 +22,12 @@ of [the CSE168 course by Prof Ravi Ramamoorthi](http://cseweb.ucsd.edu/~viscomp/
 - Debugger
   ![cornel_box debugger](images/debugger.gif)
 
-- QuadLight(Not good enough, but not bad)
+- QuadLight(640 x 480, 128spp, cosine weight sampling)
   ![quadlight](images/quadlight.png)
+
+- QuadLight(640 x 480, 128spp, Blinn-Phong importance sampling)
+  This one looks much better.
+  ![quadlight](images/quadlight_with_IS.png)
+  
 
 

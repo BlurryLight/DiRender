@@ -28,6 +28,7 @@ private:
   mutable tf_table_t tf_table_;
 };
 } // namespace IMPL
+class Renderer;
 struct Scene {
   Scene() = default;
   Scene(const Scene &other) = delete;
@@ -41,5 +42,7 @@ struct Scene {
   Vector3f background_{0};
   // has ownership
   IMPL::TransTable trans_table;
+  std::unique_ptr<Renderer> renderer_;
+  void render() const;
 };
 NAMESPACE_END(DR)

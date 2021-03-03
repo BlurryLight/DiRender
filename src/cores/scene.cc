@@ -1,4 +1,5 @@
 #include <cores/scene.h>
+#include <renderer/renderer.h>
 using namespace DR;
 observer_ptr<Transform> IMPL::TransTable::get_tf(const Matrix4 &mat) const {
   value_type trans =
@@ -45,4 +46,11 @@ IMPL::TransTable::get_tf_and_inv(const Transform &trans) const {
   assert_msg((res.first->mInv_ * res.second->mInv_).is_identity(),
              "got" << res.first->mInv_ * res.second->mInv_);
   return res;
+}
+void Scene::render() const {
+  if (!renderer_) {
+    std::cerr << "renderer is not parsed correctly!" << std::endl;
+    std::abort();
+  }
+  this->renderer_->render(*this);
 }

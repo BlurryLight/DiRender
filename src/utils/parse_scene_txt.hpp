@@ -23,7 +23,7 @@
 // NAMESPACE_BEGIN(DR)
 // NAMESPACE_BEGIN(IMPL)
 namespace DR {
-namespace IMPL {
+namespace impl {
 inline constexpr int kMaxNumLights = 10;
 inline constexpr int kMaxNumObjects = 2'000;
 
@@ -59,10 +59,11 @@ static std::vector<std::string> split(const std::string &str,
   return tokens;
 }
 
-inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
+extern inline void make_render(Scene *scene, int spp, const std::string &type);
+inline void parse_scene_txt(std::string filename, Scene *scene) {
   std::string str, cmd;
   std::ifstream in;
-  *spp = 8;
+  int spp = 8;
   in.open(filename);
   int numlights = 0;
   int numobjects = 0;
@@ -403,7 +404,12 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
           vertices.push_back(str);
         } else if (cmd == "spp") {
           validinput = readvals(s, 1, values);
-          *spp = static_cast<int>(values[0]);
+          spp = static_cast<int>(values[0]);
+          std::cout << "spp: " << spp << std::endl;
+        } else if (cmd == "integrator") {
+          std::string type;
+          s >> type;
+          make_render(scene, spp, type);
         }
 
         else {
@@ -423,7 +429,7 @@ inline void parse_scene_txt(std::string filename, Scene *scene, int *spp) {
     throw std::runtime_error(oss.str());
   }
 }
-} // namespace IMPL
+} // namespace impl
 
 } // namespace DR
 

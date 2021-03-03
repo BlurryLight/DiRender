@@ -30,35 +30,14 @@ int main(int argc, char **argv) {
     filename = argv[1];
 
   std::unique_ptr<DR::Renderer> rd{nullptr};
-  int spp = 32;
-#ifdef NDEBUG
-  int nthreads = std::thread::hardware_concurrency();
-  std::cout << "Threads: " << nthreads << std::endl;
-#else
-  std::cout << "Running in Debug Mode: MultiThread Mode has been off."
-            << std::endl;
-#endif
   if (argc > 2 && !strcmp(argv[2], "txt")) {
-    DR::IMPL::parse_scene_txt(filename, &scene, &spp);
-#ifdef NDEBUG
-    rd = std::make_unique<DR::PathTracingRenderer>(spp, nthreads);
-//    rd = std::make_unique<DR::BlingPhongRenderer>(spp, nthreads);
-#else
-
-    rd = std::make_unique<DR::PathTracingRenderer>(1, 1);
-//    rd = std::make_unique<DR::BlingPhongRenderer>(1, 1);
-#endif
+    DR::impl::parse_scene_txt(filename, &scene);
   } else {
-    DR::parse_scene(filename, &scene, &spp);
-#ifdef NDEBUG
-    rd = std::make_unique<DR::PathTracingRenderer>(spp, nthreads);
-#else
-    rd = std::make_unique<DR::PathTracingRenderer>(1, 1);
-#endif
+    DR::parse_scene(filename, &scene);
   }
   DR::HRTimer timer;
   timer.start();
-  rd->render(scene);
+  scene.render();
   timer.end();
   std::cout << std::endl;
   std::cout << timer.elapsed() << " ms" << std::endl;

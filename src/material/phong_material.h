@@ -8,6 +8,9 @@ NAMESPACE_BEGIN(DR)
 // Although it is similar to MatteMaterial,
 // it still inherits from Material instead of MatteMaterial because it is
 // relatively simple to implement.
+
+// https://www.cs.princeton.edu/courses/archive/fall16/cos526/papers/importance.pdf
+// about the brdf and the importance sampling
 class phong_material : public Material {
 public:
   phong_material(vec3 diffuse, vec3 specular, float shininess, vec3 emission,
@@ -28,16 +31,15 @@ public:
   Vector3f emission_;
   Vector3f ambient_;
 
-private:
-  // hide
   Vector3f evalBxDF(const Vector3f &r_in, const Intersection &isect,
                     const Vector3f &r_out) const override {
     ignore(r_in);
     ignore(isect);
     ignore(r_out);
-    // wrong implementation: this is just for debug
-    auto tmp = dot(r_out, isect.normal);
-    return tmp > 0 ? diffuse_ * k1_Pi : Vector3f{};
+    auto idea_rout = reflect(r_in, isect.normal);
+    float cos_alpha = dot(idea_rout, r_out);
+    return diffuse_ * k1_Pi + specular_ * std::pow(cos_alpha, shininess_) *
+                                  (shininess_ + 2) * k1_2Pi;
   }
 };
 
@@ -59,8 +61,6 @@ public:
   std::bitset<8> type_;
   // 0 for point, 1 for directional, other bits are reserved
 
-private:
-  // hide
   Vector3f evalBxDF(const Vector3f &r_in, const Intersection &isect,
                     const Vector3f &r_out) const override {
     ignore(r_in);

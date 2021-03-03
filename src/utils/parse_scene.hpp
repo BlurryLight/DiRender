@@ -115,16 +115,39 @@ inline void parse_material_data(const toml::value &material_toml,
                            toml::get<std::string>(material_toml.at("type")));
 }
 
+// TODO: add more type
+inline void make_render(Scene *scene, int spp,
+                        const std::string &type = "pathtracer") {
+#ifdef NDEBUG
+  int nthreads = std::thread::hardware_concurrency();
+  std::cout << "Threads: " << nthreads << std::endl;
+#else
+  std::cout << "Running in Debug Mode: MultiThread Mode has been off."
+            << std::endl;
+  int nthreads = 1;
+  spp = 1;
+#endif
+
+  if (type == "direct") {
+    scene->renderer_ = std::make_unique<DirectLightRenderer>(spp, nthreads);
+  } else // default path tracer
+  {
+    scene->renderer_ = std::make_unique<PathTracingRenderer>(spp, nthreads);
+  }
+  std::cout << "Renderer:" << type << std::endl;
+}
+
 NAMESPACE_END(impl)
 
-inline void parse_scene(std::string filename, Scene *scene, int *spp) {
+inline void parse_scene(std::string filename, Scene *scene) {
   auto data = toml::parse(filename);
 
   auto title = toml::find<std::string>(data, "title");
   std::cout << "Rendering: " << title << std::endl;
 
-  *spp = toml::find<toml::integer>(data, "spp");
-  std::cout << "spp: " << *spp << std::endl;
+  int spp = toml::find<toml::integer>(data, "spp");
+  std::cout << "spp: " << spp << std::endl;
+  impl::make_render(scene, spp);
 
   if (data.contains("background")) {
     const auto &bg_toml = toml::get<std::vector<float>>(data.at("background"));
