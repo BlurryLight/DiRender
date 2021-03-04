@@ -48,8 +48,10 @@ set(SHAPES_SOURCE
 set(UTILS_SOURCE
         ${CMAKE_SOURCE_DIR}/src/utils/di_global.h
         ${CMAKE_SOURCE_DIR}/src/utils/thread_pool.hpp
-        ${CMAKE_SOURCE_DIR}/src/utils/parse_scene.hpp
-        ${CMAKE_SOURCE_DIR}/src/utils/parse_scene_txt.hpp
+        ${CMAKE_SOURCE_DIR}/src/utils/parse_scene.hh
+        ${CMAKE_SOURCE_DIR}/src/utils/parse_scene.cc
+        ${CMAKE_SOURCE_DIR}/src/utils/parse_scene_txt.hh
+        ${CMAKE_SOURCE_DIR}/src/utils/parse_scene_txt.cc
         ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.h
         ${CMAKE_SOURCE_DIR}/src/utils/high_resolution_timer.cc
         ${CMAKE_SOURCE_DIR}/src/utils/resource_path_searcher.h

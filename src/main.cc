@@ -4,8 +4,8 @@
 #include <renderer/path_tracing_renderer.h>
 #include <utils/cmake_vars.h>
 #include <utils/high_resolution_timer.h>
-#include <utils/parse_scene.hpp>
-#include <utils/parse_scene_txt.hpp>
+#include <utils/parse_scene.hh>
+#include <utils/parse_scene_txt.hh>
 //#define NDEBUG
 #include <spdlog/async.h>
 #include <spdlog/sinks/basic_file_sink.h>

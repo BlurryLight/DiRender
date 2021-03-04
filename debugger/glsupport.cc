@@ -1,5 +1,4 @@
 #include "glsupport.h"
-#define STB_IMAGE_IMPLEMENTATION
 #include "../third_party/stb_image.h"
 using namespace DR_D;
 static unsigned int cubeVAO = 0;
@@ -533,4 +532,82 @@ Model::Model(const std::string &path) {
 
     this->meshes_.push_back(tmpMesh);
   }
+}
+std::vector<std::shared_ptr<DR_D::Object>>
+DR::impl::parse_objects_wrapper(const toml::value &data) {
+  const auto &objects_toml = toml::find(data, "objects");
+  std::vector<std::shared_ptr<DR_D::Object>> objects;
+  try {
+    const auto &names_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "name");
+    const auto &transforms_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "transform");
+    const auto &materials_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "material");
+    const auto &shapes_vec =
+        toml::find<std::vector<toml::table>>(objects_toml, "shape");
+
+    // parse objects
+    for (uint i = 0; i < names_vec.size(); i++) {
+      auto obj_ptr = std::make_shared<DR_D::Object>();
+      // obj_name
+      obj_ptr->name = names_vec[i].at("name").as_string();
+      auto mat_toml =
+          toml::get<std::vector<float>>(transforms_vec[i].at("matrix4"));
+
+      // obj_mat
+      for (int j = 0; j < 16; j++) {
+        // column major
+        obj_ptr->model_mat4[j % 4][j / 4] = mat_toml.at(j);
+      }
+
+      auto material_toml = materials_vec[i];
+      std::string mat_type = toml::get<std::string>(material_toml.at("type"));
+      static std::array<std::string, 3> supported_materials{"matte", "glass",
+                                                            "dielectric"};
+      if (std::find(supported_materials.begin(), supported_materials.end(),
+                    mat_type) != supported_materials.end()) {
+        std::string texture_type = material_toml.at("texture").as_string();
+        if (texture_type == "constant") {
+          auto albedo =
+              toml::get<std::vector<float>>(material_toml.at("albedo"));
+          obj_ptr->albedo = glm::vec3{albedo[0], albedo[1], albedo[2]};
+        } else {
+          throw std::runtime_error("Debugger: Unsupported texture type:" +
+                                   texture_type);
+          std::exit(EXIT_FAILURE);
+        }
+        if (material_toml.count("emission")) {
+          auto tmp =
+              toml::get<std::vector<float>>(material_toml.at("emission"));
+          obj_ptr->emission = {tmp[0], tmp[1], tmp[2]};
+          obj_ptr->has_emission = true;
+        }
+
+        if (material_toml.count("ior")) {
+          obj_ptr->ior = toml::get<float>(material_toml.at("ior"));
+        }
+        obj_ptr->mat_type = mat_type;
+      } else {
+        throw std::runtime_error(
+            "Debugger: Unsupported material type: " +
+            toml::get<std::string>(material_toml.at("type")));
+        std::exit(EXIT_FAILURE);
+      }
+      auto shape_toml = shapes_vec[i].at("type").as_string();
+      // shape parse
+      std::string obj_path;
+      if (shape_toml == "obj") {
+        obj_ptr->path = shapes_vec[i].at("path").as_string();
+      } else {
+        throw std::runtime_error("Debugger currently only supports obj files");
+        continue;
+      }
+      objects.push_back(obj_ptr);
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Debugger: Exception captured: " << '\n'
+              << e.what() << std::endl;
+  }
+  return objects;
 }

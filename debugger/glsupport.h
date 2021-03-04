@@ -13,8 +13,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <utils/parse_scene.hpp>
+#include <utils/parse_scene.hh>
 #include <vector>
+
 namespace DR_D // DR_Debugger
 {
 
@@ -68,16 +69,15 @@ void renderCube();
 void renderSphere();
 inline float lerp(float a, float b, float t) { return a * (1 - t) + b * t; }
 
-inline float get_random_float(float min=0.0f,float max=1.0f)
-{
+inline float get_random_float(float min = 0.0f, float max = 1.0f) {
   static std::mt19937 generator;
-  std::uniform_real_distribution<float> dis(min,max);
+  std::uniform_real_distribution<float> dis(min, max);
   return dis(generator);
 }
 
-// An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
-class Camera
-{
+// An abstract camera class that processes input and calculates the
+// corresponding Euler Angles, Vectors and Matrices for use in OpenGL
+class Camera {
 public:
   // Camera Attributes
   glm::vec3 Position;
@@ -103,14 +103,18 @@ public:
   // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
   glm::mat4 GetViewMatrix();
 
-  // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
+  // Processes input received from any keyboard-like input system. Accepts input
+  // parameter in the form of camera defined ENUM (to abstract it from windowing
+  // systems)
   void ProcessKeyboard(Camera_Movement direction, float deltaTime);
 
-  // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+  // Processes input received from a mouse input system. Expects the offset
+  // value in both the x and y direction.
   void ProcessMouseMovement(float xoffset, float yoffset,
                             GLboolean constrainPitch = true);
 
-  // Processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
+  // Processes input received from a mouse scroll-wheel event. Only requires
+  // input on the vertical wheel-axis
   void ProcessMouseScroll(float yoffset);
 
 private:
@@ -118,8 +122,7 @@ private:
   void updateCameraVectors();
 };
 
-class Shader
-{
+class Shader {
 public:
   unsigned int ID;
   // constructor generates the shader on the fly
@@ -229,88 +232,9 @@ struct Object // DR_Debugger_Object
 
 namespace DR::impl {
 
-template <typename T>
 // This is a wrapper to be called by the debugger
 // return value:
 std::vector<std::shared_ptr<DR_D::Object>>
-parse_objects_wrapper(const T &data) {
-  const auto &objects_toml = toml::find(data, "objects");
-  std::vector<std::shared_ptr<DR_D::Object>> objects;
-  try {
-    const auto &names_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "name");
-    const auto &transforms_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "transform");
-    const auto &materials_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "material");
-    const auto &shapes_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "shape");
-
-    // parse objects
-    for (uint i = 0; i < names_vec.size(); i++) {
-      auto obj_ptr = std::make_shared<DR_D::Object>();
-      // obj_name
-      obj_ptr->name = names_vec[i].at("name").as_string();
-      auto mat_toml =
-          toml::get<std::vector<float>>(transforms_vec[i].at("matrix4"));
-
-      // obj_mat
-      for (int j = 0; j < 16; j++) {
-        // column major
-        obj_ptr->model_mat4[j % 4][j / 4] = mat_toml.at(j);
-      }
-
-      auto material_toml = materials_vec[i];
-      std::string mat_type = toml::get<std::string>(material_toml.at("type"));
-      static std::array<std::string, 3> supported_materials{"matte", "glass",
-                                                            "dielectric"};
-      if (std::find(supported_materials.begin(), supported_materials.end(),
-                    mat_type) != supported_materials.end()) {
-        std::string texture_type = material_toml.at("texture").as_string();
-        vec3 obj_albedo;
-        if (texture_type == "constant") {
-          auto albedo =
-              toml::get<std::vector<float>>(material_toml.at("albedo"));
-          obj_ptr->albedo = glm::vec3{albedo[0], albedo[1], albedo[2]};
-        } else {
-          throw std::runtime_error("Debugger: Unsupported texture type:" +
-                                   texture_type);
-          std::exit(EXIT_FAILURE);
-        }
-        vec3 obj_emission{0};
-        if (material_toml.count("emission")) {
-          auto tmp =
-              toml::get<std::vector<float>>(material_toml.at("emission"));
-          obj_ptr->emission = {tmp[0], tmp[1], tmp[2]};
-          obj_ptr->has_emission = true;
-        }
-
-        if (material_toml.count("ior")) {
-          obj_ptr->ior = toml::get<float>(material_toml.at("ior"));
-        }
-        obj_ptr->mat_type = mat_type;
-      } else {
-        throw std::runtime_error(
-            "Debugger: Unsupported material type: " +
-            toml::get<std::string>(material_toml.at("type")));
-        std::exit(EXIT_FAILURE);
-      }
-      auto shape_toml = shapes_vec[i].at("type").as_string();
-      // shape parse
-      std::string obj_path;
-      if (shape_toml == "obj") {
-        obj_ptr->path = shapes_vec[i].at("path").as_string();
-      } else {
-        throw std::runtime_error("Debugger currently only supports obj files");
-        continue;
-      }
-      objects.push_back(obj_ptr);
-    }
-  } catch (const std::exception &e) {
-    std::cerr << "Debugger: Exception captured: " << '\n'
-              << e.what() << std::endl;
-  }
-  return objects;
-}
+parse_objects_wrapper(const toml::value &data);
 
 } // namespace DR::impl

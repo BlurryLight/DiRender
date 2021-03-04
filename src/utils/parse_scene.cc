@@ -1,5 +1,7 @@
-#pragma once
-#include "../../third_party/toml11/toml.hpp"
+//
+// Created by panda on 2021/3/4.
+//
+
 #include <accelerator/bvh.h>
 #include <accelerator/linear_list.h>
 #include <cameras/pinhole_camera.h>
@@ -8,18 +10,17 @@
 #include <material/glass_material.h>
 #include <material/matte_material.h>
 #include <math/geometry.hpp>
+#include <renderer/direct_light_renderer.h>
+#include <renderer/path_tracing_renderer.h>
+#include <renderer/renderer.h>
 #include <shapes/sphere.h>
 #include <texture/checker_texture.h>
 #include <texture/constant_texture.h>
 #include <utils/OBJ_Loader_wrapper.h>
-NAMESPACE_BEGIN(DR_D)
-NAMESPACE_END(DR_D)
-
-NAMESPACE_BEGIN(DR)
-NAMESPACE_BEGIN(impl)
-
-// This function is also called by debugger to render in OpenGL
-inline auto parse_camera_data_impl(const toml::value &data) {
+#include <utils/parse_scene.hh>
+using namespace DR;
+std::vector<std::tuple<Point3f, vec3, vec3, float, float, float, std::string>>
+impl::parse_camera_data_impl(const toml::value &data) {
   std::vector<std::tuple<Point3f, vec3, vec3, float, float, float, std::string>>
       res;
   const auto &cams_toml = toml::find(data, "cameras");
@@ -49,7 +50,7 @@ inline auto parse_camera_data_impl(const toml::value &data) {
   }
   return res;
 }
-inline void parse_camera_data(Scene *scene, const toml::value &data) {
+void impl::parse_camera_data(Scene *scene, const toml::value &data) {
   auto res = parse_camera_data_impl(data);
   for (const auto &cam_data : res) {
     const auto &[origin, up, lookat, fov, height, width, type] = cam_data;
@@ -61,9 +62,9 @@ inline void parse_camera_data(Scene *scene, const toml::value &data) {
     scene->add(cam);
   }
 }
-inline void parse_material_data(const toml::value &material_toml,
-                                std::shared_ptr<Material> &mat_ptr,
-                                bool &has_emission) {
+void impl::parse_material_data(const toml::value &material_toml,
+                               std::shared_ptr<Material> &mat_ptr,
+                               bool &has_emission) {
   // material parse
   has_emission = false;
   std::string mat_type = toml::get<std::string>(material_toml.at("type"));
@@ -114,10 +115,7 @@ inline void parse_material_data(const toml::value &material_toml,
   throw std::runtime_error("Unsupported material type: " +
                            toml::get<std::string>(material_toml.at("type")));
 }
-
-// TODO: add more type
-inline void make_render(Scene *scene, int spp,
-                        const std::string &type = "pathtracer") {
+void impl::make_render(Scene *scene, int spp, const std::string &type) {
 #ifdef NDEBUG
   int nthreads = std::thread::hardware_concurrency();
   std::cout << "Threads: " << nthreads << std::endl;
@@ -137,9 +135,7 @@ inline void make_render(Scene *scene, int spp,
   std::cout << "Renderer:" << type << std::endl;
 }
 
-NAMESPACE_END(impl)
-
-inline void parse_scene(std::string filename, Scene *scene) {
+void DR::parse_scene(std::string filename, Scene *scene) {
   auto data = toml::parse(filename);
 
   auto title = toml::find<std::string>(data, "title");
@@ -217,5 +213,3 @@ inline void parse_scene(std::string filename, Scene *scene) {
     return;
   }
 }
-
-NAMESPACE_END(DR)

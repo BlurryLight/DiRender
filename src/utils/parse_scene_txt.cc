@@ -1,9 +1,7 @@
 //
-//* This is the program skeleton for homework 2 in CSE167 by Ravi Ramamoorthi */
+// Created by panda on 2021/3/4.
 //
 
-#pragma once
-#include "di_global.h"
 #include <accelerator/bvh.h>
 #include <cameras/pinhole_camera.h>
 #include <cores/scene.h>
@@ -19,17 +17,11 @@
 #include <stack>
 #include <string>
 #include <texture/constant_texture.h>
+#include <utils/OBJ_Loader_wrapper.h>
+#include <utils/parse_scene_txt.hh>
+using namespace DR;
 
-// NAMESPACE_BEGIN(DR)
-// NAMESPACE_BEGIN(IMPL)
-namespace DR {
-namespace impl {
-inline constexpr int kMaxNumLights = 10;
-inline constexpr int kMaxNumObjects = 2'000;
-
-// Function to read the input data values
-// Use is optional, but should be very helpful in parsing.
-bool readvals(std::stringstream &s, const int numvals, float *values) {
+bool impl::readvals(std::stringstream &s, const int numvals, float *values) {
   for (int i = 0; i < numvals; i++) {
     s >> values[i];
     if (s.fail()) {
@@ -40,11 +32,8 @@ bool readvals(std::stringstream &s, const int numvals, float *values) {
   }
   return true;
 }
-
-// copy from
-// https://stackoverflow.com/questions/14265581/parse-split-a-string-in-c-using-string-delimiter-standard-c
-static std::vector<std::string> split(const std::string &str,
-                                      const std::string &delim) {
+std::vector<std::string> impl::split(const std::string &str,
+                                     const std::string &delim) {
   std::vector<std::string> tokens;
   size_t prev = 0, pos = 0;
   do {
@@ -58,9 +47,7 @@ static std::vector<std::string> split(const std::string &str,
   } while (pos < str.length() && prev < str.length());
   return tokens;
 }
-
-extern inline void make_render(Scene *scene, int spp, const std::string &type);
-inline void parse_scene_txt(std::string filename, Scene *scene) {
+void impl::parse_scene_txt(std::string filename, Scene *scene) {
   std::string str, cmd;
   std::ifstream in;
   int spp = 8;
@@ -429,9 +416,3 @@ inline void parse_scene_txt(std::string filename, Scene *scene) {
     throw std::runtime_error(oss.str());
   }
 }
-} // namespace impl
-
-} // namespace DR
-
-// NAMESPACE_END(IMPL)
-// NAMESPACE_END(DR)

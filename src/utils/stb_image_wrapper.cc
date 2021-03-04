@@ -1,8 +1,13 @@
 #include <utils/stb_image_wrapper.h>
+
+#ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../third_party/stb_image_write.h"
+#endif
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include "../third_party/stb_image.h"
+#endif
 using namespace DR;
 bool Image::write_image(const std::string &path, bool flip) {
   bool success = false;

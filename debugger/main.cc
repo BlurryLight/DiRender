@@ -7,8 +7,9 @@
 #include "third_party/imgui/imgui.h"
 #include "third_party/imgui/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui_impl_opengl3.h"
+#include <math/vector.hpp>
 #include <utils/di_global.h>
-#include <utils/parse_scene.hpp>
+#include <utils/parse_scene.hh>
 #include <utils/resource_path_searcher.h>
 
 #include <fstream>
