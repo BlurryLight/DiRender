@@ -62,6 +62,13 @@ endif (DI_USE_GLM)
 # Flags are added only with the main target
 if (MSVC)
     target_compile_options(DiRender PRIVATE /W4)
+    # ignore stupid conversion warnings
+    target_compile_options(DiRender PRIVATE /wd4305 /wd4244 /wd4287 /wd4838)
+    # special case: nameless struct/union is nonstandard but major compilers support it so I use it
+    # disable the warning about it
+    target_compile_options(DiRender PRIVATE /wd4201)
+    # stupid msvc only accepts UTF-8 with Bom unless we force it to accept utf-8
+    target_compile_options(DiRender PRIVATE /utf-8)
     #clang
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic -Wno-unknown-warning-option)
