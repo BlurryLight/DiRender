@@ -38,6 +38,10 @@ Vector3f PathTracingRenderer::cast_ray(
   if (emission.squared_length() > 0.0f) // no more bounce when hitting a light
     return emission;
 
+  //be more defensive
+  //ray's direction is towards the surface
+
+//  assert(r.direction_.dot(isect.normal) <= 0);
   // Shadow ray
   Intersection light_pos;
   float light_pdf = 0;
@@ -77,16 +81,16 @@ Vector3f PathTracingRenderer::cast_ray(
     }
   }
 
-  Vector3f scatter_direction;
-  float scatter_pdf = 0.0f;
-  std::tie(scatter_direction, scatter_pdf) =
+  auto [scatter_direction, scatter_pdf] =
       isect.mat_ptr->sampleScatter(r.direction_, isect);
   Ray r_new(isect.coords, scatter_direction);
+
+//  assert(scatter_direction.dot(isect.normal) >= 0);
   auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
 
   auto part1 = cast_ray(r_new, prim, lights, depth + 1);
   auto part2 = multiply(brdf, part1);
-  L_in = part2 * std::fabs(dot(r_new.direction_, isect.normal)) /
+  L_in = part2 * std::max(dot(r_new.direction_, isect.normal),0.0f) /
          (scatter_pdf * russian_roulette + kEpsilon); // avoid zero
   return L_in + L_shadowray;
 }

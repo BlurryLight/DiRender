@@ -43,7 +43,7 @@ jobs:
           mkdir build
           cd build
           pwd
-          cmake -G Ninja -DCMAKE_BUILD_TYPE=RELEASE -DDI_BUILD_TESTS=ON -DDI_BUILD_DEBUGGER=ON ..
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=RELEASE -DDI_BUILD_TESTS=ON -DDI_BUILD_DEBUGGER=OFF ..
       - name: build
         run:  cmake --build build --parallel
       - name: run

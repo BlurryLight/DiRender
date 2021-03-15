@@ -9,6 +9,7 @@
 #include <material/dielectric_material.h>
 #include <material/glass_material.h>
 #include <material/matte_material.h>
+#include <material/cook_torrance.h>
 #include <math/geometry.hpp>
 #include <renderer/direct_light_renderer.h>
 #include <renderer/path_tracing_renderer.h>
@@ -69,8 +70,8 @@ void impl::parse_material_data(const toml::value &material_toml,
   has_emission = false;
   std::string mat_type = toml::get<std::string>(material_toml.at("type"));
   std::cout << mat_type << std::endl;
-  static std::array<std::string, 3> supported_materials{"matte", "glass",
-                                                        "dielectric"};
+  static std::vector<std::string> supported_materials{"matte", "glass",
+                                                        "dielectric","cooktorrance"};
   if (std::find(supported_materials.begin(), supported_materials.end(),
                 mat_type) != supported_materials.end()) {
     // constant texture
@@ -101,6 +102,7 @@ void impl::parse_material_data(const toml::value &material_toml,
       index_of_refraction = toml::get<float>(material_toml.at("ior"));
     }
 
+
     //    if (material_toml.at("type").as_string() == "matte") {
     if (mat_type == "matte") {
       mat_ptr = std::make_shared<MatteMaterial>(texture_ptr, emission);
@@ -109,6 +111,21 @@ void impl::parse_material_data(const toml::value &material_toml,
     } else if (mat_type == "dielectric") {
       mat_ptr = std::make_shared<DielectricMaterial>(texture_ptr,
                                                      index_of_refraction);
+    }
+    else if(mat_type == "cooktorrance")
+    {
+
+      float metallic = 0.0f;
+      float roughness = 0.0f;
+      metallic = toml::get<float>(material_toml.at("metallic"));
+      roughness = toml::get<float>(material_toml.at("roughness"));
+
+      auto tmp = toml::get<std::vector<float>>(material_toml.at("f0"));
+      vec3 f0 = {tmp[0], tmp[1], tmp[2]};
+      tmp = toml::get<std::vector<float>>(material_toml.at("albedo"));
+      vec3 albedo = {tmp[0], tmp[1], tmp[2]};
+      mat_ptr = std::make_shared<CookTorranceMaterial>(f0,albedo,roughness,metallic,
+                                                     emission);
     }
     return;
   }

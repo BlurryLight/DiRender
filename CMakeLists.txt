@@ -12,7 +12,9 @@ include(${CMAKE_SOURCE_DIR}/cmake/cmake_filesystem.cmake)
 #options 
 option(EXPERIMENTAL_UNITY_BUILD "UNITY_BUILD to reduce compilation time" OFF)
 option(DI_BUILD_TESTS "Build test programs" ON)
-option(DI_BUILD_DEBUGGER "Build a real-time debugger" ON)
+# due to the change of the Render, the debugger now needs much  more work to catch up the progress of the main project
+# so I change the default option to off.
+option(DI_BUILD_DEBUGGER "Build a real-time debugger" OFF)
 option(DI_USE_GLM "USE GLM for matrix. DO NOT USE. BROKEN" OFF)
 
 # options build

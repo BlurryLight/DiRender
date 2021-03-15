@@ -76,6 +76,8 @@ set(MATERIAL_SOURCE
         ${CMAKE_SOURCE_DIR}/src/material/dielectric_material.cc
         ${CMAKE_SOURCE_DIR}/src/material/phong_material.h
         ${CMAKE_SOURCE_DIR}/src/material/phong_material.cc
+        ${CMAKE_SOURCE_DIR}/src/material/cook_torrance.h
+        ${CMAKE_SOURCE_DIR}/src/material/cook_torrance.cc
         )
 
 set(THIRD_PARTY_SOURCE

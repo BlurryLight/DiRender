@@ -331,6 +331,11 @@ public:
     };
   }
 
+  bool is_unit() const
+  {
+    return abs_almost_equal(l2_norm(),1.0f);
+  }
+
   template <class T> static T min(const T &lhs, const T &rhs) = delete;
   template <class T>
   static T max(const T &lhs, const T &rhs) = delete; // forbid other type
