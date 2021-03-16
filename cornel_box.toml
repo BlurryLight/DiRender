@@ -1,13 +1,13 @@
 title = "SIMPLE SCENE"
-spp = 256
+spp = 128
 [cameras]
     [[cameras.camera]]
     origin = [278.0,273.0,-800.0]
     up = [0.0,1.0,0.0]
     lookat = [278.0,273.0,-790.0]
     fov = 45.0
-    film_height = 200
-    film_width = 200
+    film_height = 400
+    film_width = 400
     type = "pinhole"
 
     # [[cameras.camera]]
@@ -145,6 +145,25 @@ spp = 256
   matrix4 = [1.0,0.0,0.0,228.0,
         0.0,1.0,0.0,223.0,
         0.0,0.0,1.0,200.0,
+        0.0,0.0,0.0,1.0]
+  [[objects.shape]]
+  type="sphere"
+  radius = 50.0
+
+  [[objects.name]]
+  name = "another_sphere"
+  [[objects.material]]
+  name = "cook_test"
+  type = "cooktorrance"
+  albedo = [0.3,0.3,0.1]
+  roughness = 0.8
+  metallic = 0.1
+  f0 = [0.04,0.04,0.04]
+  texture = "constant"
+  [[objects.transform]]
+  matrix4 = [1.0,0.0,0.0,378.0,
+        0.0,1.0,0.0,53.0,
+        0.0,0.0,1.0,150.0,
         0.0,0.0,0.0,1.0]
   [[objects.shape]]
   type="sphere"

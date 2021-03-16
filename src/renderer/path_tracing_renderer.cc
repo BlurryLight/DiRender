@@ -36,7 +36,18 @@ Vector3f PathTracingRenderer::cast_ray(
 #endif
   auto emission = isect.mat_ptr->evalEmitted(r.direction_, isect);
   if (emission.squared_length() > 0.0f) // no more bounce when hitting a light
-    return emission;
+  {
+    //although not correct with the original path tracing algorithm,
+    // it makes the output look better.
+    // If we don't handle the overflow of the emission vector, the final output will be very noisy.
+    return {
+        clamp(0.0f, 1.0f, emission.x),
+        clamp(0.0f, 1.0f, emission.y),
+        clamp(0.0f, 1.0f, emission.z)
+    };
+  }
+
+//    return emission;
 
   //be more defensive
   //ray's direction is towards the surface
@@ -90,7 +101,9 @@ Vector3f PathTracingRenderer::cast_ray(
 
   auto part1 = cast_ray(r_new, prim, lights, depth + 1);
   auto part2 = multiply(brdf, part1);
-  L_in = part2 * std::max(dot(r_new.direction_, isect.normal),0.0f) /
+  // it cannot be std::max(dot(r_new.direction_,isct.normal),0.0f)
+  // because of the dielctric refraction ray will be negative
+  L_in = part2 * std::abs(dot(r_new.direction_, isect.normal)) /
          (scatter_pdf * russian_roulette + kEpsilon); // avoid zero
   return L_in + L_shadowray;
 }
