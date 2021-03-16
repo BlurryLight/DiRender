@@ -16,8 +16,10 @@ of [the CSE168 course by Prof Ravi Ramamoorthi](http://cseweb.ucsd.edu/~viscomp/
 
 ## Milestone
 
-- Cornel Box
-  ![cornel_box](images/cornel_box.jpg)
+- Cornel Box (1200 x 1200 x 1024spp,about 35mins)
+  
+  Matte, dielectric, glass and Cook-Torrance material
+  ![cornel_box](images/cornel_box_new.png)
 
 - Debugger
   ![cornel_box debugger](images/debugger.gif)
