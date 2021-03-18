@@ -20,10 +20,10 @@
 #include <utils/OBJ_Loader_wrapper.h>
 #include <utils/parse_scene.hh>
 using namespace DR;
-std::vector<std::tuple<Point3f, vec3, vec3, float, float, float, std::string>>
-impl::parse_camera_data_impl(const toml::value &data) {
-  std::vector<std::tuple<Point3f, vec3, vec3, float, float, float, std::string>>
-      res;
+
+
+impl::cam_return_type  impl::parse_camera_data_impl(const toml::value &data) {
+  cam_return_type    res;
   const auto &cams_toml = toml::find(data, "cameras");
   const auto &cam_vec_toml =
       toml::find<std::vector<toml::table>>(cams_toml, "camera");
@@ -44,21 +44,23 @@ impl::parse_camera_data_impl(const toml::value &data) {
       up[i] = up_toml[i];
       lookat[i] = lookat_toml[i];
     }
+    bool gamma = false;
+    if(cam_toml.find("gamma") != cam_toml.end())
+      gamma = toml::get<toml::boolean>(cam_toml.at("gamma"));
     std::string type = toml::get<std::string>(cam_toml.at("type"));
-    std::tuple<Point3f, vec3, vec3, float, float, float, std::string> tmp{
-        origin, up, lookat, fov_toml, height_toml, width_toml, type};
-    res.emplace_back(tmp);
+    res.emplace_back(
+        origin, up, lookat, fov_toml, height_toml, width_toml, type,gamma);
   }
   return res;
 }
 void impl::parse_camera_data(Scene *scene, const toml::value &data) {
   auto res = parse_camera_data_impl(data);
   for (const auto &cam_data : res) {
-    const auto &[origin, up, lookat, fov, height, width, type] = cam_data;
+    const auto &[origin, up, lookat, fov, height, width, type,gamma] = cam_data;
     std::shared_ptr<Camera> cam = nullptr;
     if (type == "pinhole") {
       cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov, height,
-                                            width, scene);
+                                            width, scene,gamma);
     }
     scene->add(cam);
   }
@@ -160,6 +162,7 @@ void DR::parse_scene(std::string filename, Scene *scene) {
 
   int spp = toml::find<toml::integer>(data, "spp");
   std::cout << "spp: " << spp << std::endl;
+
   impl::make_render(scene, spp);
 
   if (data.contains("background")) {

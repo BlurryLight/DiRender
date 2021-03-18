@@ -67,9 +67,24 @@ void Film::write(const std::string &filename, PicType type) {
   for (uint i = 0; i < height * width; i++) {
     for (uint j = 0; j < 3; j++) {
       uint8_t tmp = 0;
+
+      static constexpr float gamma_index = 1 / 2.2f;
+      //Tone mapping
+      auto AcesFilmicToneMapping = [](float color)
+      {
+        float a = 2.51f;
+        float b = 0.03f;
+        float c = 2.43f;
+        float d = 0.59f;
+        float e = 0.14f;
+
+        float new_cl = clamp(0.0f,1.0f,(color * ( a * color + b)) / (color * (c * color + d) + e));
+        return new_cl;
+      };
+      framebuffer_[i][j] = AcesFilmicToneMapping(framebuffer_[i][j]);
       if (gamma_) {
         tmp = static_cast<uint8_t>(
-            std::pow(clamp(0.0f, kOneMinusEps, framebuffer_[i][j]), 0.6) * 255);
+            std::pow(clamp(0.0f, kOneMinusEps, framebuffer_[i][j]),gamma_index) * 255);
       } else {
         tmp = static_cast<uint8_t>(
             clamp(0.0f, kOneMinusEps, framebuffer_[i][j]) * 255);

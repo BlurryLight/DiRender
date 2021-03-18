@@ -8,6 +8,7 @@ spp = 128
     fov = 45.0
     film_height = 400
     film_width = 400
+    gamma = true
     type = "pinhole"
 
     # [[cameras.camera]]
