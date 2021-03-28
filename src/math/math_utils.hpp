@@ -11,6 +11,9 @@
 NAMESPACE_BEGIN(DR)
 constexpr float kFloatInfinity = std::numeric_limits<float>::max();
 constexpr float kFloatMax = kFloatInfinity;
+constexpr int kIntMax = std::numeric_limits<int>::max();
+constexpr uint kUIntMax = std::numeric_limits<unsigned int>::max();
+constexpr int kIntMin = std::numeric_limits<int>::min();
 constexpr float kFloatMin = std::numeric_limits<float>::min();
 constexpr float kFloatLowest = -kFloatMax;
 constexpr float kEpsilon = std::numeric_limits<float>::epsilon();
@@ -29,7 +32,6 @@ template <typename T>
 inline T clamp(const T &low, const T &high, const T &value) {
   return std::max(low, std::min(high, value));
 }
-
 
 template <typename T> inline T lerp(const T &l, const T &r, const float &t) {
   float tt = clamp<float>(0.0f, 1.0f, t);

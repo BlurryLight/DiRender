@@ -15,7 +15,8 @@ int main(int argc, char **argv) {
             << "Built by:" << DR::BUILD_COMPILER << " " << DR::CXX_VER << " on "
             << DR::BUILD_UTC_TIMESTAMP << '\n'
             << "System: " << DR::BUILD_SYSTEM_NAME << " "
-            << DR::BUILD_SYSTEM_VERSION << std::endl;
+            << DR::BUILD_SYSTEM_VERSION << '\n'
+            << "Build type" << DR::BUILD_TYPE << std::endl;
 
   auto basic_logger =
       spdlog::basic_logger_mt("basic_logger", "Dirender_log.txt", true);
