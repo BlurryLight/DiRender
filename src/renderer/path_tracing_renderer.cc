@@ -82,7 +82,7 @@ Vector3f PathTracingRenderer::cast_ray(
     pdf_sum += true_light_pdf;
     shadow_mis_weight = true_light_pdf / pdf_sum;
     auto L_shadow =
-        cast_ray(shadow_ray, prim, lights, INT_MAX, shadow_mis_weight, true);
+        cast_ray(shadow_ray, prim, lights, kIntMax, shadow_mis_weight, true);
     if (L_shadow.squared_length() > 0.0f) {
       float cosine1 = std::max(dot(shadowray_direction, isect.normal), 0.0f);
       auto brdf =
