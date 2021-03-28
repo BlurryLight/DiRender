@@ -1,4 +1,5 @@
 #include <cameras/pinhole_camera.h>
+#include <sampler/naive_sampler.hh>
 using namespace DR;
 
 Ray PinholeCamera::get_ray(float u, float v) const {
@@ -20,4 +21,5 @@ PinholeCamera::PinholeCamera(Point3f origin, Vector3f WorldUp, Vector3f target,
   vertical_ = Vector3f{0.0, h, 0.0};
   left_bottom_corner_ = Vector3f{0.0f} - horizontal_ * 0.5f - vertical_ * 0.5f -
                         Vector3f{0.0f, 0.0f, 1.0f};
+  sampler_ = std::make_unique<NaiveSampler>();
 }

@@ -3,6 +3,7 @@
 #include <math/geometry.hpp>
 #include <math/transform.h>
 #include <memory>
+#include <sampler/sampler.hh>
 #include <string>
 #include <utils/stb_image_wrapper.h>
 NAMESPACE_BEGIN(DR)
@@ -32,9 +33,10 @@ public:
   Camera(Point3f origin, Vector3f WorldUp, Vector3f target, float fov,
          uint height, uint width, observer_ptr<Scene> scene,
          bool gamma = false);
-  virtual ~Camera(){};
+  virtual ~Camera() = default;
   virtual Ray get_ray(float u, float v) const = 0;
   std::unique_ptr<Film> film_ptr_;
+  std::unique_ptr<Sampler> sampler_;
 
   // protected:
   Point3f position_;

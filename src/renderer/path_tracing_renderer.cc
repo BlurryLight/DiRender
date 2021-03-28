@@ -122,8 +122,9 @@ void PathTracingRenderer::render_tile(
       if (trueJ >= width || trueI >= height)
         continue;
       for (int k = 0; k < spp; k++) {
-        float u = float(trueJ + get_random_float()) / (width);
-        float v = float(height - 1 - trueI + get_random_float()) / (height);
+        auto [x, y] = cam->sampler_->get_2d();
+        float u = float(trueJ + x) / (width);
+        float v = float(height - 1 - trueI + y) / (height);
         auto r = cam->get_ray(u, v);
         auto tmp = cast_ray(r, prim, lights, 0, 1, true) / spp;
         cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) += tmp;

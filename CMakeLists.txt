@@ -46,7 +46,7 @@ configure_file(${CMAKE_SOURCE_DIR}/src/utils/cmake_vars.h.in ${CMAKE_SOURCE_DIR}
 
 
 # main target
-add_executable(DiRender ${SOURCE_HEADERS} src/main.cc)
+add_executable(DiRender ${SOURCE_HEADERS} src/main.cc src/sampler/sampler.cc src/sampler/sampler.hh)
 target_include_directories(DiRender PRIVATE "src")
 target_link_libraries(DiRender PRIVATE Threads::Threads spdlog::spdlog)
 

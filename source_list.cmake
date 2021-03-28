@@ -26,6 +26,11 @@ set(MATH_SOURCE
         )
 
 set(SAMPLER_SOURCE
+        ${CMAKE_SOURCE_DIR}/src/sampler/sampler.hh
+        ${CMAKE_SOURCE_DIR}/src/sampler/sampler.cc
+        ${CMAKE_SOURCE_DIR}/src/sampler/naive_sampler.hh
+        ${CMAKE_SOURCE_DIR}/src/sampler/naive_sampler.cc
+
         )
 
 set(CAMERAS_SOURCE
