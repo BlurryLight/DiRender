@@ -4,7 +4,8 @@
 using namespace DR;
 Vector3f DirectLightRenderer::cast_ray(
     const Ray &r, std::shared_ptr<Primitive> prim,
-    const std::vector<std::shared_ptr<Primitive>> &lights, int depth) {
+    const std::vector<std::shared_ptr<Primitive>> &lights, int depth, float,
+    bool) {
   // All rays will be scattered to the light direction when possible
   if (depth > 5)
     return background_;
@@ -48,7 +49,7 @@ Vector3f DirectLightRenderer::cast_ray(
   auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
   L_in = isect.mat_ptr->evalEmitted(r.direction_, isect);
 
-  auto part1 = cast_ray(r_new, prim, lights, depth + 1);
+  auto part1 = cast_ray(r_new, prim, lights, depth + 1, 1, false);
   auto part2 = multiply(brdf, part1);
   L_in += part2 * std::max(dot(r_new.direction_, isect.normal), 0.0f) /
           (pdf + kEpsilon); // avoid zero

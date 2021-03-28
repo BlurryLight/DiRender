@@ -18,14 +18,13 @@
 using namespace DR;
 Vector3f PathTracingRenderer::cast_ray(
     const Ray &r, std::shared_ptr<Primitive> prim,
-    const std::vector<std::shared_ptr<Primitive>> &lights, int depth = 0) {
-  float russian_roulette = 0.8f;
-  if (depth > 5 || (depth != 0 && get_random_float() > russian_roulette))
-    return background_;
+    const std::vector<std::shared_ptr<Primitive>> &lights, int depth,
+    float mis_weight, bool includeLe) {
 
   Intersection isect;
   if (!prim->Intersect(r, &isect))
     return background_;
+
 #ifndef NDEBUG
   // ray.origin; isect.coords; isect.normal
   static auto ray_logger = spdlog::get("ray_logger");
@@ -35,24 +34,17 @@ Vector3f PathTracingRenderer::cast_ray(
       isect.coords.z, isect.normal.x, isect.normal.y, isect.normal.z);
 #endif
   auto emission = isect.mat_ptr->evalEmitted(r.direction_, isect);
-  if (emission.squared_length() > 0.0f) // no more bounce when hitting a light
-  {
-//    return emission;
-    //although not correct with the original path tracing algorithm,
-    // it makes the output look better.
-    // If we don't handle the overflow of the emission vector, the final output will be very noisy.
-    return {
-        clamp(0.0f, 1.0f, emission.x),
-        clamp(0.0f, 1.0f, emission.y),
-        clamp(0.0f, 1.0f, emission.z)
-    };
-  }
+  Vector3f Le{};
+  Le = includeLe ? mis_weight * emission : Le;
 
+  static float russian_roulette = 0.8f;
+  if (depth > 5 || (depth > 0 && get_random_float() > russian_roulette))
+    return Le;
 
-  //be more defensive
-  //ray's direction is towards the surface
+  // be more defensive
+  // ray's direction is towards the surface
 
-//  assert(r.direction_.dot(isect.normal) <= 0);
+  //  assert(r.direction_.dot(isect.normal) <= 0);
   // Shadow ray
   Intersection light_pos;
   float light_pdf = 0;
@@ -62,50 +54,59 @@ Vector3f PathTracingRenderer::cast_ray(
   }
   int index = std::floor(size * get_random_float(0.0, 0.99));
   std::tie(light_pos, light_pdf) = lights.at(index)->sample();
+
+  // multi importance sampling
+  float emit_area = 0.0f;
+  for (const auto &i : lights) {
+    emit_area += i->Area();
+  }
+  light_pdf = 1 / emit_area;
+
+  auto [scatter_direction, scatter_pdf] =
+      isect.mat_ptr->sampleScatter(r.direction_, isect);
+
+  float pdf_sum = scatter_pdf;
+  float shadow_mis_weight = 0.0f;
+  float brdf_mis_weight = 1.0f;
+
   Vector3f L_in = {0};
   Vector3f L_shadowray = {0};
   if (!isect.mat_ptr->specular) {
     Vector3f shadowray_direction =
         (light_pos.coords - isect.coords).normalize();
     Ray shadow_ray(isect.coords, shadowray_direction);
-    Intersection shadow_intersection;
-    prim->Intersect(shadow_ray, &shadow_intersection);
-    if (shadow_intersection.happened) {
-      auto shadow_emission = shadow_intersection.mat_ptr->evalEmitted(
-          shadowray_direction, shadow_intersection);
-      if (shadow_emission.squared_length() > 0.0f) //命中光源
-      {
-        float emit_area = 0;
-        for (const auto &i : lights) {
-          emit_area += i->Area();
-        }
-        light_pdf = 1 / emit_area;
-        float distance2 = (light_pos.coords - isect.coords).squared_length();
-        float cosine2 =
-            std::max(dot(-shadowray_direction, light_pos.normal), 0.0f);
-        float cosine1 = std::max(dot(shadowray_direction, isect.normal), 0.0f);
-        auto brdf =
-            isect.mat_ptr->evalBxDF(r.direction_, isect, shadowray_direction);
-        L_shadowray = multiply(brdf, shadow_emission) * cosine1 * cosine2;
-        L_shadowray /= (distance2 * light_pdf);
-      }
+    float distance2 = (light_pos.coords - isect.coords).squared_length();
+    float cosine2 = std::max(dot(-shadowray_direction, light_pos.normal), 0.0f);
+
+    float true_light_pdf = light_pdf * distance2 / cosine2;
+    pdf_sum += true_light_pdf;
+    shadow_mis_weight = true_light_pdf / pdf_sum;
+    auto L_shadow =
+        cast_ray(shadow_ray, prim, lights, INT_MAX, shadow_mis_weight, true);
+    if (L_shadow.squared_length() > 0.0f) {
+      float cosine1 = std::max(dot(shadowray_direction, isect.normal), 0.0f);
+      auto brdf =
+          isect.mat_ptr->evalBxDF(r.direction_, isect, shadowray_direction);
+      L_shadowray = multiply(brdf, L_shadow) * cosine1 / true_light_pdf;
     }
   }
 
-  auto [scatter_direction, scatter_pdf] =
-      isect.mat_ptr->sampleScatter(r.direction_, isect);
+  // now we have both pdf(brdf sampling and light sampling)
+
+  brdf_mis_weight = scatter_pdf / pdf_sum;
   Ray r_new(isect.coords, scatter_direction);
 
-//  assert(scatter_direction.dot(isect.normal) >= 0);
+  //  assert(scatter_direction.dot(isect.normal) >= 0);
   auto brdf = isect.mat_ptr->evalBxDF(r.direction_, isect, r_new.direction_);
 
-  auto part1 = cast_ray(r_new, prim, lights, depth + 1);
+  auto part1 = cast_ray(r_new, prim, lights, depth + 1, brdf_mis_weight,
+                        false); // doesn't allow hit the light source
   auto part2 = multiply(brdf, part1);
   // it cannot be std::max(dot(r_new.direction_,isct.normal),0.0f)
   // because of the dielctric refraction ray will be negative
   L_in = part2 * std::abs(dot(r_new.direction_, isect.normal)) /
          (scatter_pdf * russian_roulette + kEpsilon); // avoid zero
-  return L_in + L_shadowray;
+  return Le + L_in + L_shadowray;
 }
 void PathTracingRenderer::render_tile(
     std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
@@ -124,7 +125,7 @@ void PathTracingRenderer::render_tile(
         float u = float(trueJ + get_random_float()) / (width);
         float v = float(height - 1 - trueI + get_random_float()) / (height);
         auto r = cam->get_ray(u, v);
-        auto tmp = cast_ray(r, prim, lights, 0) / spp;
+        auto tmp = cast_ray(r, prim, lights, 0, 1, true) / spp;
         cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) += tmp;
       }
     }

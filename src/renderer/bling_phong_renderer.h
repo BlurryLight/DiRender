@@ -15,7 +15,7 @@ public:
       : PathTracingRenderer(spp, nthreads) {}
   Vector3f cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
                     const std::vector<std::shared_ptr<Primitive>> &lights,
-                    int depth) override;
+                    int depth, float, bool) override;
 };
 
 } // namespace DR

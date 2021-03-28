@@ -10,7 +10,8 @@ public:
 protected:
   virtual Vector3f
   cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
-           const std::vector<std::shared_ptr<Primitive>> &lights, int depth);
+           const std::vector<std::shared_ptr<Primitive>> &lights, int depth,
+           float mis_weight, bool includeLe);
   void render_tile(std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
                    const std::vector<std::shared_ptr<Primitive>> &lights,
                    int height, int width, int blockheight, int blockwidth,

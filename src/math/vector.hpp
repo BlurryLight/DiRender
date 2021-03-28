@@ -331,10 +331,7 @@ public:
     };
   }
 
-  bool is_unit() const
-  {
-    return abs_almost_equal(l2_norm(),1.0f);
-  }
+  bool is_unit() const { return abs_almost_equal(l2_norm(), 1.0f); }
 
   template <class T> static T min(const T &lhs, const T &rhs) = delete;
   template <class T>
@@ -659,6 +656,12 @@ inline float dot(const Vector3f &lhs, const Vector3f &rhs) {
 
 inline Vector3f multiply(const Vector3f &lhs, const Vector3f &rhs) {
   return {lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z};
+}
+
+inline Vector3f clamp(const float &low, const float &high,
+                      const Vector3f &vec) {
+  return {clamp<float>(low, high, vec.x), clamp<float>(low, high, vec.y),
+          clamp<float>(low, high, vec.z)};
 }
 #ifdef __GNUC__
 

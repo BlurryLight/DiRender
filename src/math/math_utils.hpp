@@ -30,6 +30,7 @@ inline T clamp(const T &low, const T &high, const T &value) {
   return std::max(low, std::min(high, value));
 }
 
+
 template <typename T> inline T lerp(const T &l, const T &r, const float &t) {
   float tt = clamp<float>(0.0f, 1.0f, t);
   return l * (1 - tt) + r * tt;

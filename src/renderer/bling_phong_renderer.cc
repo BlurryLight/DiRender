@@ -8,7 +8,8 @@
 using namespace DR;
 Vector3f BlingPhongRenderer::cast_ray(
     const Ray &r, std::shared_ptr<Primitive> prim,
-    const std::vector<std::shared_ptr<Primitive>> &lights, int depth) {
+    const std::vector<std::shared_ptr<Primitive>> &lights, int depth, float,
+    bool) {
   // All rays will be scattered to the light direction when possible
   if (depth > 5)
     return background_;
