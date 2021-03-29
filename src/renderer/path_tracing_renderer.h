@@ -15,7 +15,7 @@ protected:
   void render_tile(std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
                    const std::vector<std::shared_ptr<Primitive>> &lights,
                    int height, int width, int blockheight, int blockwidth,
-                   int blockheightId, int blockwidthId, int spp);
+                   int blockheightId, int blockwidthId, int sppstep);
   Vector3f background_{0};
 };
 NAMESPACE_END(DR)

@@ -112,7 +112,7 @@ void PathTracingRenderer::render_tile(
     std::shared_ptr<Camera> cam, std::shared_ptr<Primitive> prim,
     const std::vector<std::shared_ptr<Primitive>> &lights, int height,
     int width, int blockheight, int blockwidth, int blockheightId,
-    int blockwidthId, int spp) {
+    int blockwidthId, int sppstep) {
   UpdateProgrss(cam->film_ptr_->tile_width_nums *
                 cam->film_ptr_->tile_height_nums);
   for (int i = 0; i < blockheight; i++) {
@@ -121,12 +121,12 @@ void PathTracingRenderer::render_tile(
       int trueI = blockheight * blockheightId + i;
       if (trueJ >= width || trueI >= height)
         continue;
-      for (int k = 0; k < spp; k++) {
+      for (int k = 0; k < sppstep; k++) {
         auto [x, y] = cam->sampler_->get_2d();
         float u = float(trueJ + x) / (width);
         float v = float(height - 1 - trueI + y) / (height);
         auto r = cam->get_ray(u, v);
-        auto tmp = cast_ray(r, prim, lights, 0, 1, true) / spp;
+        auto tmp = cast_ray(r, prim, lights, 0, 1, true);
         cam->film_ptr_->framebuffer_.at(trueI * width + trueJ) += tmp;
       }
     }
@@ -136,7 +136,7 @@ void PathTracingRenderer::render_tile(
 void PathTracingRenderer::render(const Scene &scene) {
   scene_ = &scene;
   std::shared_ptr<Primitive> hit_list = nullptr;
-  if (scene.prims_.size() > 0) {
+  if (!scene.prims_.empty()) {
     if (scene.prims_.size() > 1) {
       std::vector<std::shared_ptr<Primitive>> prims;
       for (auto &i : scene.prims_)
@@ -153,45 +153,64 @@ void PathTracingRenderer::render(const Scene &scene) {
   //  std::cout << "background:"<< background_<<std::endl;
 
   int index = 0;
+  int cam_index = 0;
   for (const auto &cam : scene.cams_) {
+
+#ifdef NDEBUG
     std::vector<std::future<void>> futures;
     futures.reserve(cam->film_ptr_->tile_width_nums *
                     cam->film_ptr_->tile_height_nums);
-    for (uint i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
-      for (uint j = 0; j < cam->film_ptr_->tile_width_nums; j++) {
-        // parallel
+#endif
+    // progressive rendering
+    // save an image per 16 spp
+    uint step = 16;
+    uint n = spp_ / 16;
+    for (int s = 0; s < n; s++) {
+      std::cout << "Current Step:(" << s << "/" << n << ")" << std::endl;
+      for (uint i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
+        for (uint j = 0; j < cam->film_ptr_->tile_width_nums; j++) {
+          // parallel
 #ifdef NDEBUG
-        futures.push_back(this->pool_.enqueue_task(
-            // Interesting syntax here
-            &PathTracingRenderer::render_tile, this, cam, hit_list,
-            scene.light_shapes_, cam->film_ptr_->height, cam->film_ptr_->width,
-            cam->film_ptr_->tile_height, cam->film_ptr_->tile_width, i, j,
-            spp_));
+          futures.push_back(this->pool_.enqueue_task(
+              // Interesting syntax here
+              &PathTracingRenderer::render_tile, this, cam, hit_list,
+              scene.light_shapes_, cam->film_ptr_->height,
+              cam->film_ptr_->width, cam->film_ptr_->tile_height,
+              cam->film_ptr_->tile_width, i, j, step));
 #else
-        // single thread
-        render_tile(cam, hit_list, scene.light_shapes_, cam->film_ptr_->height,
-                    cam->film_ptr_->width, cam->film_ptr_->tile_height,
-                    cam->film_ptr_->tile_width, i, j, spp_);
+          // single thread
+          render_tile(cam, hit_list, scene.light_shapes_,
+                      cam->film_ptr_->height, cam->film_ptr_->width,
+                      cam->film_ptr_->tile_height, cam->film_ptr_->tile_width,
+                      i, j, spp_);
 #endif
+        }
       }
-    }
 #ifdef NDEBUG
-    size_t index_test = 0;
-    try {
-      for (index_test = 0; index_test < futures.size(); index_test++) {
-        auto &&result = futures.at(index_test);
-        result.get();
+      size_t index_test = 0;
+      try {
+        for (index_test = 0; index_test < futures.size(); index_test++) {
+          auto &&result = futures.at(index_test);
+          result.get();
+        }
+      } catch (std::exception &e) {
+        std::cout << e.what() << std::endl;
+        std::cout << "size:" << futures.size() << std::endl;
+        std::cout << "Index test:" << index_test << std::endl;
       }
-    } catch (std::exception &e) {
-      std::cout << e.what() << std::endl;
-      std::cout << "size:" << futures.size() << std::endl;
-      std::cout << "Index test:" << index_test << std::endl;
-    }
+      std::vector<std::future<void>>{}.swap(futures);
+      {
+        std::lock_guard<std::mutex> gd(mutex_);
+        count_ = 0;
+      }
 #endif
-    cam->film_ptr_->write("output_" + std::to_string(index++) +
-                              std::string(MapTypeToSuffix()(PicType::kPNG)),
-                          PicType::kPNG);
-    //    cam->film_ptr_->write_ppm("output" + std::to_string(index++) +
-    //    ".ppm");
+      cam->film_ptr_->write("cam" + std::to_string(cam_index) + "_output_" +
+                                std::to_string(index++) +
+                                std::string(MapTypeToSuffix()(PicType::kPNG)),
+                            PicType::kPNG, step * (s + 1));
+      //    cam->film_ptr_->write_ppm("output" + std::to_string(index++) +
+      //    ".ppm");
+    }
   }
+  cam_index++;
 }
