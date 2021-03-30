@@ -40,7 +40,7 @@ of [the CSE168 course by Prof Ravi Ramamoorthi](http://cseweb.ucsd.edu/~viscomp/
     - :heavy_check_mark: linear list(just for testing)
 - Sampler
     - :heavy_check_mark: Naive sampler(std::mt19937)
-    - :x: Halton sequence
+    - :heavy_check_mark: Halton sequence(no scramble)
     - :x: Sobel sequence
 - Camera
     - :heavy_check_mark: Naive camera

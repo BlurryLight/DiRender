@@ -1,4 +1,5 @@
 #include <cameras/pinhole_camera.h>
+#include <sampler/halton_sampler.hh>
 #include <sampler/naive_sampler.hh>
 using namespace DR;
 
@@ -21,5 +22,6 @@ PinholeCamera::PinholeCamera(Point3f origin, Vector3f WorldUp, Vector3f target,
   vertical_ = Vector3f{0.0, h, 0.0};
   left_bottom_corner_ = Vector3f{0.0f} - horizontal_ * 0.5f - vertical_ * 0.5f -
                         Vector3f{0.0f, 0.0f, 1.0f};
-  sampler_ = std::make_unique<NaiveSampler>();
+  //  sampler_ = std::make_unique<NaiveSampler>();
+  sampler_ = std::make_unique<HaltonSampler>();
 }

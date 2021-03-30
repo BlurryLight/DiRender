@@ -30,6 +30,8 @@ set(SAMPLER_SOURCE
         ${CMAKE_SOURCE_DIR}/src/sampler/sampler.cc
         ${CMAKE_SOURCE_DIR}/src/sampler/naive_sampler.hh
         ${CMAKE_SOURCE_DIR}/src/sampler/naive_sampler.cc
+        ${CMAKE_SOURCE_DIR}/src/sampler/halton_sampler.hh
+        ${CMAKE_SOURCE_DIR}/src/sampler/halton_sampler.cc
 
         )
 
