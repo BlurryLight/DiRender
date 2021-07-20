@@ -12,5 +12,5 @@ NormalRenderer::cast_ray(const Ray &r, std::shared_ptr<Primitive> prim,
   Intersection isect;
   if (!prim->Intersect(r, &isect))
     return background_;
-  return isect.normal;
+  return isect.normal.normalize();
 }

@@ -21,6 +21,7 @@ struct Film {
   uint tile_height_nums = std::ceil(height / tile_height);
   uint tile_width_nums = std::ceil(width / tile_width);
   bool gamma_ = false;
+  bool tone_mapping_ = true;
   void write(const std::string &filename, PicType type, uint spp) const;
   void write_ppm(const std::string &filename);
 };

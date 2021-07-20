@@ -83,7 +83,7 @@ void Film::write(const std::string &filename, PicType type, uint spp) const {
                   (color * (a * color + b)) / (color * (c * color + d) + e));
         return new_cl;
       };
-      auto value = AcesFilmicToneMapping(framebuffer_[i][j] * inv_spp);
+      float value = tone_mapping_ ? AcesFilmicToneMapping(framebuffer_[i][j] * inv_spp) : framebuffer_[i][j] * inv_spp;
       if (gamma_) {
         tmp = static_cast<uint8_t>(
             std::pow(clamp(0.0f, kOneMinusEps, value), gamma_index) * 255);

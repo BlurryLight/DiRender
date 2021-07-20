@@ -46,23 +46,33 @@ impl::cam_return_type impl::parse_camera_data_impl(const toml::value &data) {
       lookat[i] = lookat_toml[i];
     }
     bool gamma = false;
+    bool tonemapping = false;
     if (cam_toml.find("gamma") != cam_toml.end())
       gamma = toml::get<toml::boolean>(cam_toml.at("gamma"));
+
+    if (cam_toml.find("tonemapping") != cam_toml.end())
+      tonemapping = toml::get<toml::boolean>(cam_toml.at("tonemapping"));
+
     std::string type = toml::get<std::string>(cam_toml.at("type"));
     res.emplace_back(origin, up, lookat, fov_toml, height_toml, width_toml,
-                     type, gamma);
+                     type, gamma,tonemapping);
   }
   return res;
 }
 void impl::parse_camera_data(Scene *scene, const toml::value &data) {
   auto res = parse_camera_data_impl(data);
   for (const auto &cam_data : res) {
-    const auto &[origin, up, lookat, fov, height, width, type, gamma] =
+    const auto &[origin, up, lookat, fov, height, width, type, gamma,tonemapping] =
         cam_data;
     std::shared_ptr<Camera> cam = nullptr;
     if (type == "pinhole") {
       cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov, height,
                                             width, scene, gamma);
+      cam->film_ptr_->tone_mapping_ = tonemapping;
+    }
+    else
+    {
+      throw std::runtime_error("Other cam type " + type + " not implemented!");
     }
     scene->add(cam);
   }
