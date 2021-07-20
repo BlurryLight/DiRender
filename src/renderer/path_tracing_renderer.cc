@@ -163,8 +163,9 @@ void PathTracingRenderer::render(const Scene &scene) {
 #endif
     // progressive rendering
     // save an image per 16 spp
-    uint step = 16;
-    uint n = spp_ / 16;
+    // if total spp < 16, then the step size is set to total spp
+    uint step = std::min(16u,spp_);
+    uint n = spp_ / step;
     for (uint s = 0; s < n; s++) {
       std::cout << "Current Step:(" << s << "/" << n << ")" << std::endl;
       for (uint i = 0; i < cam->film_ptr_->tile_height_nums; i++) {
