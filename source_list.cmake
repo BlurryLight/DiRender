@@ -107,6 +107,8 @@ set(RENDERER_SOURCE
         ${CMAKE_SOURCE_DIR}/src/renderer/direct_light_renderer.cc
         ${CMAKE_SOURCE_DIR}/src/renderer/bling_phong_renderer.h
         ${CMAKE_SOURCE_DIR}/src/renderer/bling_phong_renderer.cc
+        ${CMAKE_SOURCE_DIR}/src/renderer/normal_renderer.h
+        ${CMAKE_SOURCE_DIR}/src/renderer/normal_renderer.cc
         )
 
 set(SOURCE_HEADERS ${THIRD_PARTY_SOURCE} ${ACCELERATOR_SOURCE} ${CORES_SOURCE} ${MATH_SOURCE} ${SAMPLER_SOURCE}

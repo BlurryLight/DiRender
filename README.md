@@ -78,6 +78,10 @@ of [the CSE168 course by Prof Ravi Ramamoorthi](http://cseweb.ucsd.edu/~viscomp/
 - QuadLight(640 x 480, 128spp, Blinn-Phong importance sampling)
   This one looks much better.
   ![quadlight](images/quadlight_with_IS.png)
+
+- Ajax(768 x 768, normal integrator)
+  Not difficult but amazing.
+  ![ajax](images/ajax.jpg)
   
 
 

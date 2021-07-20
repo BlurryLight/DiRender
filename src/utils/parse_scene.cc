@@ -6,13 +6,15 @@
 #include <accelerator/linear_list.h>
 #include <cameras/pinhole_camera.h>
 #include <cores/scene.h>
+#include <material/cook_torrance.h>
 #include <material/dielectric_material.h>
 #include <material/glass_material.h>
 #include <material/matte_material.h>
-#include <material/cook_torrance.h>
 #include <math/geometry.hpp>
 #include <renderer/direct_light_renderer.h>
+#include <renderer/normal_renderer.h>
 #include <renderer/path_tracing_renderer.h>
+#include <renderer/bling_phong_renderer.h>
 #include <renderer/renderer.h>
 #include <shapes/sphere.h>
 #include <texture/checker_texture.h>
@@ -21,9 +23,8 @@
 #include <utils/parse_scene.hh>
 using namespace DR;
 
-
-impl::cam_return_type  impl::parse_camera_data_impl(const toml::value &data) {
-  cam_return_type    res;
+impl::cam_return_type impl::parse_camera_data_impl(const toml::value &data) {
+  cam_return_type res;
   const auto &cams_toml = toml::find(data, "cameras");
   const auto &cam_vec_toml =
       toml::find<std::vector<toml::table>>(cams_toml, "camera");
@@ -45,22 +46,23 @@ impl::cam_return_type  impl::parse_camera_data_impl(const toml::value &data) {
       lookat[i] = lookat_toml[i];
     }
     bool gamma = false;
-    if(cam_toml.find("gamma") != cam_toml.end())
+    if (cam_toml.find("gamma") != cam_toml.end())
       gamma = toml::get<toml::boolean>(cam_toml.at("gamma"));
     std::string type = toml::get<std::string>(cam_toml.at("type"));
-    res.emplace_back(
-        origin, up, lookat, fov_toml, height_toml, width_toml, type,gamma);
+    res.emplace_back(origin, up, lookat, fov_toml, height_toml, width_toml,
+                     type, gamma);
   }
   return res;
 }
 void impl::parse_camera_data(Scene *scene, const toml::value &data) {
   auto res = parse_camera_data_impl(data);
   for (const auto &cam_data : res) {
-    const auto &[origin, up, lookat, fov, height, width, type,gamma] = cam_data;
+    const auto &[origin, up, lookat, fov, height, width, type, gamma] =
+        cam_data;
     std::shared_ptr<Camera> cam = nullptr;
     if (type == "pinhole") {
       cam = std::make_shared<PinholeCamera>(origin, up, lookat, fov, height,
-                                            width, scene,gamma);
+                                            width, scene, gamma);
     }
     scene->add(cam);
   }
@@ -72,8 +74,8 @@ void impl::parse_material_data(const toml::value &material_toml,
   has_emission = false;
   std::string mat_type = toml::get<std::string>(material_toml.at("type"));
   std::cout << mat_type << std::endl;
-  static std::vector<std::string> supported_materials{"matte", "glass",
-                                                        "dielectric","cooktorrance"};
+  static std::vector<std::string> supported_materials{
+      "matte", "glass", "dielectric", "cooktorrance"};
   if (std::find(supported_materials.begin(), supported_materials.end(),
                 mat_type) != supported_materials.end()) {
     // constant texture
@@ -104,7 +106,6 @@ void impl::parse_material_data(const toml::value &material_toml,
       index_of_refraction = toml::get<float>(material_toml.at("ior"));
     }
 
-
     //    if (material_toml.at("type").as_string() == "matte") {
     if (mat_type == "matte") {
       mat_ptr = std::make_shared<MatteMaterial>(texture_ptr, emission);
@@ -113,9 +114,7 @@ void impl::parse_material_data(const toml::value &material_toml,
     } else if (mat_type == "dielectric") {
       mat_ptr = std::make_shared<DielectricMaterial>(texture_ptr,
                                                      index_of_refraction);
-    }
-    else if(mat_type == "cooktorrance")
-    {
+    } else if (mat_type == "cooktorrance") {
 
       float metallic = 0.0f;
       float roughness = 0.0f;
@@ -126,8 +125,8 @@ void impl::parse_material_data(const toml::value &material_toml,
       vec3 f0 = {tmp[0], tmp[1], tmp[2]};
       tmp = toml::get<std::vector<float>>(material_toml.at("albedo"));
       vec3 albedo = {tmp[0], tmp[1], tmp[2]};
-      mat_ptr = std::make_shared<CookTorranceMaterial>(f0,albedo,roughness,metallic,
-                                                     emission);
+      mat_ptr = std::make_shared<CookTorranceMaterial>(f0, albedo, roughness,
+                                                       metallic, emission);
     }
     return;
   }
@@ -147,89 +146,100 @@ void impl::make_render(Scene *scene, int spp, const std::string &type) {
 
   if (type == "direct") {
     scene->renderer_ = std::make_unique<DirectLightRenderer>(spp, nthreads);
-  } else // default path tracer
-  {
+  } else if (type == "normal") {
+    scene->renderer_ = std::make_unique<NormalRenderer>(spp, nthreads);
+  } else if (type == "Blinn" || type == "BlinnPhong") {
+    scene->renderer_ = std::make_unique<BlingPhongRenderer>(spp, nthreads);
+  } else { // default path tracer
     scene->renderer_ = std::make_unique<PathTracingRenderer>(spp, nthreads);
   }
   std::cout << "Renderer:" << type << std::endl;
 }
 
-void DR::parse_scene(std::string filename, Scene *scene) {
-  auto data = toml::parse(filename);
+  void DR::parse_scene(std::string filename, Scene * scene) {
+    auto data = toml::parse(filename);
 
-  auto title = toml::find<std::string>(data, "title");
-  std::cout << "Rendering: " << title << std::endl;
+    auto title = toml::find<std::string>(data, "title");
+    std::cout << "Rendering: " << title << std::endl;
 
-  int spp = toml::find<toml::integer>(data, "spp");
-  std::cout << "spp: " << spp << std::endl;
+    int spp = toml::find<toml::integer>(data, "spp");
+    std::cout << "spp: " << spp << std::endl;
 
-  impl::make_render(scene, spp);
-
-  if (data.contains("background")) {
-    const auto &bg_toml = toml::get<std::vector<float>>(data.at("background"));
-    for (int i = 0; i < 3; i++) {
-      scene->background_[i] = bg_toml[i];
+    auto integrator = std::string("path tracer");
+    if (data.contains("integrator")) {
+      integrator = toml::get<std::string>(data.at("integrator"));
     }
-  }
-  const auto &objects_toml = toml::find(data, "objects");
-  try {
-    const auto &names_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "name");
-    const auto &transforms_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "transform");
-    const auto &materials_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "material");
-    const auto &shapes_vec =
-        toml::find<std::vector<toml::table>>(objects_toml, "shape");
+    std::cout << "Integrtor: " << integrator << std::endl;
 
-    // parse  camera
-    DR::impl::parse_camera_data(scene, data);
+    impl::make_render(scene, spp,integrator);
 
-    // parse objects
-    std::vector<std::shared_ptr<Primitive>> objects;
-    for (uint i = 0; i < names_vec.size(); i++) {
-      std::cout << "Objects: " << names_vec[i].at("name") << std::endl;
-      auto mat_toml =
-          toml::get<std::vector<float>>(transforms_vec[i].at("matrix4"));
-      Matrix4 mat;
-      for (int j = 0; j < 16; j++) {
-        mat.m[j / 4][j % 4] = mat_toml.at(j);
-      }
-      auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(mat);
-      auto material_toml = materials_vec[i];
-      std::shared_ptr<Material> mat_ptr = nullptr;
-      bool has_emission = false;
-      DR::impl::parse_material_data(material_toml, mat_ptr, has_emission);
-      // shape parse
-      auto shape_toml = shapes_vec[i].at("type").as_string();
-      std::shared_ptr<Shape> shape_ptr = nullptr;
-      if (shape_toml == "sphere") {
-        float radius = 1.0f;
-        bool reverse = false;
-        if (shapes_vec[i].find("radius") != shapes_vec[i].end())
-          radius = shapes_vec[i].at("radius").as_floating();
-        if (shapes_vec[i].find("reverse") != shapes_vec[i].end())
-          reverse = shapes_vec[i].at("reverse").as_boolean();
-        shape_ptr = std::make_shared<Sphere>(trans, trans_inv, reverse, radius);
-        auto object_ptr =
-            std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
-        objects.push_back(object_ptr);
-        if (has_emission) {
-          scene->light_shapes_.push_back(object_ptr);
-        }
-      } else if (shape_toml == "obj") {
-        std::string path = shapes_vec[i].at("path").as_string();
-        Model model(trans, trans_inv, path, mat_ptr);
-        objects.push_back(model.model_ptr);
-        if (has_emission) {
-          scene->light_shapes_.push_back(model.model_ptr);
-        }
+    if (data.contains("background")) {
+      const auto &bg_toml =
+          toml::get<std::vector<float>>(data.at("background"));
+      for (int i = 0; i < 3; i++) {
+        scene->background_[i] = bg_toml[i];
       }
     }
-    auto bvh_tree = std::make_shared<BVHTree>(objects);
-    scene->add(bvh_tree);
-  } catch (const std::exception &e) {
-    std::cerr << "Exception captured: " << '\n' << e.what() << std::endl;
-    return;
+    const auto &objects_toml = toml::find(data, "objects");
+    try {
+      const auto &names_vec =
+          toml::find<std::vector<toml::table>>(objects_toml, "name");
+      const auto &transforms_vec =
+          toml::find<std::vector<toml::table>>(objects_toml, "transform");
+      const auto &materials_vec =
+          toml::find<std::vector<toml::table>>(objects_toml, "material");
+      const auto &shapes_vec =
+          toml::find<std::vector<toml::table>>(objects_toml, "shape");
+
+      // parse  camera
+      DR::impl::parse_camera_data(scene, data);
+
+      // parse objects
+      std::vector<std::shared_ptr<Primitive>> objects;
+      for (uint i = 0; i < names_vec.size(); i++) {
+        std::cout << "Objects: " << names_vec[i].at("name") << std::endl;
+        auto mat_toml =
+            toml::get<std::vector<float>>(transforms_vec[i].at("matrix4"));
+        Matrix4 mat;
+        for (int j = 0; j < 16; j++) {
+          mat.m[j / 4][j % 4] = mat_toml.at(j);
+        }
+        auto [trans, trans_inv] = scene->trans_table.get_tf_and_inv(mat);
+        auto material_toml = materials_vec[i];
+        std::shared_ptr<Material> mat_ptr = nullptr;
+        bool has_emission = false;
+        DR::impl::parse_material_data(material_toml, mat_ptr, has_emission);
+        // shape parse
+        auto shape_toml = shapes_vec[i].at("type").as_string();
+        std::shared_ptr<Shape> shape_ptr = nullptr;
+        if (shape_toml == "sphere") {
+          float radius = 1.0f;
+          bool reverse = false;
+          if (shapes_vec[i].find("radius") != shapes_vec[i].end())
+            radius = shapes_vec[i].at("radius").as_floating();
+          if (shapes_vec[i].find("reverse") != shapes_vec[i].end())
+            reverse = shapes_vec[i].at("reverse").as_boolean();
+          shape_ptr =
+              std::make_shared<Sphere>(trans, trans_inv, reverse, radius);
+          auto object_ptr =
+              std::make_shared<GeometricPrimitive>(shape_ptr, mat_ptr);
+          objects.push_back(object_ptr);
+          if (has_emission) {
+            scene->light_shapes_.push_back(object_ptr);
+          }
+        } else if (shape_toml == "obj") {
+          std::string path = shapes_vec[i].at("path").as_string();
+          Model model(trans, trans_inv, path, mat_ptr);
+          objects.push_back(model.model_ptr);
+          if (has_emission) {
+            scene->light_shapes_.push_back(model.model_ptr);
+          }
+        }
+      }
+      auto bvh_tree = std::make_shared<BVHTree>(objects);
+      scene->add(bvh_tree);
+    } catch (const std::exception &e) {
+      std::cerr << "Exception captured: " << '\n' << e.what() << std::endl;
+      return;
+    }
   }
-}
