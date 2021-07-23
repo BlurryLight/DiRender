@@ -11,7 +11,7 @@ public:
   bool Intersect_test(const Ray &ray) const override;
   bool Intersect(const Ray &ray, Intersection *isect) const override;
   BVHTree(std::vector<std::shared_ptr<Primitive>> prims,
-          uint maxPrimsInNode = 1, Method splitmethod = Method::NAIVE);
+          uint maxPrimsInNode = 16, Method splitmethod = Method::NAIVE);
 
   virtual std::pair<Intersection, float> sample() const override {
     return this->sample_a_node(root_);
@@ -43,10 +43,11 @@ private:
   };
   std::vector<std::shared_ptr<Primitive>> prims_;
   std::shared_ptr<BvhNode> root_;
-  uint maxPrimsInNode = 1;
+  uint maxPrimsInNode = 16;
+  uint maxDepth = 18;
   Method method = Method::NAIVE;
   std::shared_ptr<BvhNode>
-  recursiveBuild(std::vector<std::shared_ptr<DR::Primitive>> prims);
+  recursiveBuild(std::vector<std::shared_ptr<DR::Primitive>> prims,uint depth);
   std::pair<Intersection, float> sample_a_node(std::shared_ptr<BvhNode> node,
                                                const Point3f &ref) const {
     if (node == nullptr) {

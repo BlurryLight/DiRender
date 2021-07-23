@@ -22,7 +22,7 @@ BVHTree::BVHTree(std::vector<std::shared_ptr<Primitive>> prims,
   this->prims_ = prims;
   HRTimer timer;
   timer.start();
-  root_ = this->recursiveBuild(this->prims_);
+  root_ = this->recursiveBuild(this->prims_,0);
   timer.end();
   std::cout << "BVH build costs " << timer.elapsed() << " ms\n" << std::endl;
 }
@@ -76,13 +76,13 @@ bool BVHTree::Intersect(std::shared_ptr<BVHTree::BvhNode> node, const Ray &ray,
 }
 
 std::shared_ptr<BVHTree::BvhNode>
-BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims) {
+BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims,uint depth) {
   auto node = std::make_shared<BvhNode>();
   Bounds3 bounds;
   for (const auto &i : prims) {
     bounds = Bounds3::Union(bounds, i->WorldBounds());
   }
-  if (prims.size() <= this->maxPrimsInNode) {
+  if (prims.size() <= this->maxPrimsInNode || depth > maxDepth) {
     node->bounds = bounds;
     node->primitives_ = prims;
     node->left_ = nullptr;
@@ -96,9 +96,9 @@ BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims) {
   }
   if (prims.size() <= 2 * this->maxPrimsInNode) {
     node->left_ = recursiveBuild(std::vector<std::shared_ptr<Primitive>>(
-        prims.cbegin(), prims.cbegin() + maxPrimsInNode));
+        prims.cbegin(), prims.cbegin() + maxPrimsInNode),depth + 1);
     node->right_ = recursiveBuild(std::vector<std::shared_ptr<Primitive>>(
-        prims.cbegin() + maxPrimsInNode, prims.cend()));
+        prims.cbegin() + maxPrimsInNode, prims.cend()),depth + 1);
     node->bounds = Bounds3::Union(node->left_->bounds, node->right_->bounds);
     node->area = node->left_->area + node->right_->area;
     return node;
@@ -141,8 +141,8 @@ BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims) {
         std::vector<std::shared_ptr<Primitive>>{vec_begin, vec_mid};
     auto right_vector =
         std::vector<std::shared_ptr<Primitive>>{vec_mid, vec_end};
-    node->left_ = recursiveBuild(left_vector);
-    node->right_ = recursiveBuild(right_vector);
+    node->left_ = recursiveBuild(left_vector,depth + 1);
+    node->right_ = recursiveBuild(right_vector,depth + 1);
     node->area = node->left_->area + node->right_->area;
     node->bounds = Bounds3::Union(node->left_->bounds, node->right_->bounds);
   }
