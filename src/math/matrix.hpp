@@ -14,6 +14,8 @@ NAMESPACE_BEGIN(DR)
 struct Matrix4;
 using mat4 = struct Matrix4;
 struct Matrix4 {
+private:
+  static Matrix4 Identity_;
 public:
 #ifndef DI_USE_GLM
   std::array<std::array<float, 4>, 4> m{};
@@ -45,6 +47,7 @@ public:
     return Matrix4::Multiply(*this, other);
   }
   //  const float *data() const;
+  static Matrix4 Identity();
   static Matrix4 Inverse(const Matrix4 &mat);
   static Matrix4 Transpose(const Matrix4 &mat);
   static Matrix4 Multiply(const Matrix4 &lhs, const Matrix4 &rhs);

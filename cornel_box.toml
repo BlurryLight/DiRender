@@ -1,5 +1,5 @@
 title = "SIMPLE SCENE"
-spp = 128
+spp = 12
 [cameras]
     [[cameras.camera]]
     origin = [278.0,273.0,-800.0]

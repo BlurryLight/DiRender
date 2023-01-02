@@ -4,8 +4,9 @@
 #include <math/matrix.hpp>
 #include <spdlog/fmt/fmt.h>
 using namespace DR;
+mat4 DR::Matrix4::Identity_ = mat4();
 #ifndef DI_USE_GLM
-bool DR::Matrix4::is_identity() const { return *this == mat4(1.0f); }
+bool DR::Matrix4::is_identity() const { return *this == Identity_; }
 
 Matrix4::Matrix4(float diag) : m() {
   for (auto &i : m)
@@ -322,4 +323,8 @@ size_t std::hash<DR::Matrix4>::operator()(const DR::Matrix4 &mat) {
               mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
   // clang-format on
   return std::hash<std::string>{}(mat_str);
+}
+
+Matrix4 DR::Matrix4::Identity() {
+  return mat4::Identity_; 
 }

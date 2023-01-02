@@ -10,8 +10,7 @@ include(${CMAKE_SOURCE_DIR}/source_list.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/cmake_filesystem.cmake)
 
 #options 
-option(EXPERIMENTAL_UNITY_BUILD "UNITY_BUILD to reduce compilation time" OFF)
-option(DI_BUILD_TESTS "Build test programs" ON)
+option(DI_BUILD_TESTS "Build test programs" OFF)
 # due to the change of the Render, the debugger now needs much  more work to catch up the progress of the main project
 # so I change the default option to off.
 option(DI_BUILD_DEBUGGER "Build a real-time debugger" OFF)
@@ -78,14 +77,3 @@ elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic)
 endif ()
-
-if (EXPERIMENTAL_UNITY_BUILD)
-    include(${CMAKE_SOURCE_DIR}/cmake/unity_build.cmake)
-    UNITY_BUILD(module_unity_build.cpp "${SOURCE_HEADERS}")
-    set(SOURCE_HEADERS ${CMAKE_BINARY_DIR}/module_unity_build.cpp)
-else (EXPERIMENTAL_UNITY_BUILD)
-    #只有在不是unity-build且不是MSVC的环境下，才启动-Werror
-    if (NOT MSVC)
-        target_compile_options(DiRender PRIVATE -Werror)
-    endif ()
-endif (EXPERIMENTAL_UNITY_BUILD)

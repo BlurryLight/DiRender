@@ -27,6 +27,15 @@
       : 1
 #endif
 
+#define ensure_msg(condition, message)                                         \
+  (!(condition))                                                               \
+      ? (std::cerr << "ensure failed: (" << #condition << "), "             \
+                   << "function " << __FUNCTION__ << ", file " << __FILE__     \
+                   << ", line " << __LINE__ << "." << std::endl                \
+                   << message << std::endl,                                    \
+        0)                                                           \
+      : 1
+
 NAMESPACE_BEGIN(DR)
 using uint = unsigned int;
 using byte = std::uint8_t;

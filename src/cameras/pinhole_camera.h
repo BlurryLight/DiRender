@@ -10,8 +10,10 @@ public:
                 bool gamma = false);
 
 private:
-  Vector3f left_bottom_corner_;
-  Vector3f horizontal_;
-  Vector3f vertical_;
+  // Vector3f left_bottom_corner_;
+  // Vector3f horizontal_;
+  // Vector3f vertical_;
+  observer_ptr<Transform> proj_trans_;
+  observer_ptr<Transform> proj_trans_inverse_;
 };
 NAMESPACE_END(DR)

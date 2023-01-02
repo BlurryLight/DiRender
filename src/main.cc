@@ -12,11 +12,11 @@
 #include <spdlog/spdlog.h>
 int main(int argc, char **argv) {
   std::cout << "DiRender:\n"
-            << "Built by:" << DR::BUILD_COMPILER << " " << DR::CXX_VER << " on "
+            << "Compiler: " << DR::BUILD_COMPILER << " " << DR::CXX_VER << " on "
             << DR::BUILD_UTC_TIMESTAMP << '\n'
             << "System: " << DR::BUILD_SYSTEM_NAME << " "
             << DR::BUILD_SYSTEM_VERSION << '\n'
-            << "Build type" << DR::BUILD_TYPE << std::endl;
+            << "Build type: " << DR::BUILD_TYPE << std::endl;
 
   auto basic_logger =
       spdlog::basic_logger_mt("basic_logger", "Dirender_log.txt", true);
@@ -26,15 +26,21 @@ int main(int argc, char **argv) {
   ray_logger->set_pattern("%v");
 
   DR::Scene scene;
-  std::string filename{"scene.toml"};
-  if (argc > 1)
-    filename = argv[1];
 
-  std::unique_ptr<DR::Renderer> rd{nullptr};
-  if (argc > 2 && !strcmp(argv[2], "txt")) {
-    DR::impl::parse_scene_txt(filename, &scene);
-  } else {
-    DR::parse_scene(filename, &scene);
+  try {
+    std::string filename{"scene.toml"};
+    if (argc > 1)
+      filename = argv[1];
+
+    std::unique_ptr<DR::Renderer> rd{nullptr};
+    if (argc > 2 && !strcmp(argv[2], "txt")) {
+      DR::impl::parse_scene_txt(filename, &scene);
+    } else {
+      DR::parse_scene(filename, &scene);
+    }
+  } catch (std::runtime_error e) {
+    fmt::print("Error throwed in parser: {}", e.what());
+    std::exit(EXIT_FAILURE);
   }
   DR::HRTimer timer;
   timer.start();

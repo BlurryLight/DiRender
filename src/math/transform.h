@@ -29,7 +29,7 @@ public:
   static Transform Inverse(const Transform &other) {
     return Transform(other.mInv_, other.m_);
   }
-  bool is_identity() const { return m_.is_identity(); }
+  bool is_identity() const { return m_.is_identity() && mInv_.is_identity(); }
   Transform inverse(void) const { return Transform::Inverse(*this); }
 
   // Todo: xx

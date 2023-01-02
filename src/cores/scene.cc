@@ -32,9 +32,9 @@ IMPL::TransTable::const_tf_pair
 IMPL::TransTable::get_tf_and_inv(const Matrix4 &mat) const {
   auto trans = Transform(mat);
   auto res = std::pair(get_tf(trans), get_tf(trans.inverse()));
-  assert_msg((res.first->m_ * res.second->m_).is_identity(),
+  ensure_msg((res.first->m_ * res.second->m_).is_identity(),
              "got" << (res.first->m_ * res.second->m_));
-  assert_msg((res.first->mInv_ * res.second->mInv_).is_identity(),
+  ensure_msg((res.first->mInv_ * res.second->mInv_).is_identity(),
              "got" << res.first->mInv_ * res.second->mInv_);
   return res;
 }
