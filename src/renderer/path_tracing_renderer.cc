@@ -7,14 +7,13 @@
 #include <shapes/sphere.h>
 #include <tuple> //for std::tie
 
-#ifndef NDEBUG
 // log
 // https://github.com/gabime/spdlog/wiki/0.-FAQ#winapi-minmax-macro-definitions
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
-#endif
 using namespace DR;
 Vector3f PathTracingRenderer::cast_ray(
     const Ray &r, std::shared_ptr<Primitive> prim,
@@ -205,12 +204,12 @@ void PathTracingRenderer::render(const Scene &scene) {
         count_ = 0;
       }
 #endif
-      cam->film_ptr_->write("cam" + std::to_string(cam_index) + "_output_" +
-                                std::to_string(index++) +
-                                std::string(MapTypeToSuffix()(PicType::kPNG)),
+
+      std::string filename = fmt::format("cam_{}_output_{}", cam_index,index++);
+      cam->film_ptr_->write(filename,
                             PicType::kPNG, step * (s + 1));
-      //    cam->film_ptr_->write_ppm("output" + std::to_string(index++) +
-      //    ".ppm");
+      cam->film_ptr_->write(filename,
+                            PicType::kEXR, step * (s + 1));
     }
   }
   cam_index++;

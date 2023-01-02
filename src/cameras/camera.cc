@@ -4,25 +4,20 @@
 
 #include <cameras/camera.h>
 #include <cores/scene.h>
+
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+
+#define TINYEXR_USE_THREAD 1
+#define TINYEXR_IMPLEMENTATION
+#include <tinyexr/tinyexr.h>
+
+#include <spdlog/spdlog.h>
 using namespace DR;
-void Film::write_ppm(const std::string &filename) {
-  auto fp = std::unique_ptr<FILE, decltype(&fclose)>(
-      fopen(filename.c_str(), "wb"), &fclose);
-  (void)fprintf(fp.get(), "P6\n%d %d\n255\n", height, width);
-  for (uint i = 0; i < width * height; ++i) {
-    static unsigned char color[3];
-    color[0] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].x), 0.6f));
-    color[1] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].y), 0.6f));
-    color[2] =
-        (unsigned char)(255 *
-                        std::pow(clamp(0.0f, 1.0f, framebuffer_[i].z), 0.6f));
-    fwrite(color, 1, 3, fp.get());
-  }
-}
+
 Transform Camera::look_at(Point3f origin, Vector3f WorldUp, Vector3f target) {
   auto cam_origin = static_cast<Vector3f>(origin);
   auto cam_target = (static_cast<Vector3f>(origin) - target).normalize();
@@ -62,6 +57,21 @@ Camera::Camera(Point3f origin, Vector3f WorldUp, Vector3f target, float fov,
 }
 
 void Film::write(const std::string &filename, PicType type, uint spp) const {
+  auto img_name = filename + std::string(MapTypeToSuffix(type));
+  switch(type)
+  {
+    case PicType::kPNG:
+      this->write_ldr(img_name,type,spp);
+      break;
+    case PicType::kEXR:
+      this->write_exr(img_name, spp);
+    default:
+      spdlog::error("Error: Unknown Image Type");
+      std::exit(-1);
+  }
+}
+
+void DR::Film::write_ldr(const std::string &filename,PicType type,uint spp) const {
   std::unique_ptr<uint8_t[]> data{
       new uint8_t[height * width * 3]}; // don't support alpha & HDR
   float inv_spp = 1.0f / float(spp);
@@ -96,5 +106,25 @@ void Film::write(const std::string &filename, PicType type, uint spp) const {
   Image img(data.get(), height, width, type, 3);
   if (!img.write_image(filename, false)) {
     std::cerr << "Error: Writing " + filename << "failed" << std::endl;
+  }
+  
+}
+
+void DR::Film::write_exr(const std::string &filename,uint spp) const {
+  std::unique_ptr<float[]> data{
+      new float[height * width * 3]}; // don't support alpha & HDR
+  float inv_spp = 1.0f / float(spp);
+  for (uint i = 0; i < height * width; i++) {
+    for (uint j = 0; j < 3; j++) {
+      float value =  framebuffer_[i][j] * inv_spp;
+      data[3 * i + j] = value;
+    }
+  }
+  const char* err = nullptr;
+  int ret = SaveEXR(data.get(), width, height, 3, false, filename.c_str(), &err);
+  if(ret != TINYEXR_SUCCESS)
+  {
+    fmt::print("SaveExr Error:{}",err);
+    FreeEXRErrorMessage(err);
   }
 }

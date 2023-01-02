@@ -91,6 +91,7 @@ set(THIRD_PARTY_SOURCE
         ${CMAKE_SOURCE_DIR}/third_party/stb_image_write.h
         ${CMAKE_SOURCE_DIR}/third_party/stb_image.h
         ${CMAKE_SOURCE_DIR}/third_party/OBJ_Loader.h
+        ${CMAKE_SOURCE_DIR}/third_party/tinyexr/miniz.c
         )
 
 set(TEXTURE_SOURCE

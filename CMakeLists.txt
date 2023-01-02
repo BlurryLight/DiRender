@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
-project(DiRender LANGUAGES CXX)
+project(DiRender)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 find_package(Threads REQUIRED)
 #spdlog
@@ -43,10 +44,10 @@ set(BUILD_SYSTEM_NAME_VAR ${CMAKE_SYSTEM_NAME})
 string(TIMESTAMP BUILD_UTC_TIMESTAMP_VAR UTC)
 configure_file(${CMAKE_SOURCE_DIR}/src/utils/cmake_vars.h.in ${CMAKE_SOURCE_DIR}/src/utils/cmake_vars.h)
 
-
 # main target
 add_executable(DiRender ${SOURCE_HEADERS} src/main.cc src/sampler/sampler.cc src/sampler/sampler.hh)
 target_include_directories(DiRender PRIVATE "src")
+target_include_directories(DiRender PRIVATE "third_party")
 target_link_libraries(DiRender PRIVATE Threads::Threads spdlog::spdlog)
 
 if (DI_USE_GLM)

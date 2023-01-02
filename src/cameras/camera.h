@@ -23,7 +23,9 @@ struct Film {
   bool gamma_ = false;
   bool tone_mapping_ = true;
   void write(const std::string &filename, PicType type, uint spp) const;
-  void write_ppm(const std::string &filename);
+private:
+  void write_ldr(const std::string &filename,PicType type,uint spp) const;
+  void write_exr(const std::string &filename,uint spp) const;
 };
 
 struct Scene;
