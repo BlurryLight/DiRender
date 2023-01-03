@@ -3,6 +3,12 @@ project(DiRender)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+# global utf-8
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>")
+add_compile_definitions("$<$<CXX_COMPILER_ID:MSVC>:_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS>")
+
 find_package(Threads REQUIRED)
 #spdlog
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/spdlog)
@@ -63,14 +69,11 @@ endif (DI_USE_GLM)
 
 # Flags are added only with the main target
 if (MSVC)
-    target_compile_options(DiRender PRIVATE /W4)
     # ignore stupid conversion warnings
     target_compile_options(DiRender PRIVATE /wd4305 /wd4244 /wd4287 /wd4838)
     # special case: nameless struct/union is nonstandard but major compilers support it so I use it
     # disable the warning about it
     target_compile_options(DiRender PRIVATE /wd4201)
-    # stupid msvc only accepts UTF-8 with Bom unless we force it to accept utf-8
-    target_compile_options(DiRender PRIVATE /utf-8)
     #clang
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(DiRender PRIVATE -Wall -Wextra -pedantic -Wno-unknown-warning-option)

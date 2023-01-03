@@ -47,7 +47,7 @@ Vector3f PathTracingRenderer::cast_ray(
   // Shadow ray
   Intersection light_pos;
   float light_pdf = 0;
-  int size = lights.size();
+  int size = (int)lights.size();
   if (size == 0) {
     throw std::runtime_error("PathTracingRenderer needs at least one light!");
   }

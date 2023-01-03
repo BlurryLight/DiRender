@@ -54,7 +54,7 @@ private:
       return {};
     }
     if (node->left_ == nullptr && node->right_ == nullptr) {
-      int size = node->primitives_.size();
+      int size = (int)node->primitives_.size();
       int index = std::floor(size * get_random_float(0, 0.99));
       return node->primitives_.at(index)->sample(ref);
     }
@@ -75,7 +75,7 @@ private:
       return {};
     }
     if (node->left_ == nullptr && node->right_ == nullptr) {
-      int size = node->primitives_.size();
+      int size = (int)node->primitives_.size();
       int index = std::floor(size * get_random_float(0, 0.99));
       return node->primitives_.at(index)->sample();
     }

@@ -13,7 +13,10 @@
 
 #define TINYEXR_USE_THREAD 1
 #define TINYEXR_IMPLEMENTATION
+// make msvc happy
+#pragma warning(push, 0)
 #include <tinyexr/tinyexr.h>
+#pragma warning(pop)
 
 #include <spdlog/spdlog.h>
 using namespace DR;
@@ -65,6 +68,7 @@ void Film::write(const std::string &filename, PicType type, uint spp) const {
       break;
     case PicType::kEXR:
       this->write_exr(img_name, spp);
+      break;
     default:
       spdlog::error("Error: Unknown Image Type");
       std::exit(-1);

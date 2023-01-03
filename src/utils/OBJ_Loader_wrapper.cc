@@ -23,8 +23,8 @@ Model::Model(observer_ptr<Transform> LocalToWorld,
   }
   for (size_t j = 0; j < loader.LoadedMeshes.size(); j++) {
     auto mesh = loader.LoadedMeshes[j];
-    int nTriangles = mesh.Indices.size() / 3;
-    int nVertices = mesh.Vertices.size();
+    int nTriangles = (int)mesh.Indices.size() / 3;
+    int nVertices = (int)mesh.Vertices.size();
     const uint *meshIndices = mesh.Indices.data();
     Point3f *vertices = new Point3f[mesh.Vertices.size()];
     Normal3f *normals = new Normal3f[mesh.Vertices.size()];

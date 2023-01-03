@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS 
 #include <utils/stb_image_wrapper.h>
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
@@ -18,7 +19,7 @@ bool write_ppm(const std::string &filename, int width,int height,const uint8_t* 
   auto fp = std::unique_ptr<FILE, decltype(&fclose)>(
       fopen(filename.c_str(), "wb"), &fclose);
   (void)fprintf(fp.get(), "P6\n%d %d\n255\n", height, width);
-  for (uint i = 0; i < width * height; ++i) {
+  for (int i = 0; i < width * height; ++i) {
     static unsigned char color[3];
     color[0] =
         (unsigned char)(data[i * 3]);

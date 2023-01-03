@@ -16,7 +16,7 @@ Vector3f DirectLightRenderer::cast_ray(
   // Shadow ray
   Intersection light_pos;
   float light_pdf = 0;
-  int size = lights.size();
+  int size = (int)lights.size();
   if (size == 0) {
     throw std::runtime_error("DirectLightRenderer needs at least one light!");
   }

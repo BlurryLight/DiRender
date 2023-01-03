@@ -87,7 +87,7 @@ BVHTree::recursiveBuild(std::vector<std::shared_ptr<Primitive>> prims,uint depth
     node->primitives_ = prims;
     node->left_ = nullptr;
     node->right_ = nullptr;
-    node->nPrimitives = prims.size();
+    node->nPrimitives = (int)prims.size();
     node->area = 0.0f;
     for (uint i = 0; i < prims.size(); i++) {
       node->area += prims[i]->Area();
